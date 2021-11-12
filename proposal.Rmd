@@ -1,0 +1,25 @@
+---
+title: "Proposal"
+author: "Wen Cheng, Jiahao Fan, Yangruijue Ma (Anna), Renee Wang, Tianwei Zhao"
+date: "11/11/2021"
+output: html_document
+---
+## Group member: 
+Wen Cheng     wc2788   
+Jiahao Fan        jf3355  
+Yangruijue Ma (Anna)     ym2813  
+Renee Wang     hw2851  
+Tianwei Zhao       tz2472
+
+
+## Project Title:  NYC Safe Map
+### 1. Motivation
+### 2. Intended Final Product 
+### 3. Anticipated Data Sources 
+### 4. Planned analyses / visualizations / coding challenges
+### 5. Planned Timeline
+
+
+
+
+
