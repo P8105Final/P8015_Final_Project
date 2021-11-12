@@ -27,6 +27,11 @@ We anticipate finding data sets containing information about different types of 
 ### 4. Planned analyses / visualizations / coding challenges
 Clean, data wrangling,mapping, ggplot, interactivity
 ### 5. Planned Timeline
+Week 1: Ask questions and do research  
+Week 2: Clean and analysis data  
+Week 3: Make web page and write report  
+Week 4: Make video and check  
+
 
 
 
