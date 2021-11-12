@@ -2,7 +2,7 @@
 title: "Proposal"
 author: "Wen Cheng, Jiahao Fan, Yangruijue Ma (Anna), Renee Wang, Tianwei Zhao"
 date: "11/11/2021"
-output: html_document
+output: github_document
 ---
 ## Group member: 
 Wen Cheng     wc2788   
@@ -17,6 +17,9 @@ Tianwei Zhao       tz2472
 Have you ever gotten nervous walking along in the streets? Have you ever felt uneasy hearing the siren closing in?  Living in NYC,  we have constantly seen news about violence, crimes, and different types of danger that surrounds us, all of which brings great anxiety to our lives. How to keep our own safety and avoid the risky neighborhoods has been a persistent subject that we want to explore. In this project, we aim to analyze the factors associated with crime and produce a “safe map” that can help the residents of NYC to identify and avoid areas with high risk of crime. 
 
 ### 2. Intended Final Product 
+
+We intend to produce reports analyzing the association between various factors and the crime incidents in NYC. Generate a high rate of violence in NYC and a “safe map” (low violence in NYC). Aim to provide new-yorkers a better visual view of crime incidence.
+
 ### 3. Anticipated Data Sources 
 ### 4. Planned analyses / visualizations / coding challenges
 ### 5. Planned Timeline
