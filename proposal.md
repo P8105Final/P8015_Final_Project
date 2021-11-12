@@ -35,5 +35,6 @@ new-yorkers a better visual view of crime incidence.
 ### 3. Anticipated Data Sources
 
 ### 4. Planned analyses / visualizations / coding challenges
+Clean, data wrangling,mapping, ggplot, interactivity
 
 ### 5. Planned Timeline
