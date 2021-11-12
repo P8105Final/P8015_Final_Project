@@ -9,7 +9,7 @@ Wen Cheng     wc2788
 Jiahao Fan        jf3355  
 Yangruijue Ma (Anna)     ym2813  
 Renee Wang     hw2851  
-Tianwei Zhao       tz2472
+Tianwei Zhao     tz2472
 
 
 ## Project Title:  NYC Safe Map
