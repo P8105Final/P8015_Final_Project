@@ -34,12 +34,15 @@ new-yorkers a better visual view of crime incidence.
 
 ### 3. Anticipated Data Sources
 
+NYC Open Data We anticipate finding data sets containing information
+about different types of violation crime. the date, time, county, (age,
+race, sex) both of suspect and victim, level of offense, specific
+location where the crime happened.
+
 ### 4. Planned analyses / visualizations / coding challenges
-Clean, data wrangling,mapping, ggplot, interactivity
 
-### 5. Planned Timeline
-
-Week 1: Ask questions and do research  
+Clean, data wrangling,mapping, ggplot, interactivity \#\#\# 5. Planned
+Timeline Week 1: Ask questions and do research  
 Week 2: Clean and analysis data  
 Week 3: Make web page and write report  
 Week 4: Make video and check
