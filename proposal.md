@@ -37,3 +37,8 @@ new-yorkers a better visual view of crime incidence.
 ### 4. Planned analyses / visualizations / coding challenges
 
 ### 5. Planned Timeline
+
+Week 1: Ask questions and do research  
+Week 2: Clean and analysis data  
+Week 3: Make web page and write report  
+Week 4: Make video and check
