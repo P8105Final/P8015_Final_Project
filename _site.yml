@@ -1,9 +1,15 @@
-name: "Yay internet!"
+name: "P8105_Final_Website"
 output_dir: "."
 navbar:
   title: "Home"
   right:
-    - text: "project report"
+    - text: "Analysis"
+      href: analysis.html
+    - text: "Regression Model"
+      href: model.html
+    - text: "Interactive Map"
+      href: map.html
+    - text: "Report"
       href: report.html
     - icon: fa-youtube fa-lg
       href: https://www.youtube.com/

@@ -1,0 +1,9 @@
+---
+title: "Interactive Map"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+Use shiny app instead?
