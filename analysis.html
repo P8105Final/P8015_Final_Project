@@ -323,7 +323,16 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="report.html">project report</a>
+  <a href="analysis.html">Analysis</a>
+</li>
+<li>
+  <a href="model.html">Regression Model</a>
+</li>
+<li>
+  <a href="map.html">Interactive Map</a>
+</li>
+<li>
+  <a href="report.html">Report</a>
 </li>
 <li>
   <a href="https://www.youtube.com/">
@@ -351,7 +360,86 @@ div.tocify {
 </div>
 
 
+<pre class="r"><code>data_hist = 
+  read_csv(&quot;data/NYPD_Shooting_Incident_Data__Historic_.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;%
+  rename(&quot;date&quot; = &quot;occur_date&quot;,
+         &quot;time&quot; = &quot;occur_time&quot;) %&gt;%
+  separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) %&gt;%
+  separate(time, into = c(&quot;hour&quot;, &quot;minute&quot;), sep = &quot;:&quot;) %&gt;% 
+  mutate(
+          boro = str_to_lower(boro),
+          location_desc = str_to_lower(location_desc),
+          perp_race = str_to_lower(perp_race),
+          vic_race = str_to_lower(vic_race),
+          perp_age_group = str_replace(perp_age_group, &quot;UNKNOWN&quot;,&quot;unknown&quot;),
+          perp_sex = recode(perp_sex, &quot;M&quot; = &quot;male&quot;,&quot;F&quot; = &quot;female&quot;,&quot;U&quot; = &quot;unknown&quot;), 
+          vic_sex = recode(vic_sex, &quot;M&quot; = &quot;male&quot;,&quot;F&quot; = &quot;female&quot;,&quot;U&quot; = &quot;unknown&quot;),
+          jurisdiction_code = case_when(
+            jurisdiction_code == 0 ~ &quot;patrol&quot;, 
+            jurisdiction_code == 1 ~ &quot;transit&quot;,
+            jurisdiction_code == 2 ~ &quot;housing&quot;)
+          ) %&gt;% 
+  arrange(year,month,day,hour,minute)</code></pre>
+<pre><code>## Rows: 23585 Columns: 19</code></pre>
+<pre><code>## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (10): OCCUR_DATE, BORO, LOCATION_DESC, PERP_AGE_GROUP, PERP_SEX, PERP_R...
+## dbl   (7): INCIDENT_KEY, PRECINCT, JURISDICTION_CODE, X_COORD_CD, Y_COORD_CD...
+## lgl   (1): STATISTICAL_MURDER_FLAG
+## time  (1): OCCUR_TIME</code></pre>
+<pre><code>## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>##2015-2020 total death by year</p>
+<pre class="r"><code>year_plot = 
+  data_hist %&gt;% 
+  filter(year &gt; 2014) %&gt;% 
+  group_by(year) %&gt;%
+  mutate(count = n()) %&gt;% 
+  ggplot(aes(x = year, y = count)) + 
+  geom_point() +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total death&quot;
+       )
 
+year_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<p>##2015-2020 total death by perpetrator’s sex</p>
+<pre class="r"><code>sex_plot = 
+  data_hist %&gt;% 
+  filter(year &gt; 2014,
+         perp_sex != &quot;unknown&quot;) %&gt;% 
+  group_by(year, perp_sex) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = year, group = n, fill = perp_sex)) + 
+  geom_bar(position = &quot;dodge&quot;) 
+  
+sex_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<p>##2015-2020 total death by perpetrator’s race</p>
+<pre class="r"><code>race_plot = 
+  data_hist %&gt;% 
+  filter(year &gt; 2014,
+         perp_race != &quot;unknown&quot;) %&gt;% 
+  group_by(perp_race) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = perp_race, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) 
+  
+race_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p>##2015-2020 total death by boro</p>
+<pre class="r"><code>boro_plot = 
+  data_hist %&gt;% 
+  filter(year &gt; 2014) %&gt;% 
+  group_by(boro) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = boro, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) 
+
+boro_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
 
 
 
