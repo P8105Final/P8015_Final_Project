@@ -9,7 +9,7 @@ output:
 library(tidyverse)
 ```
 
-#2015-2020 total death by year
+##2015-2020 total death by year
 ```{r}
 year_plot = 
   data_hist %>% 
@@ -25,7 +25,7 @@ year_plot =
 year_plot
 ```
 
-#2015-2020 total death by perpetrator’s sex
+##2015-2020 total death by perpetrator’s sex
 ```{r}
 sex_plot = 
   data_hist %>% 
@@ -39,4 +39,30 @@ sex_plot =
 sex_plot
 ```
 
+##2015-2020 total death by perpetrator’s race
+```{r}
+race_plot = 
+  data_hist %>% 
+  filter(year > 2014,
+         perp_race != "unknown") %>% 
+  group_by(perp_race) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = perp_race, group = n)) + 
+  geom_bar(position = "dodge") 
+  
+race_plot
+```
+
+##2015-2020 total death by boro
+```{r}
+boro_plot = 
+  data_hist %>% 
+  filter(year > 2014) %>% 
+  group_by(boro) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = boro, group = n)) + 
+  geom_bar(position = "dodge") 
+
+boro_plot
+```
 
