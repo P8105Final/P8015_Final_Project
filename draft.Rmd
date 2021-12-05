@@ -92,3 +92,11 @@ data_map %>%
     fillOpacity = 0.5,
     radius = 0.5,
     popup = ~ label) 
+
+lat1 = vector()
+lng1 = vector()
+for (i in 1 : nrow(data_map)){
+    lat1[i] = data_map$lat[i]
+    lng1[i] = data_map$lng[i]
+}
+
