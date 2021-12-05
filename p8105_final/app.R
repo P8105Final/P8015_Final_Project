@@ -2,7 +2,7 @@ library(shiny)
 
 library(leaflet)
 library(tidyverse)
-library(lubridate)
+library(RColorBrewer)
 
 #Read in dataset
 Data = read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv")
@@ -34,6 +34,8 @@ data_hist =
 data_map = 
     data_hist %>% 
     mutate(
+        date_paste = as.Date(paste(year,month,day,sep = "-")),
+        time_paste = paste(hour,minute,sep = ":"),
         statistical_murder_flag = case_when(
             statistical_murder_flag == "TRUE" ~"murdered",
             statistical_murder_flag == "FALSE" ~"survived"
@@ -41,7 +43,7 @@ data_map =
     rename("lat" = "latitude",
            "lng" = "longitude",
            "outcome" = "statistical_murder_flag") %>%
-    select(year, hour, boro, outcome, lat,lng) 
+    select(date_paste,time_paste, year, hour, boro, outcome, lat,lng) 
 
 boro = data_map %>% distinct(boro) %>% pull()
 
@@ -58,7 +60,7 @@ shinyApp(options = list(height = 1000),
              
              sidebarLayout(
                  sidebarPanel(
-                     helpText("Explore the shotting incident across NYC yourself! Choose the borough, time, and incident outcome of interest!"),
+                     helpText("Enter the interested borough, time range, and incident outcome to explore the NYC shooting incident map yourself! "),
                      
                      # select boro
                      radioButtons("boro_choice", 
@@ -93,6 +95,7 @@ shinyApp(options = list(height = 1000),
                  
                  
                  mainPanel(
+                     h3("Click on each point to see exact occurence date and time"),
                      leafletOutput('map', height = 550))
              )
          ),
@@ -114,27 +117,36 @@ shinyApp(options = list(height = 1000),
                  df = df2()
                  df = subset(df,
                              as.numeric(year) >= input$date_choice[1] & as.numeric(year) <= input$date_choice[2]
-                             & as.numeric(hour) >= input$time_choice[1] & as.numeric(hour) <= input$time_choice[2])
-                 lat = vector()
-                 lng = vector()
-                 for (i in 1:nrow(df)) {
-                     lat[i] = df$lat[i]
-                     lng[i] = df$lng[i]
-                 }
+                             & as.numeric(hour) >= input$time_choice[1] & as.numeric(hour) <= input$time_choice[2]) %>% 
+                     mutate(label = str_c("<b>date: ", date_paste, "</b><br>time: ", time_paste , sep = ""))
+                 
+            #set color
+            pal2 = colorFactor(c("sienna2", "steelblue3"), domain = c("murdered", "survived"))
+                 
+            lat = vector()
+            lng = vector()
+            for (i in 1:nrow(df)) {
+                lat[i] = df$lat[i]
+                lng[i] = df$lng[i]
+            }
         
-                 
-                 df$lat = as.numeric(lat)
-                 df$lng = as.numeric(lng)
-                 
-                 leaflet() %>% 
-                     addTiles() %>%
-                     addProviderTiles(providers$CartoDB.Positron) %>% 
-                     addCircleMarkers(
-                         lng = df$lng,
-                         lat = df$lat,
-                         data = df,
-                         fillOpacity = 0.5,
-                         radius = 0.5) 
+            
+            df$lat = as.numeric(lat)
+            df$lng = as.numeric(lng)
+            
+            leaflet() %>% 
+                addTiles() %>%
+                addProviderTiles(providers$CartoDB.Positron) %>% 
+                addCircleMarkers(
+                    lng = df$lng,
+                    lat = df$lat,
+                    data = df,
+                    color = ~pal2(df$outcome),
+                    opacity = 0.8,
+                    radius = 0.6,
+                    fillColor = ~pal2(df$outcome),
+                    popup = ~ label) %>%
+                     addLegend(position = 'bottomright', pal = pal2, values = df$outcome, title = "Incident Outcome")
              })
          }
 )
