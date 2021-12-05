@@ -144,7 +144,7 @@ incident_by_hour =
   mutate(n = n()) %>% 
   ggplot(aes(x = hour, group = n)) + 
   geom_bar(position = "dodge") +
-  facet_grid(~boro)
+  facet_grid(rows = vars(boro))
   
 incident_by_hour
 ```

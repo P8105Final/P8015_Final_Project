@@ -479,7 +479,7 @@ boro_plot</code></pre>
   mutate(n = n()) %&gt;% 
   ggplot(aes(x = hour, group = n)) + 
   geom_bar(position = &quot;dodge&quot;) +
-  facet_grid(~boro)
+  facet_grid(rows = vars(boro))
   
 incident_by_hour</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /> ##2015-2020 total death by jurisdiction_code</p>
