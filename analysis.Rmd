@@ -5,3 +5,38 @@ output:
     toc: true
     toc_float: true
 ---
+```{r}
+library(tidyverse)
+```
+
+#2015-2020 total death by year
+```{r}
+year_plot = 
+  data_hist %>% 
+  filter(year > 2014) %>% 
+  group_by(year) %>%
+  mutate(count = n()) %>% 
+  ggplot(aes(x = year, y = count)) + 
+  geom_point() +
+  labs(x = "Year",
+       y = "Total death"
+       )
+
+year_plot
+```
+
+#2015-2020 total death by perpetrator’s sex
+```{r}
+sex_plot = 
+  data_hist %>% 
+  filter(year > 2014,
+         perp_sex != "unknown") %>% 
+  group_by(year, perp_sex) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = year, group = n, fill = perp_sex)) + 
+  geom_bar(position = "dodge") 
+  
+sex_plot
+```
+
+
