@@ -34,8 +34,6 @@ data_hist =
 data_map = 
     data_hist %>% 
     mutate(
-        date_paste = as.Date(paste(year,month,day,sep = "-")),
-        time_paste = paste(hour,minute,sep = ":"),
         statistical_murder_flag = case_when(
             statistical_murder_flag == "TRUE" ~"murdered",
             statistical_murder_flag == "FALSE" ~"survived"
@@ -43,14 +41,11 @@ data_map =
     rename("lat" = "latitude",
            "lng" = "longitude",
            "outcome" = "statistical_murder_flag") %>%
-    select(date_paste,time_paste, boro, outcome, lat,lng) 
+    select(year, hour, boro, outcome, lat,lng) 
 
 boro = data_map %>% distinct(boro) %>% pull()
 
 outcome = data_map %>% distinct(outcome) %>% pull()
-
-day = data_map %>% distinct(date_paste) %>% pull()
-
 
 
 
@@ -79,12 +74,20 @@ shinyApp(options = list(height = 1000),
                                  multiple = TRUE),
                      helpText("Multiple selections are avaliable. Select both to see the total incidents!"),
                      
-                     #Select time range 
+                     #select date range 
                      sliderInput(
                          "date_choice", 
                          label = h3("Choose a date range"), 
                          min = 2015, max = 2020, 
-                         value = c(2015, 2020))
+                         value = c(2015, 2020)),
+                     
+                     #select time range
+                     
+                     sliderInput(
+                         "time_choice", 
+                         label = h3("Choose a time range"), 
+                         min = 00, max = 23, 
+                         value = c(00, 23))
                                 
                      ),
                  
@@ -109,10 +112,12 @@ shinyApp(options = list(height = 1000),
              
              output$map = renderLeaflet({
                  df = df2()
-                 df = subset(df,year(date_paste) >= input$date_choice[1] & year(date_paste) <= input$date_choice[2])
+                 df = subset(df,
+                             as.numeric(year) >= input$date_choice[1] & as.numeric(year) <= input$date_choice[2]
+                             & as.numeric(hour) >= input$time_choice[1] & as.numeric(hour) <= input$time_choice[2])
                  lat = vector()
                  lng = vector()
-                 for (i in 1:nrow(df)){
+                 for (i in 1:nrow(df)) {
                      lat[i] = df$lat[i]
                      lng[i] = df$lng[i]
                  }
