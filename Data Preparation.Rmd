@@ -40,8 +40,47 @@ data_hist =
           vic_race = str_to_lower(vic_race),
           perp_age_group = str_replace(perp_age_group, "UNKNOWN","unknown"),
           perp_sex = recode(perp_sex, "M" = "male","F" = "female","U" = "unknown"), 
-          vic_sex = recode(vic_sex, "M" = "male","F" = "female","U" = "unknown")
+          vic_sex = recode(vic_sex, "M" = "male","F" = "female","U" = "unknown"),
+          jurisdiction_code = case_when(
+            jurisdiction_code == 0 ~ "patrol", 
+            jurisdiction_code == 1 ~ "transit",
+            jurisdiction_code == 2 ~ "housing")
           ) %>% 
   arrange(year,month,day,hour,minute)
 ```
 
+## Map
+
+```{r}
+library(leaflet)
+```
+
+
+
+### Accident Number Across the Map
+
+Number of accident differs according to places.To be specific, more people injured on highway. Brooklyn and Bronx had more injured cases than other boroughs. The map constructed by injured cases refected the severity of car collsions among boroughs. **Hover on the map to explore the cases**
+
+```{r}
+data_2018 = tidy_data
+map_data = rename(data_2018, long = latitude, lat = longitude) 
+pal <- colorNumeric(
+  palette = "Accent",
+  domain = map_data$persons_injured)
+map_data %>% 
+  filter(persons_injured > 0) %>% 
+  filter(!(lat < "-70" | lat >= "-75")) %>% 
+  mutate(
+    label = str_c("<b>vehicle type: ", vehicle_type, "</b><br>Month: ", month , sep = "") ) %>%
+  leaflet() %>% 
+  addTiles() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addLegend("bottomright", pal = pal, values = ~persons_injured,
+    title = "Persons Injured",
+    opacity = 1
+  ) %>% 
+  addCircleMarkers(
+    ~lat, ~long,
+    color = ~pal(persons_injured),
+    radius = 0.5,
+    popup = ~ label) 
