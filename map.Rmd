@@ -6,4 +6,18 @@ output:
     toc_float: true
 ---
 
+
 Use shiny app instead?
+
+outcome = data_map %>% distinct(outcome) %>% pull()
+
+ #select incident outcome
+                     selectInput("outcome_choice",
+                                 label = h3("Choose incident outcome"),
+                                 choices = as.list(outcome),
+                                 selected = "murder")
+                                 
+                                  df2 = reactive({
+                 x = df1()
+                 x = subset(x, outcome == input$outcome_choice)
+             })

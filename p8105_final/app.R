@@ -46,22 +46,36 @@ data_map =
 
 boro = data_map %>% distinct(boro) %>% pull()
 
-subset(data_map,boro == "manhattan")
+outcome = data_map %>% distinct(outcome) %>% pull()
+
+
 
 shinyApp(options = list(height = 1000), 
 #Define the user interface
          ui = fluidPage(
              
-             titlePanel("Shooting Incident Map in NYC"),
+             titlePanel("NYC Shooting Incident Map"),
              
              sidebarLayout(
                  sidebarPanel(
                      helpText("Explore the shotting incident across NYC yourself! Choose the borough, time, and incident outcome of interest!"),
-                     # year select box 
+                     
+                     # select boro
                      selectInput("boro_choice", 
                                  label = h3("Choose a borough"),
                                  choices = as.list(boro),
-                                 selected = "manhattan")),# variable select box
+                                 selected = "manhattan"),
+                     
+                     #select incident outcome
+                     selectInput("outcome_choice",
+                                 label = h3("Choose incident outcome"),
+                                 choices = as.list(outcome),
+                                 selected = "murdered",
+                                 multiple = TRUE),
+                     helpText("Multiple selections are avaliable. Select both to see the total incidents!")
+                                ),
+                 
+                 
                  mainPanel(
                      leafletOutput('map', height = 550))
              )
@@ -73,16 +87,22 @@ shinyApp(options = list(height = 1000),
                  df = data_map
                  df = subset(df, boro == input$boro_choice)
              })
+             
+             df2 = reactive({
+                 x = df1()
+                 x = subset(x, outcome %in% input$outcome_choice)
+             })
 
              
              output$map = renderLeaflet({
-                 df = df1()
+                 df = df2()
                  lat = vector()
                  lng = vector()
-                 for (i in 1 : nrow(df)){
+                 for (i in 1:nrow(df)){
                      lat[i] = df$lat[i]
                      lng[i] = df$lng[i]
                  }
+        
                  
                  df$lat = as.numeric(lat)
                  df$lng = as.numeric(lng)
