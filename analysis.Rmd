@@ -58,7 +58,8 @@ year_plot =
   group_by(year) %>%
   mutate(count = n()) %>% 
   ggplot(aes(x = year, y = count)) + 
-  geom_point() +
+  geom_point() + geom_line(aes(x = year, y = count))
+
   labs(x = "Year",
        y = "Total death"
        )
@@ -93,6 +94,19 @@ race_plot =
   
 race_plot
 ```
+##2015-2020 total death by victim’s race
+```{r}
+vic_race_plot = 
+  data_hist %>% 
+  filter(year > 2014,
+         vic_race != "unknown") %>% 
+  group_by(vic_race) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(vic_race, group = n)) + 
+  geom_bar(position = "dodge") 
+
+vic_race_plot
+```
 
 ##2015-2020 total death by boro
 ```{r}
@@ -107,3 +121,29 @@ boro_plot =
 boro_plot
 ```
 
+##2015-2020 total death by hour in day
+```{r}
+incident_by_hour =
+  data_hist %>%
+  filter(year > 2014) %>% 
+  group_by(hour) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = hour, group = n)) + 
+  geom_bar(position = "dodge") +
+  facet_grid(~boro)
+  
+incident_by_hour
+```
+##2015-2020 total death by jurisdiction_code
+```{r}
+jurisdiction_code =
+  data_hist %>%
+  filter(year > 2014) %>% 
+  group_by(jurisdiction_code) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = jurisdiction_code, group = n)) + 
+  geom_bar(position = "dodge") 
+
+  
+jurisdiction_code
+```
