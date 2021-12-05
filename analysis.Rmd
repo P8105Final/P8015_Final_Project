@@ -54,7 +54,7 @@ data_hist =
 ```{r}
 year_plot = 
   data_hist %>% 
-  filter(year > 2014) %>% 
+  filter(year >= 2010) %>% 
   group_by(year) %>%
   mutate(count = n()) %>% 
   ggplot(aes(x = year, y = count)) + 
@@ -71,7 +71,7 @@ year_plot
 ```{r}
 sex_plot = 
   data_hist %>% 
-  filter(year > 2014,
+  filter(year >= 2010,
          perp_sex != "unknown") %>% 
   group_by(year, perp_sex) %>%
   mutate(n = n()) %>% 
@@ -98,7 +98,7 @@ race_plot
 ```{r}
 vic_race_plot = 
   data_hist %>% 
-  filter(year > 2014,
+  filter(year >= 2010,
          vic_race != "unknown") %>% 
   group_by(vic_race, vic_sex) %>%
   mutate(n = n()) %>% 
@@ -112,7 +112,7 @@ vic_race_plot
 ```{r}
 vic_sex_plot = 
   data_hist %>% 
-  filter(year > 2014,
+  filter(year >= 2010,
          vic_sex != "unknown") %>% 
   group_by(vic_sex) %>%
   mutate(n = n()) %>% 
@@ -126,7 +126,7 @@ vic_sex_plot
 ```{r}
 boro_plot = 
   data_hist %>% 
-  filter(year > 2014) %>% 
+  filter(year >= 2010) %>% 
   group_by(boro) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = boro, group = n)) + 
@@ -139,7 +139,7 @@ boro_plot
 ```{r}
 incident_by_hour =
   data_hist %>%
-  filter(year > 2014) %>% 
+  filter(year >= 2010) %>% 
   group_by(hour) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = hour, group = n)) + 
@@ -148,11 +148,13 @@ incident_by_hour =
   
 incident_by_hour
 ```
+
+
 ##2015-2020 total death by jurisdiction_code
 ```{r}
 jurisdiction_code =
   data_hist %>%
-  filter(year > 2014) %>% 
+  filter(year > 2010) %>% 
   group_by(jurisdiction_code) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = jurisdiction_code, group = n)) + 
