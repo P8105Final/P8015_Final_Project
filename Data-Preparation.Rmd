@@ -1,0 +1,93 @@
+---
+title: "Data Cleaning"
+author: "Anna Ma"
+date: "12/4/2021"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = element_text(face = "bold")))
+```
+
+## Load data
+
+```{r}
+data_hist = 
+  read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv") %>%
+  janitor::clean_names() %>%
+  rename("date" = "occur_date",
+         "time" = "occur_time") %>%
+  separate(date, into = c("month", "day", "year"), sep = "/") %>%
+  separate(time, into = c("hour", "minute"), sep = ":") %>% 
+  mutate(
+          boro = str_to_lower(boro),
+          location_desc = str_to_lower(location_desc),
+          perp_race = str_to_lower(perp_race),
+          vic_race = str_to_lower(vic_race),
+          perp_age_group = str_replace(perp_age_group, "UNKNOWN","unknown"),
+          perp_sex = recode(perp_sex, "M" = "male","F" = "female","U" = "unknown"), 
+          vic_sex = recode(vic_sex, "M" = "male","F" = "female","U" = "unknown"),
+          jurisdiction_code = case_when(
+            jurisdiction_code == 0 ~ "patrol", 
+            jurisdiction_code == 1 ~ "transit",
+            jurisdiction_code == 2 ~ "housing")
+          ) %>% 
+  arrange(year,month,day,hour,minute)
+```
+
+## Map
+
+```{r}
+library(leaflet)
+```
+
+
+
+```{r}
+pal <- colorFactor(c("navy", "red"), domain = data_hist$statistical_murder_flag)
+
+<<<<<<< HEAD:Data Preparation.Rmd
+Number of accident differs according to places.To be specific, more people injured on highway. Brooklyn and Bronx had more injured cases than other boroughs. The map constructed by injured cases reflected the severity of car collsions among boroughs. **Hover on the map to explore the cases**
+=======
+>>>>>>> 7cd4eb9ec8bdbf3e50afa60461878a013bf4ddc9:Data-Preparation.Rmd
+
+data_map = 
+  data_hist %>%
+  filter(boro=="Manhatten") %>% 
+  mutate(
+    date_paste = as.Date(paste(year,month,day,sep = "-")),
+    time_paste = paste(hour,minute,sep = ":")) %>% 
+  rename("lat" = "latitude",
+         "long" = "longitude") %>%
+  select(date_paste,time_paste, statistical_murder_flag, lat,long)
+  
+
+data_map %>% 
+  mutate(
+    label = str_c("<b>date: ", date_paste, "</b><br>time: ", time_paste , sep = "") ) %>%
+  leaflet() %>% 
+  addTiles() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addLegend("bottomright", pal = pal, values = ~statistical_murder_flag,
+    title = "statistical_murder_flag",
+    opacity = 1
+  ) %>% 
+  addCircleMarkers(
+    ~lat, ~long,
+    color = ~pal(statistical_murder_flag),
+    radius = 0.5,
+    popup = ~ label) 
