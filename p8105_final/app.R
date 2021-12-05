@@ -2,6 +2,7 @@ library(shiny)
 
 library(leaflet)
 library(tidyverse)
+library(lubridate)
 
 #Read in dataset
 Data = read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv")
@@ -48,6 +49,10 @@ boro = data_map %>% distinct(boro) %>% pull()
 
 outcome = data_map %>% distinct(outcome) %>% pull()
 
+day = data_map %>% distinct(date_paste) %>% pull()
+
+
+
 
 
 shinyApp(options = list(height = 1000), 
@@ -61,7 +66,7 @@ shinyApp(options = list(height = 1000),
                      helpText("Explore the shotting incident across NYC yourself! Choose the borough, time, and incident outcome of interest!"),
                      
                      # select boro
-                     selectInput("boro_choice", 
+                     radioButtons("boro_choice", 
                                  label = h3("Choose a borough"),
                                  choices = as.list(boro),
                                  selected = "manhattan"),
@@ -72,8 +77,16 @@ shinyApp(options = list(height = 1000),
                                  choices = as.list(outcome),
                                  selected = "murdered",
                                  multiple = TRUE),
-                     helpText("Multiple selections are avaliable. Select both to see the total incidents!")
-                                ),
+                     helpText("Multiple selections are avaliable. Select both to see the total incidents!"),
+                     
+                     #Select time range 
+                     sliderInput(
+                         "date_choice", 
+                         label = h3("Choose a date range"), 
+                         min = 2015, max = 2020, 
+                         value = c(2015, 2020))
+                                
+                     ),
                  
                  
                  mainPanel(
@@ -96,6 +109,7 @@ shinyApp(options = list(height = 1000),
              
              output$map = renderLeaflet({
                  df = df2()
+                 df = subset(df,year(date_paste) >= input$date_choice[1] & year(date_paste) <= input$date_choice[2])
                  lat = vector()
                  lng = vector()
                  for (i in 1:nrow(df)){
