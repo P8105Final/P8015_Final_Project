@@ -361,33 +361,13 @@ div.tocify {
 
 
 <pre class="r"><code>data_hist = 
-  read_csv(&quot;data/NYPD_Shooting_Incident_Data__Historic_.csv&quot;) %&gt;%
-  janitor::clean_names() %&gt;%
-  rename(&quot;date&quot; = &quot;occur_date&quot;,
-         &quot;time&quot; = &quot;occur_time&quot;) %&gt;%
-  separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) %&gt;%
-  separate(time, into = c(&quot;hour&quot;, &quot;minute&quot;), sep = &quot;:&quot;) %&gt;% 
-  mutate(
-          boro = str_to_lower(boro),
-          location_desc = str_to_lower(location_desc),
-          perp_race = str_to_lower(perp_race),
-          vic_race = str_to_lower(vic_race),
-          perp_age_group = str_replace(perp_age_group, &quot;UNKNOWN&quot;,&quot;unknown&quot;),
-          perp_sex = recode(perp_sex, &quot;M&quot; = &quot;male&quot;,&quot;F&quot; = &quot;female&quot;,&quot;U&quot; = &quot;unknown&quot;), 
-          vic_sex = recode(vic_sex, &quot;M&quot; = &quot;male&quot;,&quot;F&quot; = &quot;female&quot;,&quot;U&quot; = &quot;unknown&quot;),
-          jurisdiction_code = case_when(
-            jurisdiction_code == 0 ~ &quot;patrol&quot;, 
-            jurisdiction_code == 1 ~ &quot;transit&quot;,
-            jurisdiction_code == 2 ~ &quot;housing&quot;)
-          ) %&gt;% 
-  arrange(year,month,day,hour,minute)</code></pre>
-<pre><code>## Rows: 23585 Columns: 19</code></pre>
+  read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) </code></pre>
+<pre><code>## Rows: 23585 Columns: 22</code></pre>
 <pre><code>## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
-## chr  (10): OCCUR_DATE, BORO, LOCATION_DESC, PERP_AGE_GROUP, PERP_SEX, PERP_R...
-## dbl   (7): INCIDENT_KEY, PRECINCT, JURISDICTION_CODE, X_COORD_CD, Y_COORD_CD...
-## lgl   (1): STATISTICAL_MURDER_FLAG
-## time  (1): OCCUR_TIME</code></pre>
+## chr (14): month, day, hour, minute, boro, jurisdiction_code, location_desc, ...
+## dbl  (7): incident_key, year, precinct, x_coord_cd, y_coord_cd, latitude, lo...
+## lgl  (1): statistical_murder_flag</code></pre>
 <pre><code>## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>

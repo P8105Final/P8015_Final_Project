@@ -26,26 +26,7 @@ theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = elemen
 
 ```{r}
 data_hist = 
-  read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv") %>%
-  janitor::clean_names() %>%
-  rename("date" = "occur_date",
-         "time" = "occur_time") %>%
-  separate(date, into = c("month", "day", "year"), sep = "/") %>%
-  separate(time, into = c("hour", "minute"), sep = ":") %>% 
-  mutate(
-          boro = str_to_lower(boro),
-          location_desc = str_to_lower(location_desc),
-          perp_race = str_to_lower(perp_race),
-          vic_race = str_to_lower(vic_race),
-          perp_age_group = str_replace(perp_age_group, "UNKNOWN","unknown"),
-          perp_sex = recode(perp_sex, "M" = "male","F" = "female","U" = "unknown"), 
-          vic_sex = recode(vic_sex, "M" = "male","F" = "female","U" = "unknown"),
-          jurisdiction_code = case_when(
-            jurisdiction_code == 0 ~ "patrol", 
-            jurisdiction_code == 1 ~ "transit",
-            jurisdiction_code == 2 ~ "housing")
-          ) %>% 
-  arrange(year,month,day,hour,minute)
+  read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") 
 ```
 
 
