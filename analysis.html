@@ -13,8 +13,8 @@
 
 <title>Analysis</title>
 
-<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
-<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -394,21 +394,29 @@ div.tocify {
 <p>##2015-2020 total death by year</p>
 <pre class="r"><code>year_plot = 
   data_hist %&gt;% 
-  filter(year &gt; 2014) %&gt;% 
+  filter(year &gt;= 2010) %&gt;% 
   group_by(year) %&gt;%
   mutate(count = n()) %&gt;% 
   ggplot(aes(x = year, y = count)) + 
-  geom_point() +
+  geom_point() 
+
   labs(x = &quot;Year&quot;,
        y = &quot;Total death&quot;
-       )
-
-year_plot</code></pre>
+       )</code></pre>
+<pre><code>## $x
+## [1] &quot;Year&quot;
+## 
+## $y
+## [1] &quot;Total death&quot;
+## 
+## attr(,&quot;class&quot;)
+## [1] &quot;labels&quot;</code></pre>
+<pre class="r"><code>year_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
 <p>##2015-2020 total death by perpetrator’s sex</p>
 <pre class="r"><code>sex_plot = 
   data_hist %&gt;% 
-  filter(year &gt; 2014,
+  filter(year &gt;= 2010,
          perp_sex != &quot;unknown&quot;) %&gt;% 
   group_by(year, perp_sex) %&gt;%
   mutate(n = n()) %&gt;% 
@@ -428,18 +436,65 @@ sex_plot</code></pre>
   geom_bar(position = &quot;dodge&quot;) 
   
 race_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /> ##2015-2020 total death by victim’s race</p>
+<pre class="r"><code>vic_race_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2010,
+         vic_race != &quot;unknown&quot;) %&gt;% 
+  group_by(vic_race, vic_sex) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = vic_race, group = n,fill = vic_sex)) + 
+  geom_bar(position = &quot;dodge&quot;) 
+
+vic_race_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p>##2015-2020 total death by victim’s sex</p>
+<pre class="r"><code>vic_sex_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2010,
+         vic_sex != &quot;unknown&quot;) %&gt;% 
+  group_by(vic_sex) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = vic_sex, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) 
+
+vic_sex_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <p>##2015-2020 total death by boro</p>
 <pre class="r"><code>boro_plot = 
   data_hist %&gt;% 
-  filter(year &gt; 2014) %&gt;% 
+  filter(year &gt;= 2010) %&gt;% 
   group_by(boro) %&gt;%
   mutate(n = n()) %&gt;% 
   ggplot(aes(x = boro, group = n)) + 
   geom_bar(position = &quot;dodge&quot;) 
 
 boro_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p>##2015-2020 total death by hour in day</p>
+<pre class="r"><code>incident_by_hour =
+  data_hist %&gt;%
+  filter(year &gt;= 2010) %&gt;% 
+  group_by(hour) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = hour, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  facet_grid(rows = vars(boro))
+  
+incident_by_hour</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p>##2015-2020 total death by jurisdiction_code</p>
+<pre class="r"><code>jurisdiction_code =
+  data_hist %&gt;%
+  filter(year &gt; 2010) %&gt;% 
+  group_by(jurisdiction_code) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = jurisdiction_code, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) 
+
+  
+jurisdiction_code</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 
 
 
