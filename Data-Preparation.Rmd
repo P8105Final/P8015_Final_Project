@@ -48,6 +48,9 @@ data_hist =
           ) %>% 
   arrange(year,month,day,hour,minute)
 ```
+```{r}
+write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names=FALSE)
+```
 
 ## Map
 

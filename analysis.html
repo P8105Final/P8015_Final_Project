@@ -361,6 +361,7 @@ div.tocify {
 
 
 <pre class="r"><code>data_hist = 
+<<<<<<< HEAD
   read_csv(&quot;data/NYPD_Shooting_Incident_Data__Historic_.csv&quot;) %&gt;%
   janitor::clean_names() %&gt;%
   rename(&quot;date&quot; = &quot;occur_date&quot;,
@@ -385,12 +386,15 @@ div.tocify {
   arrange(year,month,day,hour,minute) %&gt;%
 view()</code></pre>
 <pre><code>## Rows: 23585 Columns: 19</code></pre>
+=======
+  read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) </code></pre>
+<pre><code>## Rows: 23585 Columns: 22</code></pre>
+>>>>>>> 5087429b896944fecb4f5868bf53405ce7d5fb5c
 <pre><code>## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
-## chr  (10): OCCUR_DATE, BORO, LOCATION_DESC, PERP_AGE_GROUP, PERP_SEX, PERP_R...
-## dbl   (7): INCIDENT_KEY, PRECINCT, JURISDICTION_CODE, X_COORD_CD, Y_COORD_CD...
-## lgl   (1): STATISTICAL_MURDER_FLAG
-## time  (1): OCCUR_TIME</code></pre>
+## chr (14): month, day, hour, minute, boro, jurisdiction_code, location_desc, ...
+## dbl  (7): incident_key, year, precinct, x_coord_cd, y_coord_cd, latitude, lo...
+## lgl  (1): statistical_murder_flag</code></pre>
 <pre><code>## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>

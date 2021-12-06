@@ -26,6 +26,7 @@ theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = elemen
 
 ```{r}
 data_hist = 
+<<<<<<< HEAD
   read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv") %>%
   janitor::clean_names() %>%
   rename("date" = "occur_date",
@@ -49,6 +50,9 @@ data_hist =
           ) %>% 
   arrange(year,month,day,hour,minute) %>%
 view()
+=======
+  read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") 
+>>>>>>> 5087429b896944fecb4f5868bf53405ce7d5fb5c
 ```
 
 
