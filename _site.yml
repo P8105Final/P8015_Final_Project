@@ -8,7 +8,7 @@ navbar:
     - text: "Regression Model"
       href: model.html
     - text: "Interactive Map"
-      href: map.html
+      href: https://ym2813.shinyapps.io/interactive_map_p8105_final/
     - text: "Report"
       href: report.html
     - icon: fa-youtube fa-lg

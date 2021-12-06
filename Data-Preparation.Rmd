@@ -56,14 +56,8 @@ library(leaflet)
 ```
 
 
-
 ```{r}
 pal <- colorFactor(c("navy", "red"), domain = data_hist$statistical_murder_flag)
-
-<<<<<<< HEAD:Data Preparation.Rmd
-Number of accident differs according to places.To be specific, more people injured on highway. Brooklyn and Bronx had more injured cases than other boroughs. The map constructed by injured cases reflected the severity of car collsions among boroughs. **Hover on the map to explore the cases**
-=======
->>>>>>> 7cd4eb9ec8bdbf3e50afa60461878a013bf4ddc9:Data-Preparation.Rmd
 
 data_map = 
   data_hist %>%
@@ -91,3 +85,4 @@ data_map %>%
     color = ~pal(statistical_murder_flag),
     radius = 0.5,
     popup = ~ label) 
+```

@@ -20,7 +20,7 @@ Our data is from NYC open data website. The data we use is [NYPD Shooting Incide
 
 [Regression Model](model.html):
 
-[Interactive Map](map.html):
+[Interactive Map](https://ym2813.shinyapps.io/interactive_map_p8105_final/):
 
 [Report](report.html):
 
