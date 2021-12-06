@@ -378,9 +378,12 @@ div.tocify {
           jurisdiction_code = case_when(
             jurisdiction_code == 0 ~ &quot;patrol&quot;, 
             jurisdiction_code == 1 ~ &quot;transit&quot;,
-            jurisdiction_code == 2 ~ &quot;housing&quot;)
+            jurisdiction_code == 2 ~ &quot;housing&quot;),
+          statistical_murder_flag = as.character(statistical_murder_flag),
+          statistical_murder_flag = recode(statistical_murder_flag, &quot;TRUE&quot; = &quot;killed&quot;, &quot;FALSE&quot; = &quot;injured&quot; )
           ) %&gt;% 
-  arrange(year,month,day,hour,minute)</code></pre>
+  arrange(year,month,day,hour,minute) %&gt;%
+view()</code></pre>
 <pre><code>## Rows: 23585 Columns: 19</code></pre>
 <pre><code>## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -391,87 +394,137 @@ div.tocify {
 <pre><code>## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<p>##2015-2020 total death by year</p>
+<p>##2010-2020 total shooting incident trend by year</p>
 <pre class="r"><code>year_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010) %&gt;% 
   group_by(year) %&gt;%
-  mutate(count = n()) %&gt;% 
-  ggplot(aes(x = year, y = count)) + 
-  geom_point() 
-
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = year, y = n)) + 
+  geom_point() +
   labs(x = &quot;Year&quot;,
-       y = &quot;Total death&quot;
-       )</code></pre>
-<pre><code>## $x
-## [1] &quot;Year&quot;
-## 
-## $y
-## [1] &quot;Total death&quot;
-## 
-## attr(,&quot;class&quot;)
-## [1] &quot;labels&quot;</code></pre>
-<pre class="r"><code>year_plot</code></pre>
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Year&quot;
+       )
+
+year_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
-<p>##2015-2020 total death by perpetrator’s sex</p>
-<pre class="r"><code>sex_plot = 
+<p>##2010-2020 total shooting incident trend by perpetrator’s sex</p>
+<pre class="r"><code>perp_sex_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
          perp_sex != &quot;unknown&quot;) %&gt;% 
   group_by(year, perp_sex) %&gt;%
   mutate(n = n()) %&gt;% 
   ggplot(aes(x = year, group = n, fill = perp_sex)) + 
-  geom_bar(position = &quot;dodge&quot;) 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Perpetrator’s Sex&quot;
+       )
   
-sex_plot</code></pre>
+perp_sex_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
-<p>##2015-2020 total death by perpetrator’s race</p>
-<pre class="r"><code>race_plot = 
+<p>##2010-2020 totalshooting incident by perpetrator’s race</p>
+<pre class="r"><code>perp_race_plot = 
   data_hist %&gt;% 
-  filter(year &gt; 2014,
+  filter(year &gt;= 2010,
          perp_race != &quot;unknown&quot;) %&gt;% 
   group_by(perp_race) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = perp_race, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) 
+  ggplot(aes(x = year, group = n, fill = perp_race)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Perpetrator’s Race&quot;
+       )
   
-race_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /> ##2015-2020 total death by victim’s race</p>
+perp_race_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p>##2010-2020 totalshooting incident by perpetrator’s age group</p>
+<pre class="r"><code>perp_age_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2010,
+         perp_age_group != &quot;NA&quot;,
+         perp_age_group != &quot;unknown&quot;
+         ) %&gt;% 
+  group_by(perp_age_group) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = year, group = n, fill = perp_age_group)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Perpetrator’s Age Group&quot;
+       )
+  
+perp_age_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p>##2010-2020 total shooting incident by victim’s race</p>
 <pre class="r"><code>vic_race_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
          vic_race != &quot;unknown&quot;) %&gt;% 
-  group_by(vic_race, vic_sex) %&gt;%
+  group_by(vic_race) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = vic_race, group = n,fill = vic_sex)) + 
-  geom_bar(position = &quot;dodge&quot;) 
+  ggplot(aes(x = year, group = n,fill = vic_race)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Race&quot;
+       )
 
 vic_race_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-<p>##2015-2020 total death by victim’s sex</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p>##2010-2020 total shooting incident by victim’s sex</p>
 <pre class="r"><code>vic_sex_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
          vic_sex != &quot;unknown&quot;) %&gt;% 
   group_by(vic_sex) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = vic_sex, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) 
+  ggplot(aes(x = year, group = n, fill = vic_sex)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Sex&quot;
+       )
 
 vic_sex_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
-<p>##2015-2020 total death by boro</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p>##2010-2020 totalshooting incident by victim’s age group</p>
+<pre class="r"><code>vic_age_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2010,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;
+         ) %&gt;% 
+  group_by(vic_age_group) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = boro, group = n, fill = vic_age_group)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Borough&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Perpetrator’s Age Group&quot;
+       )
+  
+vic_age_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p>##2010-2020 total shooting incident by boro</p>
 <pre class="r"><code>boro_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010) %&gt;% 
   group_by(boro) %&gt;%
   mutate(n = n()) %&gt;% 
   ggplot(aes(x = boro, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Borough&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident By Borough&quot;
+       )
 
 boro_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
-<p>##2015-2020 total death by hour in day</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p>##2010-2020 total shooting incident by hour in day</p>
 <pre class="r"><code>incident_by_hour =
   data_hist %&gt;%
   filter(year &gt;= 2010) %&gt;% 
@@ -479,22 +532,30 @@ boro_plot</code></pre>
   mutate(n = n()) %&gt;% 
   ggplot(aes(x = hour, group = n)) + 
   geom_bar(position = &quot;dodge&quot;) +
-  facet_grid(rows = vars(boro))
+  facet_grid(rows = vars(boro)) +
+  labs(x = &quot;Hour&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Hour In Day&quot;
+       )
   
 incident_by_hour</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
-<p>##2015-2020 total death by jurisdiction_code</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p>##2010-2020 total shooting incident by jurisdiction_code</p>
 <pre class="r"><code>jurisdiction_code =
   data_hist %&gt;%
   filter(year &gt; 2010) %&gt;% 
   group_by(jurisdiction_code) %&gt;%
   mutate(n = n()) %&gt;% 
   ggplot(aes(x = jurisdiction_code, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Location of the incident&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident By Location Of The Incident&quot;
+       )
 
   
 jurisdiction_code</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
 
 
 
