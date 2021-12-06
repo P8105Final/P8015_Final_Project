@@ -26,33 +26,14 @@ theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = elemen
 
 ```{r}
 data_hist = 
-<<<<<<< HEAD
-  read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv") %>%
-  janitor::clean_names() %>%
-  rename("date" = "occur_date",
-         "time" = "occur_time") %>%
-  separate(date, into = c("month", "day", "year"), sep = "/") %>%
-  separate(time, into = c("hour", "minute"), sep = ":") %>% 
+
+ 
+  read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
   mutate(
-          boro = str_to_lower(boro),
-          location_desc = str_to_lower(location_desc),
-          perp_race = str_to_lower(perp_race),
-          vic_race = str_to_lower(vic_race),
-          perp_age_group = str_replace(perp_age_group, "UNKNOWN","unknown"),
-          perp_sex = recode(perp_sex, "M" = "male","F" = "female","U" = "unknown"), 
-          vic_sex = recode(vic_sex, "M" = "male","F" = "female","U" = "unknown"),
-          jurisdiction_code = case_when(
-            jurisdiction_code == 0 ~ "patrol", 
-            jurisdiction_code == 1 ~ "transit",
-            jurisdiction_code == 2 ~ "housing"),
-          statistical_murder_flag = as.character(statistical_murder_flag),
-          statistical_murder_flag = recode(statistical_murder_flag, "TRUE" = "killed", "FALSE" = "injured" )
-          ) %>% 
-  arrange(year,month,day,hour,minute) %>%
-view()
-=======
-  read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") 
->>>>>>> 5087429b896944fecb4f5868bf53405ce7d5fb5c
+    statistical_murder_flag = as.character(statistical_murder_flag)
+    statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
+  )
+data_hist
 ```
 
 
@@ -61,11 +42,13 @@ view()
 ```{r}
 year_plot = 
   data_hist %>% 
-  filter(year >= 2010) %>% 
-  group_by(year) %>%
+  filter(year >= 2010
+         ) %>% 
+  group_by(year, statistical_murder_flag) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = year, y = n)) + 
-  geom_point() +
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + 
+  geom_point() + geom_line()
+  #facet_grid(~statistical_murder_flag)
   labs(x = "Year",
        y = "Total incident",
        title = "Shooting Incident Trend By Year"
