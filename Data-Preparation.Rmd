@@ -48,44 +48,8 @@ data_hist =
           ) %>% 
   arrange(year,month,day,hour,minute)
 ```
+
+
 ```{r}
 write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names=FALSE)
-```
-
-## Map
-
-```{r}
-library(leaflet)
-```
-
-
-```{r}
-pal <- colorFactor(c("navy", "red"), domain = data_hist$statistical_murder_flag)
-
-data_map = 
-  data_hist %>%
-  filter(boro=="Manhatten") %>% 
-  mutate(
-    date_paste = as.Date(paste(year,month,day,sep = "-")),
-    time_paste = paste(hour,minute,sep = ":")) %>% 
-  rename("lat" = "latitude",
-         "long" = "longitude") %>%
-  select(date_paste,time_paste, statistical_murder_flag, lat,long)
-  
-
-data_map %>% 
-  mutate(
-    label = str_c("<b>date: ", date_paste, "</b><br>time: ", time_paste , sep = "") ) %>%
-  leaflet() %>% 
-  addTiles() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>% 
-  addLegend("bottomright", pal = pal, values = ~statistical_murder_flag,
-    title = "statistical_murder_flag",
-    opacity = 1
-  ) %>% 
-  addCircleMarkers(
-    ~lat, ~long,
-    color = ~pal(statistical_murder_flag),
-    radius = 0.5,
-    popup = ~ label) 
 ```
