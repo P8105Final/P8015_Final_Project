@@ -26,89 +26,112 @@ theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = elemen
 
 ```{r}
 data_hist = 
-  read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv") %>%
-  janitor::clean_names() %>%
-  rename("date" = "occur_date",
-         "time" = "occur_time") %>%
-  separate(date, into = c("month", "day", "year"), sep = "/") %>%
-  separate(time, into = c("hour", "minute"), sep = ":") %>% 
+
+ 
+  read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
   mutate(
-          boro = str_to_lower(boro),
-          location_desc = str_to_lower(location_desc),
-          perp_race = str_to_lower(perp_race),
-          vic_race = str_to_lower(vic_race),
-          perp_age_group = str_replace(perp_age_group, "UNKNOWN","unknown"),
-          perp_sex = recode(perp_sex, "M" = "male","F" = "female","U" = "unknown"), 
-          vic_sex = recode(vic_sex, "M" = "male","F" = "female","U" = "unknown"),
-          jurisdiction_code = case_when(
-            jurisdiction_code == 0 ~ "patrol", 
-            jurisdiction_code == 1 ~ "transit",
-            jurisdiction_code == 2 ~ "housing")
-          ) %>% 
-  arrange(year,month,day,hour,minute)
+    statistical_murder_flag = as.character(statistical_murder_flag)
+    statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
+  )
+data_hist
 ```
 
 
 
-##2015-2020 total death by year
+##2010-2020 total shooting incident trend by year
 ```{r}
 year_plot = 
   data_hist %>% 
-  filter(year >= 2010) %>% 
-  group_by(year) %>%
-  mutate(count = n()) %>% 
-  ggplot(aes(x = year, y = count)) + 
-  geom_point() 
-
+  filter(year >= 2010
+         ) %>% 
+  group_by(year, statistical_murder_flag) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + 
+  geom_point() + geom_line()
+  #facet_grid(~statistical_murder_flag)
   labs(x = "Year",
-       y = "Total death"
+       y = "Total incident",
+       title = "Shooting Incident Trend By Year"
        )
 
 year_plot
 ```
 
-##2015-2020 total death by perpetrator’s sex
+##2010-2020 total shooting incident trend by perpetrator’s sex
 ```{r}
-sex_plot = 
+perp_sex_plot = 
   data_hist %>% 
   filter(year >= 2010,
          perp_sex != "unknown") %>% 
   group_by(year, perp_sex) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = year, group = n, fill = perp_sex)) + 
-  geom_bar(position = "dodge") 
+  geom_bar(position = "dodge") +
+  labs(x = "Year",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Perpetrator’s Sex"
+       )
   
-sex_plot
+perp_sex_plot
 ```
 
-##2015-2020 total death by perpetrator’s race
+##2010-2020 totalshooting incident by perpetrator’s race
 ```{r}
-race_plot = 
+perp_race_plot = 
   data_hist %>% 
-  filter(year > 2014,
+  filter(year >= 2010,
          perp_race != "unknown") %>% 
   group_by(perp_race) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = perp_race, group = n)) + 
-  geom_bar(position = "dodge") 
+  ggplot(aes(x = year, group = n, fill = perp_race)) + 
+  geom_bar(position = "dodge") +
+  labs(x = "Year",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Perpetrator’s Race"
+       )
   
-race_plot
+perp_race_plot
 ```
-##2015-2020 total death by victim’s race
+
+##2010-2020 totalshooting incident by perpetrator’s age group
+```{r}
+perp_age_plot = 
+  data_hist %>% 
+  filter(year >= 2010,
+         perp_age_group != "NA",
+         perp_age_group != "unknown"
+         ) %>% 
+  group_by(perp_age_group) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = year, group = n, fill = perp_age_group)) + 
+  geom_bar(position = "dodge") +
+  labs(x = "Year",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Perpetrator’s Age Group"
+       )
+  
+perp_age_plot
+```
+
+##2010-2020 total shooting incident by victim’s race
 ```{r}
 vic_race_plot = 
   data_hist %>% 
   filter(year >= 2010,
          vic_race != "unknown") %>% 
-  group_by(vic_race, vic_sex) %>%
+  group_by(vic_race) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = vic_race, group = n,fill = vic_sex)) + 
-  geom_bar(position = "dodge") 
+  ggplot(aes(x = year, group = n,fill = vic_race)) + 
+  geom_bar(position = "dodge") +
+  labs(x = "Year",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Victim’s Race"
+       )
 
 vic_race_plot
 ```
 
-##2015-2020 total death by victim’s sex
+##2010-2020 total shooting incident by victim’s sex
 ```{r}
 vic_sex_plot = 
   data_hist %>% 
@@ -116,13 +139,37 @@ vic_sex_plot =
          vic_sex != "unknown") %>% 
   group_by(vic_sex) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = vic_sex, group = n)) + 
-  geom_bar(position = "dodge") 
+  ggplot(aes(x = year, group = n, fill = vic_sex)) + 
+  geom_bar(position = "dodge") +
+  labs(x = "Year",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Victim’s Sex"
+       )
 
 vic_sex_plot
 ```
 
-##2015-2020 total death by boro
+##2010-2020 totalshooting incident by victim’s age group
+```{r}
+vic_age_plot = 
+  data_hist %>% 
+  filter(year >= 2010,
+         vic_age_group != "NA",
+         vic_age_group != "UNKNOWN"
+         ) %>% 
+  group_by(vic_age_group) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = boro, group = n, fill = vic_age_group)) + 
+  geom_bar(position = "dodge") +
+  labs(x = "Borough",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Perpetrator’s Age Group"
+       )
+  
+vic_age_plot
+```
+
+##2010-2020 total shooting incident by boro
 ```{r}
 boro_plot = 
   data_hist %>% 
@@ -130,12 +177,16 @@ boro_plot =
   group_by(boro) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = boro, group = n)) + 
-  geom_bar(position = "dodge") 
+  geom_bar(position = "dodge") +
+  labs(x = "Borough",
+       y = "Total incident",
+       title = "Shooting Incident By Borough"
+       )
 
 boro_plot
 ```
 
-##2015-2020 total death by hour in day
+##2010-2020 total shooting incident by hour in day
 ```{r}
 incident_by_hour =
   data_hist %>%
@@ -144,13 +195,17 @@ incident_by_hour =
   mutate(n = n()) %>% 
   ggplot(aes(x = hour, group = n)) + 
   geom_bar(position = "dodge") +
-  facet_grid(rows = vars(boro))
+  facet_grid(rows = vars(boro)) +
+  labs(x = "Hour",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Hour In Day"
+       )
   
 incident_by_hour
 ```
 
 
-##2015-2020 total death by jurisdiction_code
+##2010-2020 total shooting incident by jurisdiction_code
 ```{r}
 jurisdiction_code =
   data_hist %>%
@@ -158,7 +213,11 @@ jurisdiction_code =
   group_by(jurisdiction_code) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = jurisdiction_code, group = n)) + 
-  geom_bar(position = "dodge") 
+  geom_bar(position = "dodge") +
+  labs(x = "Location of the incident",
+       y = "Total incident",
+       title = "Shooting Incident By Location Of The Incident"
+       )
 
   
 jurisdiction_code
