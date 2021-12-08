@@ -30,7 +30,7 @@ data_hist =
  
   read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
   mutate(
-    statistical_murder_flag = as.character(statistical_murder_flag)
+    statistical_murder_flag = as.character(statistical_murder_flag),
     statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
   )
 data_hist
@@ -38,7 +38,7 @@ data_hist
 
 
 
-##2010-2020 total shooting incident trend by year
+##2010-2020 total shooting incident trends by year
 ```{r}
 year_plot = 
   data_hist %>% 
@@ -46,7 +46,7 @@ year_plot =
          ) %>% 
   group_by(year, statistical_murder_flag) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + 
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + + scale_x_continuous(breaks = seq(2010, 2020, by = 1))
   geom_point() + geom_line()
   #facet_grid(~statistical_murder_flag)
   labs(x = "Year",
@@ -186,7 +186,7 @@ boro_plot =
 boro_plot
 ```
 
-##2010-2020 total shooting incident by hour in day
+##2010-2020 total shooting incident by hour in a day
 ```{r}
 incident_by_hour =
   data_hist %>%
