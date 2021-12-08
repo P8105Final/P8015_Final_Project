@@ -46,7 +46,7 @@ year_plot =
          ) %>% 
   group_by(year, statistical_murder_flag) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + + scale_x_continuous(breaks = seq(2010, 2020, by = 1))
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1))+
   geom_point() + geom_line()
   #facet_grid(~statistical_murder_flag)
   labs(x = "Year",
