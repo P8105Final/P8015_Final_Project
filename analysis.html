@@ -401,9 +401,9 @@ year_plot</code></pre>
          vic_race %in% c(&quot;black&quot;,&quot;white hispanic&quot;,&quot;black hispanic&quot;,&quot;white&quot;,&quot;asian / pacific islander&quot;,&quot;white&quot;)) %&gt;% 
   group_by(year,vic_race) %&gt;%
   mutate(n = n()) %&gt;%
-  ggplot(aes(x = year, y = n, color = vic_race)) + 
-  geom_point() + geom_line() +
-  facet_grid(rows = vars(vic_race), scales = &quot;free&quot;)+
+  ggplot(aes(x = year, y = n, fill = vic_race)) + 
+  geom_bar(width = 0.8, stat = &quot;identity&quot;)+
+  
 
   labs(x = &quot;Year&quot;,
        y = &quot;Total incident&quot;,
