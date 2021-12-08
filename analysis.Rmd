@@ -33,7 +33,7 @@ data_hist =
     statistical_murder_flag = as.character(statistical_murder_flag),
     statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
   )
-data_hist
+
 ```
 
 
@@ -44,11 +44,11 @@ year_plot =
   data_hist %>% 
   filter(year >= 2010
          ) %>% 
-  group_by(year, statistical_murder_flag) %>%
+  group_by (year, statistical_murder_flag) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1))+
-  geom_point() + geom_line()
-  #facet_grid(~statistical_murder_flag)
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
+  geom_point() + geom_line()+
+  #facet_grid (~statistical_murder_flag)
   labs(x = "Year",
        y = "Total incident",
        title = "Shooting Incident Trend By Year"
@@ -57,79 +57,32 @@ year_plot =
 year_plot
 ```
 
-##2010-2020 total shooting incident trend by perpetrator’s sex
-```{r}
-perp_sex_plot = 
-  data_hist %>% 
-  filter(year >= 2010,
-         perp_sex != "unknown") %>% 
-  group_by(year, perp_sex) %>%
-  mutate(n = n()) %>% 
-  ggplot(aes(x = year, group = n, fill = perp_sex)) + 
-  geom_bar(position = "dodge") +
-  labs(x = "Year",
-       y = "Total incident",
-       title = "Shooting Incident Trend By Perpetrator’s Sex"
-       )
-  
-perp_sex_plot
-```
 
-##2010-2020 totalshooting incident by perpetrator’s race
-```{r}
-perp_race_plot = 
-  data_hist %>% 
-  filter(year >= 2010,
-         perp_race != "unknown") %>% 
-  group_by(perp_race) %>%
-  mutate(n = n()) %>% 
-  ggplot(aes(x = year, group = n, fill = perp_race)) + 
-  geom_bar(position = "dodge") +
-  labs(x = "Year",
-       y = "Total incident",
-       title = "Shooting Incident Trend By Perpetrator’s Race"
-       )
-  
-perp_race_plot
-```
 
-##2010-2020 totalshooting incident by perpetrator’s age group
-```{r}
-perp_age_plot = 
-  data_hist %>% 
-  filter(year >= 2010,
-         perp_age_group != "NA",
-         perp_age_group != "unknown"
-         ) %>% 
-  group_by(perp_age_group) %>%
-  mutate(n = n()) %>% 
-  ggplot(aes(x = year, group = n, fill = perp_age_group)) + 
-  geom_bar(position = "dodge") +
-  labs(x = "Year",
-       y = "Total incident",
-       title = "Shooting Incident Trend By Perpetrator’s Age Group"
-       )
-  
-perp_age_plot
-```
+
 
 ##2010-2020 total shooting incident by victim’s race
+
 ```{r}
 vic_race_plot = 
-  data_hist %>% 
+  data_hist %>%
   filter(year >= 2010,
-         vic_race != "unknown") %>% 
-  group_by(vic_race) %>%
-  mutate(n = n()) %>% 
-  ggplot(aes(x = year, group = n,fill = vic_race)) + 
-  geom_bar(position = "dodge") +
+         vic_race %in% c("black","white hispanic","black hispanic","white","asian / pacific islander","white")) %>% 
+  group_by(year,vic_race) %>%
+  mutate(n = n()) %>%
+  ggplot(aes(x = year, y = n, fill = vic_race)) + 
+  geom_bar(width = 0.8, stat = "identity")+
+  
+
   labs(x = "Year",
        y = "Total incident",
-       title = "Shooting Incident Trend By Victim’s Race"
+       title = "Shooting Incident Trend By Victim’s Race "
        )
 
 vic_race_plot
 ```
+
+
 
 ##2010-2020 total shooting incident by victim’s sex
 ```{r}
@@ -137,10 +90,10 @@ vic_sex_plot =
   data_hist %>% 
   filter(year >= 2010,
          vic_sex != "unknown") %>% 
-  group_by(vic_sex) %>%
+  group_by(year, vic_sex) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = year, group = n, fill = vic_sex)) + 
-  geom_bar(position = "dodge") +
+  ggplot(aes(x = year, y = n, color = vic_sex)) + 
+  geom_point() + geom_line() +
   labs(x = "Year",
        y = "Total incident",
        title = "Shooting Incident Trend By Victim’s Sex"
@@ -163,7 +116,7 @@ vic_age_plot =
   geom_bar(position = "dodge") +
   labs(x = "Borough",
        y = "Total incident",
-       title = "Shooting Incident Trend By Perpetrator’s Age Group"
+       title = "Shooting Incident Trend By victim’s Age Group"
        )
   
 vic_age_plot
