@@ -60,8 +60,6 @@ source: https://dol.ny.gov/labor-statistics-new-york-city-region
 ```{r}
 library(readxl)
 
-read_csv("data/unemployment/borough_labor_force.xlsx", sheet = 1, col)
-
 path = "data/unemployment/borough_labor_force.xlsx"
 
 unemployment_df = bind_rows(path %>% 
