@@ -10,13 +10,32 @@ output: github_document
 library(tidyverse)
 ```
 
+
+
+## Goal
+
+My goal was to compare the rate of death in a gunshoot in 2020 to the same month in 2019 (e.g., rate of death in January 2020 v. rate of death in January 2019). I examined January through December. I additionally stratified these rate ratio estimates by borough.
+
+
+To accomplish this, I filtered the tidy data to create one dataset for male victims and one for female victims.I created nested datasets by month, and, in each of these datasets, I mapped Poisson models to extract rate ratio estimates for number of death in each borough. Finally, I unnessted these models to extract the desired coefficients: rate ratios and standard errors (used to compute 95% confidence intervals).
+
+
+
+tidy functions to filter either male or female victims.
 ```{r}
 mydata = read.csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>% 
 mutate(
     statistical_murder_flag = as.character(statistical_murder_flag),
     statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "1","TRUE" = "0")
   ) %>% 
-  mutate(statistical_murder_flag = as.numeric(statistical_murder_flag))
+  mutate(statistical_murder_flag = as.numeric(statistical_murder_flag)) 
+
+
+male_based = mydata%>% 
+  filter(vic_sex == "male")
+
+female_based = mydata %>% 
+  filter(vic_sex == "female")
 
 month_df=
   tibble(
@@ -24,7 +43,14 @@ month_df=
     month_name = factor(month.name, ordered = TRUE, levels = month.name)
   )
 
-newdata = mydata %>%
+
+```
+
+
+### For male victims
+
+```{r}
+male_data = male_based %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
   group_by(year) %>%
@@ -36,7 +62,7 @@ newdata = mydata %>%
   select(-data) %>% 
   unnest(models) %>%
   select(month, term, estimate, std.error, p.value) %>% 
-  mutate(term = str_replace(term, "year:boro", "2020 v. 2019, Boro: ")) %>% 
+  mutate(term = str_replace(term, "year:boro", "Boro: ")) %>% 
   left_join(month_df, by = "month") %>%
   select(-month) %>%
   rename(month = month_name) %>%
@@ -45,11 +71,10 @@ newdata = mydata %>%
 
 ```
 
-
 ```{r}
-newdata %>% 
+male_data %>% 
   filter(term != "(Intercept)") %>%
-  mutate(term = str_replace(term, "2020 v. 2019, ", "")) %>%
+  mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
   ggplot(aes(x = month, y = exp(estimate), color = term)) + 
   geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
   geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
@@ -57,9 +82,9 @@ newdata %>%
   geom_hline(yintercept = 1, linetype="dashed", 
                 color = "darkred", size = 1, alpha = .7) +
   labs(
-    title = "Difference in Rate of Death Per Gunshoot in 2020 v. 2019",
+    title = "Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 Based on Male Victims",
     x = "Month",
-    y = "2020 v. 2019 Difference"
+    y = "2019 v. 2020 Difference"
   ) +
   ylim(0, 5) +
   theme(legend.position="right", legend.title = element_blank(),
@@ -69,3 +94,57 @@ newdata %>%
 
 ```
 
+
+Based on the figure above, no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in male victims. In part, this could be due to very wide confidence intervals.
+
+
+### For female victims
+
+```{r}
+female_data = female_based %>%
+  filter(year %in% c(2019,2020)) %>%
+  mutate(boro = str_to_title(boro)) %>%
+  group_by(year) %>%
+  mutate(year = year - 2019) %>%
+  nest(data = -month) %>%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = "poisson", data = .x)),
+         models = map(models, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest(models) %>%
+  select(month, term, estimate, std.error, p.value) %>% 
+  mutate(term = str_replace(term, "year:boro", "Boro: ")) %>% 
+  left_join(month_df, by = "month") %>%
+  select(-month) %>%
+  rename(month = month_name) %>%
+  select(month, everything())
+```
+
+
+```{r}
+female_data %>% 
+  filter(term != "(Intercept)") %>%
+  mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype="dashed", 
+                color = "darkred", size = 1, alpha = .7) +
+  labs(
+    title = "Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 Based on Female Victims",
+    x = "Month",
+    y = "2019 v. 2020 Difference"
+  ) +
+  ylim(0, 5) +
+  theme(legend.position="right", legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)
+```
+
+Based on the figure above, also no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in female victims. 
+
+
+## Summary
+In conclusion, there was no evidence that rates of death per gunshoot differed between 2019 and 2020 for gunshoot that involved either male or female.
