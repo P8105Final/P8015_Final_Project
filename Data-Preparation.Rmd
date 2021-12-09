@@ -47,6 +47,8 @@ data_hist =
             jurisdiction_code == 2 ~ "housing")
           ) %>% 
   arrange(year,month,day,hour,minute)
+
+data_hist = replace(data_hist, is.na(data_hist),"unknown")
 ```
 
 
@@ -88,3 +90,84 @@ write.csv(unemployment_df, "data/unemployment/unemployment_cleaned.csv")
 
 educational attainment source:
 https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false
+
+
+```{r}
+covid_df = read_csv("data/covid/cases-by-day.csv") %>%
+  janitor::clean_names() %>% 
+  select(1,2,6,10,14,18,22) %>% 
+  rename("date" = "date_of_interest",
+        "total_case" = "case_count") %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  pivot_longer(
+    cols = 5:9,
+    names_to = "boro",
+    values_to = "boro_case") %>%
+  mutate(
+    boro = case_when(
+      str_starts(boro, "bx") ~ "bronx",
+      str_starts(boro, "bk") ~ "brooklyn",
+      str_starts(boro, "mn") ~ "manhattan",
+      str_starts(boro, "qn") ~ "queens",
+      str_starts(boro, "si") ~ "staten island"
+    )
+  )
+```
+
+```{r}
+write.csv(covid_df, "data/covid/covid_cleaned.csv")
+```
+
+https://github.com/nychealth/coronavirus-data/tree/master/trends
+
+https://fred.stlouisfed.org/series/NYUR
+
+```{r}
+unemployed_complete = read_csv("data/unemployment/NYUR.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("year", "month", "date"), sep = "-") %>% 
+  rename("unemployment_rate" = "nyur") %>% 
+  mutate(unemployment_rate = round(unemployment_rate/100,3)) %>% 
+  select(-date)
+```
+
+```{r}
+write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
+```
+
+```{r}
+education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year)) %>% rename("edu" = "percent")
+```
+
+
+```{r}
+regression_df = data_hist %>% filter(year >= 2010) %>% select(-c(incident_key,x_coord_cd,y_coord_cd,vic_age_group,vic_race,vic_sex,lon_lat))
+
+data_unemployed_df = left_join(regression_df,unemployed_complete,by = c("year","month"))
+
+combined_df = left_join(data_unemployed_df,education_df, by = c("year","boro"))
+```
+
+```{r}
+write.csv(combined_df, "data/combined.csv")
+```
+
+```{r}
+unemployment_df
+
+total_df = combined_df %>% 
+  group_by(boro,year,month) %>% 
+  count(boro, name = "n_incident") 
+
+reg_df = left_join(combined_df,total_df, by = c("year","boro","month")) %>%
+  mutate(perp_sex = factor(perp_sex),
+  perp_race = factor(perp_race),
+  perp_age_group = factor(perp_age_group))
+
+
+mod = lm(n_incident ~ perp_sex + perp_race+perp_age_group, data = reg_df)
+
+
+
+```
+
