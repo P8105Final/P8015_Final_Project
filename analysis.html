@@ -360,50 +360,17 @@ div.tocify {
 </div>
 
 
-<pre class="r"><code>data_hist = 
-
- 
-  read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;%
-  mutate(
-    statistical_murder_flag = as.character(statistical_murder_flag),
-    statistical_murder_flag = recode(statistical_murder_flag, &quot;FALSE&quot; = &quot;survived&quot;,&quot;TRUE&quot; = &quot;murdered&quot;)
-  )</code></pre>
-<pre><code>## Rows: 23585 Columns: 22</code></pre>
-<pre><code>## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (14): month, day, hour, minute, boro, jurisdiction_code, location_desc, ...
-## dbl  (7): incident_key, year, precinct, x_coord_cd, y_coord_cd, latitude, lo...
-## lgl  (1): statistical_murder_flag</code></pre>
-<pre><code>## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>data_hist</code></pre>
-<pre><code>## # A tibble: 23,585 × 22
-##    incident_key month day    year hour  minute boro      precinct jurisdiction_co…
-##           &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt;           
-##  1      9953245 01    01     2006 02    00     bronx           48 patrol          
-##  2      9953252 01    01     2006 02    22     manhattan       28 patrol          
-##  3      9953250 01    01     2006 02    34     queens         114 patrol          
-##  4      9953250 01    01     2006 02    34     queens         114 patrol          
-##  5      9953247 01    01     2006 03    30     brooklyn        67 patrol          
-##  6      9953246 01    01     2006 05    51     bronx           44 patrol          
-##  7    139716503 01    01     2006 12    30     brooklyn        77 patrol          
-##  8      9953248 01    01     2006 19    00     queens         106 patrol          
-##  9      9953249 01    02     2006 00    49     brooklyn        90 housing         
-## 10      9953255 01    02     2006 03    59     brooklyn        70 patrol          
-## # … with 23,575 more rows, and 13 more variables: location_desc &lt;chr&gt;,
-## #   statistical_murder_flag &lt;chr&gt;, perp_age_group &lt;chr&gt;, perp_sex &lt;chr&gt;,
-## #   perp_race &lt;chr&gt;, vic_age_group &lt;chr&gt;, vic_sex &lt;chr&gt;, vic_race &lt;chr&gt;,
-## #   x_coord_cd &lt;dbl&gt;, y_coord_cd &lt;dbl&gt;, latitude &lt;dbl&gt;, longitude &lt;dbl&gt;,
-## #   lon_lat &lt;chr&gt;</code></pre>
-<p>##2010-2020 total shooting incident trends by year</p>
+<div id="trend" class="section level2">
+<h2>Trend</h2>
+<div id="total-shooting-incident-trends-by-year" class="section level3">
+<h3>2010-2020 total shooting incident trends by year</h3>
 <pre class="r"><code>year_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010
          ) %&gt;% 
   group_by(year, statistical_murder_flag) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1))+
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag)) +    scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
   geom_point() + geom_line()
   #facet_grid(~statistical_murder_flag)
   labs(x = &quot;Year&quot;,
@@ -423,7 +390,12 @@ div.tocify {
 ## [1] &quot;labels&quot;</code></pre>
 <pre class="r"><code>year_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident trend by perpetrator’s sex</p>
+</div>
+</div>
+<div id="perpetrator" class="section level2">
+<h2>Perpetrator</h2>
+<div id="total-shooting-incident-trend-by-perpetrators-sex" class="section level3">
+<h3>2010-2020 total shooting incident trend by perpetrator’s sex</h3>
 <pre class="r"><code>perp_sex_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
@@ -439,7 +411,10 @@ div.tocify {
   
 perp_sex_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
-<p>##2010-2020 totalshooting incident by perpetrator’s race</p>
+<p>From the plot, we can easy see <strong>male</strong> are the majority of perpetrator. Male are generally considered to be more combative.</p>
+</div>
+<div id="total-shooting-incident-by-perpetrators-race" class="section level3">
+<h3>2010-2020 total shooting incident by perpetrator’s race</h3>
 <pre class="r"><code>perp_race_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
@@ -455,7 +430,10 @@ perp_sex_plot</code></pre>
   
 perp_race_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
-<p>##2010-2020 totalshooting incident by perpetrator’s age group</p>
+<p>Most of perpetrator are <strong>black</strong>, then is white hispanic, black hispanic, white and asian/pacific islander.</p>
+</div>
+<div id="totalshooting-incident-by-perpetrators-age-group" class="section level3">
+<h3>2010-2020 totalshooting incident by perpetrator’s age group</h3>
 <pre class="r"><code>perp_age_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
@@ -472,24 +450,13 @@ perp_race_plot</code></pre>
        )
   
 perp_age_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident by victim’s race</p>
-<pre class="r"><code>vic_race_plot = 
-  data_hist %&gt;% 
-  filter(year &gt;= 2010,
-         vic_race != &quot;unknown&quot;) %&gt;% 
-  group_by(vic_race) %&gt;%
-  mutate(n = n()) %&gt;% 
-  ggplot(aes(x = year, group = n,fill = vic_race)) + 
-  geom_bar(position = &quot;dodge&quot;) +
-  labs(x = &quot;Year&quot;,
-       y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident Trend By Victim’s Race&quot;
-       )
-
-vic_race_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident by victim’s sex</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /> From 2010 to 2015, the majority of perpetrator are age <strong>18-24</strong>, then is 25-44. However, in recent 5 years(2016-2020), most of perpetrator are age <strong>25-44</strong>. We are wondering maybe this is because some education program or some law about college student.</p>
+</div>
+</div>
+<div id="victim" class="section level2">
+<h2>Victim</h2>
+<div id="total-shooting-incident-by-victims-sex" class="section level3">
+<h3>2010-2020 total shooting incident by victim’s sex</h3>
 <pre class="r"><code>vic_sex_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
@@ -504,8 +471,29 @@ vic_race_plot</code></pre>
        )
 
 vic_sex_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
-<p>##2010-2020 totalshooting incident by victim’s age group</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><strong>male</strong> are the majority of victim.</p>
+</div>
+<div id="total-shooting-incident-by-victims-race" class="section level3">
+<h3>2010-2020 total shooting incident by victim’s race</h3>
+<pre class="r"><code>vic_race_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2010,
+         vic_race != &quot;unknown&quot;) %&gt;% 
+  group_by(vic_race) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = year, group = n,fill = vic_race)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Race&quot;
+       )
+
+vic_race_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /> the majority of victim are <strong>black</strong>. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim</p>
+</div>
+<div id="totalshooting-incident-by-victims-age-group" class="section level3">
+<h3>2010-2020 totalshooting incident by victim’s age group</h3>
 <pre class="r"><code>vic_age_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010,
@@ -514,7 +502,7 @@ vic_sex_plot</code></pre>
          ) %&gt;% 
   group_by(vic_age_group) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = boro, group = n, fill = vic_age_group)) + 
+  ggplot(aes(x = year, group = n, fill = vic_age_group)) + 
   geom_bar(position = &quot;dodge&quot;) +
   labs(x = &quot;Borough&quot;,
        y = &quot;Total incident&quot;,
@@ -522,23 +510,13 @@ vic_sex_plot</code></pre>
        )
   
 vic_age_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident by boro</p>
-<pre class="r"><code>boro_plot = 
-  data_hist %&gt;% 
-  filter(year &gt;= 2010) %&gt;% 
-  group_by(boro) %&gt;%
-  mutate(n = n()) %&gt;% 
-  ggplot(aes(x = boro, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) +
-  labs(x = &quot;Borough&quot;,
-       y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident By Borough&quot;
-       )
-
-boro_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident by hour in a day</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /> same situation as perpetrator age group, 2010-2015 age 18-25 are the major victim but less in 2016-2018</p>
+</div>
+</div>
+<div id="time" class="section level2">
+<h2>Time</h2>
+<div id="total-shooting-incident-by-hour-in-a-day" class="section level3">
+<h3>2010-2020 total shooting incident by hour in a day</h3>
 <pre class="r"><code>incident_by_hour =
   data_hist %&gt;%
   filter(year &gt;= 2010) %&gt;% 
@@ -553,14 +531,19 @@ boro_plot</code></pre>
        )
   
 incident_by_hour</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident by jurisdiction_code</p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /> the most dangerous time <strong>21:00-1:00</strong>, basically at dark</p>
+</div>
+</div>
+<div id="place" class="section level2">
+<h2>Place</h2>
+<div id="total-shooting-incident-by-jurisdiction_code" class="section level3">
+<h3>2010-2020 total shooting incident by jurisdiction_code</h3>
 <pre class="r"><code>jurisdiction_code =
   data_hist %&gt;%
   filter(year &gt; 2010) %&gt;% 
   group_by(jurisdiction_code) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = jurisdiction_code, group = n)) + 
+  ggplot(aes(x = boro, group = n, fill = jurisdiction_code)) + 
   geom_bar(position = &quot;dodge&quot;) +
   labs(x = &quot;Location of the incident&quot;,
        y = &quot;Total incident&quot;,
@@ -569,7 +552,26 @@ incident_by_hour</code></pre>
 
   
 jurisdiction_code</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /> Most shooting incident happened at <strong>patrol</strong>, then is house.</p>
+</div>
+<div id="total-shooting-incident-by-boro" class="section level3">
+<h3>2010-2020 total shooting incident by boro</h3>
+<pre class="r"><code>boro_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2010) %&gt;% 
+  group_by(boro) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = boro, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(x = &quot;Borough&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident By Borough&quot;
+       )
+
+boro_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" width="90%" /> <strong>brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incident since it dose not have much population</p>
+</div>
+</div>
 
 
 
