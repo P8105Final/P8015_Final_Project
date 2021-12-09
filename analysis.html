@@ -570,6 +570,17 @@ jurisdiction_code</code></pre>
 
 boro_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-13-1.png" width="90%" /> <strong>brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incident since it dose not have much population</p>
+<pre class="r"><code>education_plot = 
+  educational_attainment %&gt;%
+  ggplot(aes(x = year, y = percent, color = boro)) +
+  geom_line() +
+  labs(
+    title = &quot;Education&quot;, 
+    x =  &quot;Year&quot;,
+    y = &quot;Percent&quot;) 
+
+education_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-14-1.png" width="90%" /> overall, all borough show increase. in 2015, brooklyn that has most shooting incident boro has a notability increase slope.</p>
 </div>
 </div>
 

@@ -36,12 +36,12 @@ data_hist =
 data_hist
 ```
 
+
+
 ```{r, include=FALSE}
-edu_2015 = read_csv("data/education/edu_2015.csv") %>%
-  janitor::clean_names()
-
+educational_attainment = read_csv("data/education/educational_attainment.csv") 
 ```
-
+ 
 
 ## Trend
 ### 2010-2020 total shooting incident trends by year
@@ -243,3 +243,17 @@ boro_plot =
 boro_plot
 ```
 **brooklyn** has most shooting incident, then is bronx. Staten island has least shooting incident since it dose not have much population
+
+```{r}
+education_plot = 
+  educational_attainment %>%
+  ggplot(aes(x = year, y = percent, color = boro)) +
+  geom_line() +
+  labs(
+    title = "Education", 
+    x =  "Year",
+    y = "Percent") 
+
+education_plot
+```
+overall, all borough show increase.  in 2015, brooklyn that has most shooting incident boro has a notability increase slope.
