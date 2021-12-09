@@ -3,8 +3,10 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
-    - text: "Analysis"
+    - text: "Descriptive Analysis"
       href: analysis.html
+    - text: "Statistical Analysis"
+      href: ModelAnalysis2.html
     - text: "Regression Model"
       href: model.html
     - text: "Interactive Map"
