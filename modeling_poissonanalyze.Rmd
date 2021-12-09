@@ -1,0 +1,71 @@
+---
+title: "plot"
+author: "tianwei zhao"
+date: "12/9/2021"
+output: github_document
+---
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+mydata = read.csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>% 
+mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "1","TRUE" = "0")
+  ) %>% 
+  mutate(statistical_murder_flag = as.numeric(statistical_murder_flag))
+
+month_df=
+  tibble(
+    month = 1:12,
+    month_name = factor(month.name, ordered = TRUE, levels = month.name)
+  )
+
+newdata = mydata %>%
+  filter(year %in% c(2019,2020)) %>%
+  mutate(boro = str_to_title(boro)) %>%
+  group_by(year) %>%
+  mutate(year = year - 2019) %>%
+  nest(data = -month) %>%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = "poisson", data = .x)),
+         models = map(models, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest(models) %>%
+  select(month, term, estimate, std.error, p.value) %>% 
+  mutate(term = str_replace(term, "year:boro", "2020 v. 2019, Boro: ")) %>% 
+  left_join(month_df, by = "month") %>%
+  select(-month) %>%
+  rename(month = month_name) %>%
+  select(month, everything())
+
+
+```
+
+
+```{r}
+newdata %>% 
+  filter(term != "(Intercept)") %>%
+  mutate(term = str_replace(term, "2020 v. 2019, ", "")) %>%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype="dashed", 
+                color = "darkred", size = 1, alpha = .7) +
+  labs(
+    title = "Difference in Rate of Death Per Gunshoot in 2020 v. 2019",
+    x = "Month",
+    y = "2020 v. 2019 Difference"
+  ) +
+  ylim(0, 5) +
+  theme(legend.position="right", legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)
+
+```
+

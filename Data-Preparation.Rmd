@@ -48,49 +48,43 @@ data_hist =
           ) %>% 
   arrange(year,month,day,hour,minute)
 ```
+
+
 ```{r}
 write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names=FALSE)
 ```
 
-## Map
+
+source: https://dol.ny.gov/labor-statistics-new-york-city-region
 
 ```{r}
-library(leaflet)
+library(readxl)
+
+path = "data/unemployment/borough_labor_force.xlsx"
+
+unemployment_df = bind_rows(path %>% 
+  excel_sheets() %>% 
+  set_names() %>% 
+  map(read_excel, path = path)) %>% 
+  janitor::clean_names() %>% 
+  drop_na() %>%
+  subset(month != "Avg") %>% 
+  rename("boro" = "area","unemployment_rate" ="unemployment_percent") %>% 
+  mutate( boro = case_when(
+    str_starts(boro,"B") ~ "bronx",
+    str_starts(boro,"K") ~ "brooklyn",
+    str_starts(boro,"Q") ~ "queens",
+    str_starts(boro,"R") ~ "staten island",
+    str_starts(boro,"N") ~ "manhattan"),
+    month = str_to_lower(month),
+    unemployment_rate = round(unemployment_rate/100,3)
+    )
+```
+
+```{r}
+write.csv(unemployment_df, "data/unemployment/unemployment_cleaned.csv")
 ```
 
 
-
-```{r}
-pal <- colorFactor(c("navy", "red"), domain = data_hist$statistical_murder_flag)
-
-<<<<<<< HEAD:Data Preparation.Rmd
-Number of accident differs according to places.To be specific, more people injured on highway. Brooklyn and Bronx had more injured cases than other boroughs. The map constructed by injured cases reflected the severity of car collsions among boroughs. **Hover on the map to explore the cases**
-=======
->>>>>>> 7cd4eb9ec8bdbf3e50afa60461878a013bf4ddc9:Data-Preparation.Rmd
-
-data_map = 
-  data_hist %>%
-  filter(boro=="Manhatten") %>% 
-  mutate(
-    date_paste = as.Date(paste(year,month,day,sep = "-")),
-    time_paste = paste(hour,minute,sep = ":")) %>% 
-  rename("lat" = "latitude",
-         "long" = "longitude") %>%
-  select(date_paste,time_paste, statistical_murder_flag, lat,long)
-  
-
-data_map %>% 
-  mutate(
-    label = str_c("<b>date: ", date_paste, "</b><br>time: ", time_paste , sep = "") ) %>%
-  leaflet() %>% 
-  addTiles() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>% 
-  addLegend("bottomright", pal = pal, values = ~statistical_murder_flag,
-    title = "statistical_murder_flag",
-    opacity = 1
-  ) %>% 
-  addCircleMarkers(
-    ~lat, ~long,
-    color = ~pal(statistical_murder_flag),
-    radius = 0.5,
-    popup = ~ label) 
+educational attainment source:
+https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false

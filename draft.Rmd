@@ -92,3 +92,16 @@ data_map %>%
     fillOpacity = 0.5,
     radius = 0.5,
     popup = ~ label) 
+```
+
+```{r}
+data_hist %>% 
+  filter(year == 2015) %>%
+  filter(boro == "manhattan") %>% 
+  filter(hour >= 00 & hour <= 03) %>% 
+  group_by(hour) %>% 
+  summarise(n_obs=n()) %>% 
+  ggplot(aes(x = hour,y = n_obs)) + 
+  geom_point()
+```
+

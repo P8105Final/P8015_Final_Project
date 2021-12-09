@@ -20,7 +20,7 @@ Our data is from [NYC open data](https://opendata.cityofnewyork.us/) website. Th
 
 [Regression Model](model.html):
 
-[Interactive Map](map.html):
+[Interactive Map](https://ym2813.shinyapps.io/interactive_map_p8105_final/):
 
 [Report](report.html):
 

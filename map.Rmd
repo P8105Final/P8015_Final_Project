@@ -6,4 +6,5 @@ output:
     toc_float: true
 ---
 
-Use shiny app instead?
+
+Use shiny app instead? maybe delete this page 
