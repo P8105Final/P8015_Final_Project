@@ -88,3 +88,28 @@ write.csv(unemployment_df, "data/unemployment/unemployment_cleaned.csv")
 
 educational attainment source:
 https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false
+
+
+```{r}
+covid_df = read_csv("data/covid/cases-by-day.csv") %>%
+  janitor::clean_names() %>% 
+  select(1,2,6,10,14,18,22) %>% 
+  rename("date" = "date_of_interest",
+        "total_case" = "case_count") %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  pivot_longer(
+    cols = 5:9,
+    names_to = "boro",
+    values_to = "boro_case") %>%
+  mutate(
+    boro = case_when(
+      str_starts(boro, "bx") ~ "bronx",
+      str_starts(boro, "bk") ~ "brooklyn",
+      str_starts(boro, "mn") ~ "manhattan",
+      str_starts(boro, "qn") ~ "queens",
+      str_starts(boro, "si") ~ "staten island"
+    )
+  ) %>% view()
+```
+
+https://github.com/nychealth/coronavirus-data/tree/master/trends
