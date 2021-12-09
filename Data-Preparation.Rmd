@@ -47,6 +47,8 @@ data_hist =
             jurisdiction_code == 2 ~ "housing")
           ) %>% 
   arrange(year,month,day,hour,minute)
+
+data_hist = replace(data_hist, is.na(data_hist),"unknown")
 ```
 
 
@@ -134,7 +136,7 @@ write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
 ```
 
 ```{r}
-education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year))
+education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year)) %>% rename("edu" = "percent")
 ```
 
 
@@ -143,10 +145,29 @@ regression_df = data_hist %>% filter(year >= 2010) %>% select(-c(incident_key,x_
 
 data_unemployed_df = left_join(regression_df,unemployed_complete,by = c("year","month"))
 
-combined_df = left_join(data_unemployed_df,education_df, by = c("year","boro")) %>% view()
+combined_df = left_join(data_unemployed_df,education_df, by = c("year","boro"))
 ```
 
 ```{r}
 write.csv(combined_df, "data/combined.csv")
+```
+
+```{r}
+unemployment_df
+
+total_df = combined_df %>% 
+  group_by(boro,year,month) %>% 
+  count(boro, name = "n_incident") 
+
+reg_df = left_join(combined_df,total_df, by = c("year","boro","month")) %>%
+  mutate(perp_sex = factor(perp_sex),
+  perp_race = factor(perp_race),
+  perp_age_group = factor(perp_age_group))
+
+
+mod = lm(n_incident ~ perp_sex + perp_race+perp_age_group, data = reg_df)
+
+
+
 ```
 
