@@ -53,3 +53,67 @@ data_hist =
 ```{r}
 write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names=FALSE)
 ```
+
+
+source: https://dol.ny.gov/labor-statistics-new-york-city-region
+
+```{r}
+library(readxl)
+
+path = "data/unemployment/borough_labor_force.xlsx"
+
+unemployment_df = bind_rows(path %>% 
+  excel_sheets() %>% 
+  set_names() %>% 
+  map(read_excel, path = path)) %>% 
+  janitor::clean_names() %>% 
+  drop_na() %>%
+  subset(month != "Avg") %>% 
+  rename("boro" = "area","unemployment_rate" ="unemployment_percent") %>% 
+  mutate( boro = case_when(
+    str_starts(boro,"B") ~ "bronx",
+    str_starts(boro,"K") ~ "brooklyn",
+    str_starts(boro,"Q") ~ "queens",
+    str_starts(boro,"R") ~ "staten island",
+    str_starts(boro,"N") ~ "manhattan"),
+    month = str_to_lower(month),
+    unemployment_rate = round(unemployment_rate/100,3)
+    )
+```
+
+```{r}
+write.csv(unemployment_df, "data/unemployment/unemployment_cleaned.csv")
+```
+
+
+educational attainment source:
+https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false
+
+
+```{r}
+covid_df = read_csv("data/covid/cases-by-day.csv") %>%
+  janitor::clean_names() %>% 
+  select(1,2,6,10,14,18,22) %>% 
+  rename("date" = "date_of_interest",
+        "total_case" = "case_count") %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  pivot_longer(
+    cols = 5:9,
+    names_to = "boro",
+    values_to = "boro_case") %>%
+  mutate(
+    boro = case_when(
+      str_starts(boro, "bx") ~ "bronx",
+      str_starts(boro, "bk") ~ "brooklyn",
+      str_starts(boro, "mn") ~ "manhattan",
+      str_starts(boro, "qn") ~ "queens",
+      str_starts(boro, "si") ~ "staten island"
+    )
+  )
+```
+
+```{r}
+write.csv(covid_df, "data/covid/covid_cleaned.csv")
+```
+
+https://github.com/nychealth/coronavirus-data/tree/master/trends
