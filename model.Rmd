@@ -25,6 +25,7 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 library(forecast)
+library(plotly)
 data_hist = 
 
   read_csv("./data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
@@ -45,9 +46,10 @@ murder_count_time_series_test = murder_count$n[(12*13+1):(length( murder_count$n
 First we make a time series plot about the data and try to observe the trend, variability and the seasonality.
 
 ```{r}
-autoplot(murder_count_time_series)+
+l1 = autoplot(murder_count_time_series)+
   ylab("Shoots") +
   ggtitle("Shoooting in New York 2006-2020")
+ggplotly(l1, tooltip = c("x", "y")) 
 ```
 
 From this plot we can observe:
@@ -61,9 +63,10 @@ From this plot we can observe:
 Also we can check the seasonality by plot each years data by different colors. From the plot below there is a clear spike in summer for all of the years.
 
 ```{r}
-ggseasonplot(murder_count_time_series, year.labels=TRUE, year.labels.left=TRUE) +
+l1 = ggseasonplot(murder_count_time_series, year.labels=TRUE, year.labels.left=TRUE) +
   ylab("Shoots") +
-  ggtitle("Seasonal plot: Shoooting in New York 2006-2020")
+  ggtitle("Seasonal Plot: Shoooting in New York 2006-2020")
+ggplotly(l1, tooltip = c("x", "y")) 
 ```
 
 # Data transformation
@@ -86,13 +89,15 @@ Then to remove the seasonality trend, we apply a log 12 difference. It does not 
 
 ```{r}
 train_lag12 = train1 %>% diff(lag = 12)  
-autoplot(train_lag12)+
+l1 =autoplot(train_lag12)+
   ylab("train") +
   ggtitle("Shoooting in New York 2006-2020, lag 12")
+ggplotly(l1, tooltip = c("x", "y")) 
 train_lag121 = train1 %>% diff(lag = 12)  %>% diff(lag = 1)  
-autoplot(train_lag121)+
+l1 =autoplot(train_lag121)+
   ylab("train") +
   ggtitle("Shoooting in New York 2006-2020, lag 12, then lag 1")
+ggplotly(l1, tooltip = c("x", "y")) 
 ```
 
 # Model selection
@@ -100,7 +105,7 @@ autoplot(train_lag121)+
 First let us check the sample ACF, PACF of the series after transformation:
 
 ```{r}
-tsdisplay(train_lag121)
+l1= tsdisplay(train_lag121)
 ```
 
 The ACF plot, in non seasonality part (< lag 8), we have significant lag 1 only, and the seasonality part have significant lag 12 and marginally significant lag 24, so the MA part could be MA1, and the SMA part should be 1 or 2.
@@ -214,7 +219,7 @@ pred1l = exp(log((pred-1.96*se) * optlambda + 1)/optlambda)
 pred1u = exp(log((pred+1.96*se) * optlambda + 1)/optlambda)
 ts.plot(murder_count_time_series_train, 
         xlim = c(2015,2022), ylim = c(35,350), ylab = "shoots")
-title("forecast plot (red) and the real data (blue) for 2019-2020")
+title("Forecast Plot (red) and the Real Data (blue) For 2019-2020")
 points(2019+(1:n)/12,pred1,col = "red",
        pch  = ".", cex= 4)
 lines(2019+(1:n)/12,pred1l,lty=2)
