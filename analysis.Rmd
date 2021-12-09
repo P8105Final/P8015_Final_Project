@@ -36,6 +36,12 @@ data_hist =
 data_hist
 ```
 
+```{r, include=FALSE}
+edu_2015 = read_csv("data/education/edu_2015.csv") %>%
+  janitor::clean_names()
+
+```
+
 
 ## Trend
 ### 2010-2020 total shooting incident trends by year
