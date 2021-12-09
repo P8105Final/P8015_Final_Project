@@ -9,10 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Anna Ma" />
 
 
-<title>Data Cleaning</title>
+<title>Data</title>
 
 <script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -30,7 +29,11 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
@@ -218,7 +221,73 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
 
 
 
@@ -228,6 +297,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -248,7 +327,13 @@ $(document).ready(function () {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="analysis.html">Analysis</a>
+  <a href="Data-Preparation.html">Data Preparation</a>
+</li>
+<li>
+  <a href="analysis.html">Descriptive Analysis</a>
+</li>
+<li>
+  <a href="ModelAnalysis2.html">Statistical Analysis</a>
 </li>
 <li>
   <a href="model.html">Regression Model</a>
@@ -278,17 +363,48 @@ $(document).ready(function () {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">Data Cleaning</h1>
-<h4 class="author">Anna Ma</h4>
-<h4 class="date">12/4/2021</h4>
+
+<h1 class="title toc-ignore">Data</h1>
 
 </div>
 
 
-<div id="load-data" class="section level2">
-<h2>Load data</h2>
+<div id="data-sources" class="section level2">
+<h2>Data Sources</h2>
+<p>For this project, we acquired data from multiple source.</p>
+<ul>
+<li>For the shooting incident data:</li>
+</ul>
+<p><a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8">NYPD Shooting Incident Data (Historic)</a></p>
+<p>This data set contains 23,575 shooting incidents that occurred during January 01, 2016 to December 31, 2020. The data set was originally provided by the Police Department (NYPD). For each incident, information on the incident date, time, location (specific to the longitude and latitude of the incident), the perpetrator and the victim’s sex, race, and age group were provided.</p>
+<ul>
+<li>For Unemployment Rate</li>
+</ul>
+<p><a href="https://fred.stlouisfed.org/series/NYUR">Unemployment Rate</a></p>
+<p>We downloaded the monthly unemployment rate in New York City from January ,2010 to December, 2020 from FRED, <a href="https://fred.stlouisfed.org/series/NYUR">Federal Reserve Bank of St. Louis</a>. The original source of the data is <a href="https://www.bls.gov/sae/">U.S. Bureau of Labor Statistics</a>.</p>
+<ul>
+<li>For Educational Attainment</li>
+</ul>
+<p><a href="https://data.census.gov/cedsci/table?q=Educational%20Attainment&amp;g=0500000US36005,36047,36061,36081,36085&amp;tid=ACSST1Y2019.S1501&amp;moe=false&amp;tp=false">Educational Attainment</a></p>
+<p>The source of our educational attainment data is <a href="https://data.census.gov/cedsci/">U.S Census Bureau</a>. We searched for educational attainment and acquired our data from table S1501. In the table, we filtered data by year and location. Namely, we filtered the educational attainment information for the five boroughs in NYC from 2010 to 2020.</p>
+<p><a href="https://github.com/nychealth/coronavirus-data/tree/master/trends">Covid-19 Cases</a></p>
+<p>This data set contains the citywide and borough-specific daily counts of COVID-19 cases from February 29, 2020 to December 05, 2020. The data set starts from February 29,2020 because it is the date that the Health Department classifies as the start of the COVID-19 outbreak in NYC. The source of this date is the NYC Department of Health and Mental Hygiene.</p>
+</div>
+<div id="data-cleaning-and-tidying" class="section level2">
+<h2>Data Cleaning and Tidying</h2>
+<ol style="list-style-type: decimal">
+<li>Shooting Incident Data</li>
+</ol>
+<p>The main data set we used is the Shooting Incident Data. After downloading our data, we cleaned the data by renamed a few variable with reasonable names, re-coded some variables to present clear information, and wrote out a csv file with the cleaned data as the resulting data set that we will be using in the project.</p>
 <pre class="r"><code>data_hist = 
   read_csv(&quot;data/NYPD_Shooting_Incident_Data__Historic_.csv&quot;) %&gt;%
   janitor::clean_names() %&gt;%
@@ -309,19 +425,14 @@ $(document).ready(function () {
             jurisdiction_code == 1 ~ &quot;transit&quot;,
             jurisdiction_code == 2 ~ &quot;housing&quot;)
           ) %&gt;% 
-  arrange(year,month,day,hour,minute)</code></pre>
-<pre><code>## Rows: 23585 Columns: 19</code></pre>
-<pre><code>## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr  (10): OCCUR_DATE, BORO, LOCATION_DESC, PERP_AGE_GROUP, PERP_SEX, PERP_R...
-## dbl   (7): INCIDENT_KEY, PRECINCT, JURISDICTION_CODE, X_COORD_CD, Y_COORD_CD...
-## lgl   (1): STATISTICAL_MURDER_FLAG
-## time  (1): OCCUR_TIME</code></pre>
-<pre><code>## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>write.csv(data_hist, &quot;.\\data\\NYPD_Shooting_Incident_Data_Clean.csv&quot;, row.names=FALSE)</code></pre>
-<p>source: <a href="https://dol.ny.gov/labor-statistics-new-york-city-region" class="uri">https://dol.ny.gov/labor-statistics-new-york-city-region</a></p>
+  arrange(year,month,day,hour,minute)
+
+write.csv(data_hist, &quot;.\\data\\NYPD_Shooting_Incident_Data_Clean.csv&quot;, row.names=FALSE)</code></pre>
+<p>data_hist = replace(data_hist, is.na(data_hist),“unknown”)</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Unemployment Rate Data</li>
+</ol>
+<p>We initially found data from the <a href="https://dol.ny.gov/labor-statistics-new-york-city-region">Nee York State Department of Labor</a> and cleaned it for a resulting data set. However, this set only contains data from 2015 to 2020.</p>
 <pre class="r"><code>library(readxl)
 
 path = &quot;data/unemployment/borough_labor_force.xlsx&quot;
@@ -342,13 +453,74 @@ unemployment_df = bind_rows(path %&gt;%
     str_starts(boro,&quot;N&quot;) ~ &quot;manhattan&quot;),
     month = str_to_lower(month),
     unemployment_rate = round(unemployment_rate/100,3)
-    )</code></pre>
-<pre class="r"><code>write.csv(unemployment_df, &quot;data/unemployment/unemployment_cleaned.csv&quot;)</code></pre>
-<p>educational attainment source: <a href="https://data.census.gov/cedsci/table?q=Educational%20Attainment&amp;g=0500000US36005,36047,36061,36081,36085&amp;tid=ACSST1Y2019.S1501&amp;moe=false&amp;tp=false" class="uri">https://data.census.gov/cedsci/table?q=Educational%20Attainment&amp;g=0500000US36005,36047,36061,36081,36085&amp;tid=ACSST1Y2019.S1501&amp;moe=false&amp;tp=false</a></p>
+    )
+
+write.csv(unemployment_df, &quot;data/unemployment/unemployment_cleaned.csv&quot;)</code></pre>
+<p>Therefore, we went back and looked for another source. Eventually, we used data from the<a href="https://fred.stlouisfed.org/series/NYUR">Federal Reserve Bank of St. Louis</a>, which was a pretty cleaned data set to start with. We also wrote out a resulting csv file for our use in the project as well.</p>
+<pre class="r"><code>unemployed_complete= read_csv(&quot;data/unemployment/NYUR.csv&quot;) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  separate(date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;date&quot;), sep = &quot;-&quot;) %&gt;% 
+  rename(&quot;unemployment_rate&quot; = &quot;nyur&quot;) %&gt;% 
+  mutate(unemployment_rate = round(unemployment_rate/100,3)) %&gt;% 
+  select(-date)
+
+write.csv(unemployed_complete, &quot;data/unemployment/unemployed_complete.csv&quot;)</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Educational Attainment Data</li>
+</ol>
+<p>We obtained our educational attainment data by searching for in the S1501 table of the U.S. census, setting the geography label to the five boroughs of NYC and the year filters from 2010 to 2020.</p>
+<pre class="r"><code>education_df = read_csv(&quot;data/education/educational_attainment.csv&quot;) %&gt;% mutate(year = as.character(year)) %&gt;% rename(&quot;edu&quot; = &quot;percent&quot;)</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>COVID-19 Data</li>
+</ol>
+<p>For the COVID-19 data set, we performed a similar process. We selected the variables of interest, cleaned and tidy the data set. Then, we wrote out a resulting csv file for the use of our project as well.</p>
+<pre class="r"><code>covid_df = read_csv(&quot;data/covid/cases-by-day.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;% 
+  select(1,2,6,10,14,18,22) %&gt;% 
+  rename(&quot;date&quot; = &quot;date_of_interest&quot;,
+        &quot;total_case&quot; = &quot;case_count&quot;) %&gt;% 
+  separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) %&gt;% 
+  pivot_longer(
+    cols = 5:9,
+    names_to = &quot;boro&quot;,
+    values_to = &quot;boro_case&quot;) %&gt;%
+  mutate(
+    boro = case_when(
+      str_starts(boro, &quot;bx&quot;) ~ &quot;bronx&quot;,
+      str_starts(boro, &quot;bk&quot;) ~ &quot;brooklyn&quot;,
+      str_starts(boro, &quot;mn&quot;) ~ &quot;manhattan&quot;,
+      str_starts(boro, &quot;qn&quot;) ~ &quot;queens&quot;,
+      str_starts(boro, &quot;si&quot;) ~ &quot;staten island&quot;
+    )
+  )
+
+write.csv(covid_df, &quot;data/covid/covid_cleaned.csv&quot;)</code></pre>
+</div>
+<div id="data-description" class="section level2">
+<h2>Data description</h2>
+<p><strong>Shooting Incident Data</strong></p>
+<p>The cleaned resulting data set contains 23,585 incidents and 22 variables. Some of the variables that we are interested in are:</p>
+<ul>
+<li><code>year</code> Year of the incident</li>
+<li><code>month</code> Month of the incident</li>
+<li><code>day</code> Day of the incident</li>
+<li><code>hour</code> Time(hour) of the incident</li>
+<li><code>boro</code> The borough where the incident happens</li>
+<li><code>statistical_murder_flag</code> the outcome of the incident. TRUE means that the victim dies from the shooting, and FALSE means the opposite</li>
+<li><code>perp_age_group</code> Perpetrator’s age group</li>
+<li><code>perp_sex</code> Perpetrator’s sex</li>
+<li><code>perp_race</code>Perpetrator’s race</li>
+<li><code>latitude</code> Latitude of the incident</li>
+<li><code>longitude</code> Longitude of the incident.</li>
+</ul>
+<p><strong>Other Data</strong></p>
+<p>We used the <code>unemployment rate</code>, <code>educational attainment</code>, and <code>COVID-19</code> data to analyze whether those variables have an association with the shooting incident.</p>
 </div>
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -380,7 +552,41 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

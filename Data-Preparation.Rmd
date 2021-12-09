@@ -1,11 +1,13 @@
 ---
-title: "Data Cleaning"
-author: "Anna Ma"
-date: "12/4/2021"
-output: html_document
+title: "Data"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
 
-```{r include=FALSE}
+```{r set up, include=FALSE}
 library(tidyverse)
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -23,9 +25,40 @@ scale_fill_discrete = scale_fill_viridis_d
 theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = element_text(face = "bold")))
 ```
 
-## Load data
+## Data Sources
 
-```{r}
+For this project, we acquired data from multiple source.   
+
+* For the shooting incident data: 
+
+[NYPD Shooting Incident Data (Historic)](https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8)
+
+This data set contains 23,575 shooting incidents that occurred during January 01, 2016 to December 31, 2020. The data set was originally provided by the Police Department (NYPD). For each incident, information on the incident date, time, location (specific to the longitude and latitude of the incident), the perpetrator and the victim's sex, race, and age group were provided. 
+
+
+* For Unemployment Rate 
+
+[Unemployment Rate](https://fred.stlouisfed.org/series/NYUR)
+
+We downloaded the monthly unemployment rate in New York City from January ,2010 to December, 2020 from FRED, [Federal Reserve Bank of St. Louis](https://fred.stlouisfed.org/series/NYUR). The original source of the data is [U.S. Bureau of Labor Statistics](https://www.bls.gov/sae/).
+
+* For Educational Attainment  
+
+[Educational Attainment](https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false)
+
+The source of our educational attainment data is [U.S Census Bureau](https://data.census.gov/cedsci/). We searched for educational attainment and acquired our data from table S1501. In the table, we filtered data by year and location. Namely, we filtered the educational attainment information for the five boroughs in NYC from 2010 to 2020. 
+
+[Covid-19 Cases](https://github.com/nychealth/coronavirus-data/tree/master/trends)
+
+This data set contains the citywide and borough-specific daily counts of COVID-19 cases from February 29, 2020 to December 05, 2020. The data set starts from February 29,2020 because it is the date that the Health Department classifies as the start of the COVID-19 outbreak in NYC. The source of this date is the NYC Department of Health and Mental Hygiene.
+
+## Data Cleaning and Tidying
+
+1. Shooting Incident Data
+
+The main data set we used is the Shooting Incident Data. After downloading our data, we cleaned the data by renamed a few variable with reasonable names, re-coded some variables to present clear information, and wrote out a csv file with the cleaned data as the resulting data set that we will be using in the project. 
+
+```{r eval=FALSE}
 data_hist = 
   read_csv("data/NYPD_Shooting_Incident_Data__Historic_.csv") %>%
   janitor::clean_names() %>%
@@ -48,18 +81,16 @@ data_hist =
           ) %>% 
   arrange(year,month,day,hour,minute)
 
-data_hist = replace(data_hist, is.na(data_hist),"unknown")
-```
-
-
-```{r}
 write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names=FALSE)
 ```
 
+data_hist = replace(data_hist, is.na(data_hist),"unknown")
 
-source: https://dol.ny.gov/labor-statistics-new-york-city-region
+2. Unemployment Rate Data
 
-```{r}
+We initially found data from the [Nee York State Department of Labor](https://dol.ny.gov/labor-statistics-new-york-city-region) and cleaned it for a resulting data set. However, this set only contains data from 2015 to 2020. 
+
+```{r eval=FALSE}
 library(readxl)
 
 path = "data/unemployment/borough_labor_force.xlsx"
@@ -81,18 +112,36 @@ unemployment_df = bind_rows(path %>%
     month = str_to_lower(month),
     unemployment_rate = round(unemployment_rate/100,3)
     )
-```
 
-```{r}
 write.csv(unemployment_df, "data/unemployment/unemployment_cleaned.csv")
 ```
 
+Therefore, we went back and looked for another source. Eventually, we used data from the[Federal Reserve Bank of St. Louis](https://fred.stlouisfed.org/series/NYUR), which was a pretty cleaned data set to start with. We also wrote out a resulting csv file for our use in the project as well. 
 
-educational attainment source:
-https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false
+```{r eval=FALSE}
+unemployed_complete= read_csv("data/unemployment/NYUR.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("year", "month", "date"), sep = "-") %>% 
+  rename("unemployment_rate" = "nyur") %>% 
+  mutate(unemployment_rate = round(unemployment_rate/100,3)) %>% 
+  select(-date)
 
+write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
+```
 
-```{r}
+3. Educational Attainment Data
+ 
+We obtained our educational attainment data by searching for in the S1501 table of the U.S. census, setting the geography label to the five boroughs of NYC and the year filters from 2010 to 2020.
+
+```{r eval=FALSE}
+education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year)) %>% rename("edu" = "percent")
+```
+
+4. COVID-19 Data
+
+For the COVID-19 data set, we performed a similar process. We selected the variables of interest, cleaned and tidy the data set. Then, we wrote out a resulting csv file for the use of our project as well.
+
+```{r eval=FALSE}
 covid_df = read_csv("data/covid/cases-by-day.csv") %>%
   janitor::clean_names() %>% 
   select(1,2,6,10,14,18,22) %>% 
@@ -112,62 +161,29 @@ covid_df = read_csv("data/covid/cases-by-day.csv") %>%
       str_starts(boro, "si") ~ "staten island"
     )
   )
-```
 
-```{r}
 write.csv(covid_df, "data/covid/covid_cleaned.csv")
 ```
 
-https://github.com/nychealth/coronavirus-data/tree/master/trends
+## Data description
 
-https://fred.stlouisfed.org/series/NYUR
+**Shooting Incident Data**
 
-```{r}
-unemployed_complete = read_csv("data/unemployment/NYUR.csv") %>% 
-  janitor::clean_names() %>% 
-  separate(date, into = c("year", "month", "date"), sep = "-") %>% 
-  rename("unemployment_rate" = "nyur") %>% 
-  mutate(unemployment_rate = round(unemployment_rate/100,3)) %>% 
-  select(-date)
-```
+The cleaned resulting data set contains 23,585 incidents and 22 variables. Some of the variables that we are interested in are:
 
-```{r}
-write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
-```
+  * `year` Year of the incident
+  * `month` Month of the incident 
+  * `day` Day of the incident
+  * `hour` Time(hour) of the incident
+  * `boro` The borough where the incident happens
+  * `statistical_murder_flag` the outcome of the incident. TRUE means that the victim dies from the shooting, and FALSE means the opposite
+  * `perp_age_group` Perpetrator's age group
+  * `perp_sex` Perpetrator's sex
+  * `perp_race`Perpetrator's race 
+  * `latitude` Latitude of the incident
+  * `longitude` Longitude of the incident. 
+  
+**Other Data**
 
-```{r}
-education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year)) %>% rename("edu" = "percent")
-```
-
-
-```{r}
-regression_df = data_hist %>% filter(year >= 2010) %>% select(-c(incident_key,x_coord_cd,y_coord_cd,vic_age_group,vic_race,vic_sex,lon_lat))
-
-data_unemployed_df = left_join(regression_df,unemployed_complete,by = c("year","month"))
-
-combined_df = left_join(data_unemployed_df,education_df, by = c("year","boro"))
-```
-
-```{r}
-write.csv(combined_df, "data/combined.csv")
-```
-
-```{r}
-unemployment_df
-
-total_df = combined_df %>% 
-  group_by(boro,year,month) %>% 
-  count(boro, name = "n_incident") 
-
-reg_df = left_join(combined_df,total_df, by = c("year","boro","month")) %>%
-  mutate(perp_sex = factor(perp_sex),
-  perp_race = factor(perp_race),
-  perp_age_group = factor(perp_age_group))
-
-
-mod = lm(n_incident ~ perp_sex + perp_race+perp_age_group, data = reg_df)
-
-
-
-```
-
+We used the `unemployment rate`, `educational attainment`, and `COVID-19` data to analyze whether those variables have an association with the shooting incident. 
+  

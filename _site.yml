@@ -3,6 +3,8 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
+    - text: "Data Preparation"
+      href: Data-Preparation.html
     - text: "Descriptive Analysis"
       href: analysis.html
     - text: "Statistical Analysis"
