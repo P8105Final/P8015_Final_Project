@@ -36,9 +36,10 @@ data_hist =
     statistical_murder_flag = as.character(statistical_murder_flag),
     statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
   )
+library(dplyr)
 data = 
   data_hist %>%
-  select(month, day, year, hour, boro,
+  dplyr::select(month, day, year, hour, boro,
          location_desc, perp_age_group,
          perp_sex, perp_race) %>% 
   mutate(date = toDate(year, month, day)) %>%
