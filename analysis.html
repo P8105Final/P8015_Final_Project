@@ -435,10 +435,10 @@ vic_sex_plot</code></pre>
          vic_age_group != &quot;NA&quot;,
          vic_age_group != &quot;UNKNOWN&quot;
          ) %&gt;% 
-  group_by(vic_age_group) %&gt;%
+  group_by(vic_age_group, boro) %&gt;%
   mutate(n = n()) %&gt;% 
-  ggplot(aes(x = boro, group = n, fill = vic_age_group)) + 
-  geom_bar(position = &quot;dodge&quot;) +
+  ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
   labs(x = &quot;Borough&quot;,
        y = &quot;Total incident&quot;,
        title = &quot;Shooting Incident Trend By victim’s Age Group&quot;
@@ -446,6 +446,24 @@ vic_sex_plot</code></pre>
   
 vic_age_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p>##2010-2020 total shooting incident by jurisdiction_code</p>
+<pre class="r"><code>jurisdiction_code_plot=
+  data_hist %&gt;%
+  filter(year &gt; 2010,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;) %&gt;% 
+  group_by(jurisdiction_code, vic_age_group) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) + 
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
+  labs(x = &quot;Age group of victims&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident By Location Of The Incident&quot;
+       )
+
+  
+jurisdiction_code_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by boro</p>
 <pre class="r"><code>boro_plot = 
   data_hist %&gt;% 
@@ -460,7 +478,7 @@ vic_age_plot</code></pre>
        )
 
 boro_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by hour in a day</p>
 <pre class="r"><code>incident_by_hour =
   data_hist %&gt;%
@@ -476,22 +494,6 @@ boro_plot</code></pre>
        )
   
 incident_by_hour</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
-<p>##2010-2020 total shooting incident by jurisdiction_code</p>
-<pre class="r"><code>jurisdiction_code =
-  data_hist %&gt;%
-  filter(year &gt; 2010) %&gt;% 
-  group_by(jurisdiction_code) %&gt;%
-  mutate(n = n()) %&gt;% 
-  ggplot(aes(x = jurisdiction_code, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) +
-  labs(x = &quot;Location of the incident&quot;,
-       y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident By Location Of The Incident&quot;
-       )
-
-  
-jurisdiction_code</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 
 

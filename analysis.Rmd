@@ -110,16 +110,36 @@ vic_age_plot =
          vic_age_group != "NA",
          vic_age_group != "UNKNOWN"
          ) %>% 
-  group_by(vic_age_group) %>%
+  group_by(vic_age_group, boro) %>%
   mutate(n = n()) %>% 
-  ggplot(aes(x = boro, group = n, fill = vic_age_group)) + 
-  geom_bar(position = "dodge") +
+  ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
+  geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Borough",
        y = "Total incident",
        title = "Shooting Incident Trend By victim’s Age Group"
        )
   
 vic_age_plot
+```
+
+##2010-2020 total shooting incident by jurisdiction_code
+```{r}
+jurisdiction_code_plot=
+  data_hist %>%
+  filter(year > 2010,
+         vic_age_group != "NA",
+         vic_age_group != "UNKNOWN") %>% 
+  group_by(jurisdiction_code, vic_age_group) %>%
+  mutate(n = n()) %>% 
+  ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) + 
+  geom_bar(width = 0.8, stat = "identity") +
+  labs(x = "Age group of victims",
+       y = "Total incident",
+       title = "Shooting Incident By Location Of The Incident"
+       )
+
+  
+jurisdiction_code_plot
 ```
 
 ##2010-2020 total shooting incident by boro
@@ -158,20 +178,4 @@ incident_by_hour
 ```
 
 
-##2010-2020 total shooting incident by jurisdiction_code
-```{r}
-jurisdiction_code =
-  data_hist %>%
-  filter(year > 2010) %>% 
-  group_by(jurisdiction_code) %>%
-  mutate(n = n()) %>% 
-  ggplot(aes(x = jurisdiction_code, group = n)) + 
-  geom_bar(position = "dodge") +
-  labs(x = "Location of the incident",
-       y = "Total incident",
-       title = "Shooting Incident By Location Of The Incident"
-       )
 
-  
-jurisdiction_code
-```
