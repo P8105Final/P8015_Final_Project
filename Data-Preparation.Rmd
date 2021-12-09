@@ -117,3 +117,36 @@ write.csv(covid_df, "data/covid/covid_cleaned.csv")
 ```
 
 https://github.com/nychealth/coronavirus-data/tree/master/trends
+
+https://fred.stlouisfed.org/series/NYUR
+
+```{r}
+unemployed_complete = read_csv("data/unemployment/NYUR.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("year", "month", "date"), sep = "-") %>% 
+  rename("unemployment_rate" = "nyur") %>% 
+  mutate(unemployment_rate = round(unemployment_rate/100,3)) %>% 
+  select(-date)
+```
+
+```{r}
+write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
+```
+
+```{r}
+education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year))
+```
+
+
+```{r}
+regression_df = data_hist %>% filter(year >= 2010) %>% select(-c(incident_key,x_coord_cd,y_coord_cd,vic_age_group,vic_race,vic_sex,lon_lat))
+
+data_unemployed_df = left_join(regression_df,unemployed_complete,by = c("year","month"))
+
+combined_df = left_join(data_unemployed_df,education_df, by = c("year","boro")) %>% view()
+```
+
+```{r}
+write.csv(combined_df, "data/combined.csv")
+```
+
