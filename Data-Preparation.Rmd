@@ -109,7 +109,11 @@ covid_df = read_csv("data/covid/cases-by-day.csv") %>%
       str_starts(boro, "qn") ~ "queens",
       str_starts(boro, "si") ~ "staten island"
     )
-  ) %>% view()
+  )
+```
+
+```{r}
+write.csv(covid_df, "data/covid/covid_cleaned.csv")
 ```
 
 https://github.com/nychealth/coronavirus-data/tree/master/trends
