@@ -4,7 +4,6 @@ output:
   html_document:
     toc: true
     toc_float: true
-    code_folding: hide
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -23,6 +22,7 @@ In this section we will analysis the shooting case by the factor of the shooting
 Due to recent raise in shooting events around the US, people become more conscious about their safety. In particular, students of Columbia university want to know whether the community around the university is comparably safe or danger in New York. Here we use bar plot to show the total shooting events from 2006 to 2020 in all 5 boros of New York: "bronx", "manhattan", "queens", "brooklyn" and"staten island".
 
 ```{r}
+library(tidyverse)
 library(dplyr)
 library(forcats)
 library(readr)
@@ -110,8 +110,8 @@ Now we wanna use Kruskal-Wallis test to statistically test whether some district
 ```{r}
 
 percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
-  select(precinct_2020, P0010001) %>% 
-  rename("total_pop" = "P0010001")
+  rename("total_pop" = "P0010001") %>% 
+  select(precinct_2020, total_pop)
 
 data1 = data %>%
   count(boro, precinct) %>%
