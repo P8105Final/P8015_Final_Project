@@ -40,7 +40,7 @@ data_hist =
 ```{r, include=FALSE}
 educational = read_csv("data/education/educational_attainment.csv") 
 
-unemployment <- read_csv("data/unemployment/unemployment_cleaned.csv")
+unemployment <- read_csv("data/unemployment/unemployed_complete.csv")
 ```
  
 
@@ -65,6 +65,7 @@ year_plot =
 year_plot
 ```
 
+*comment*  
 Murdered shooting incidence is much less than survived shooting incidence. From 2006 to 2011, the survived shooting incidence was steadily fluctuate around 1500 and murdered shooting incidence was steadily fluctuate around 400.Both types of the shooting incidence were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it might be influenced by the outbreak of COVID-19 which led to a raise in unemployment and panic. We will do more statistical analysis on that later.
 
 
@@ -89,6 +90,7 @@ vic_race_plot =
 vic_race_plot
 ```
 
+*comment*  
 The majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most among all victim's race.
 
 
@@ -101,7 +103,7 @@ vic_sex_plot =
   group_by(year, vic_sex) %>%
   summarise(n = n()) %>% 
   ggplot(aes(x = year, y = n, fill = vic_sex)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
-  geom_bar(width = 0.8, stat = "identity") +
+  geom_boxplot() +
   labs(x = "Year",
        y = "Total incident",
        title = "Shooting Incident Trend By Victim’s Sex")
@@ -110,10 +112,11 @@ vic_sex_plot =
 vic_sex_plot
 ```
 
+*comment*  
 **Male** victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.
 
 
-## Age group
+## Age
 
 ```{r echo = FALSE, message=FALSE}
 vic_age_plot = 
@@ -135,9 +138,33 @@ vic_age_plot =
 vic_age_plot
 ```
 
+*comment*  
 The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65.
-From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.
+From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.Then we want to see what happened in perpetrator.
 
+### Perpetrator Age Group
+```{r echo=FALSE,message=FALSE}
+perp_age_plot = 
+  data_hist %>% 
+  filter(year >= 2010,
+         perp_age_group != "NA",
+         perp_age_group != "UNKNOWN"
+         ) %>% 
+  group_by(perp_age_group, year) %>%
+  summarise(n = n()) %>% 
+
+  ggplot(aes(x = year, y = n, color = perp_age_group)) + 
+  geom_point() + geom_line() +
+
+  labs(x = "Year",
+       y = "Total incident",
+       title = "Shooting Incident Trend By Perpetrator's Age group"
+       )
+perp_age_plot
+```
+
+*comment*  
+From the plot we can see same situation happened. From 2010-2014, age group 18-24 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly. Both of the perpetrators and victims might be influenced by the education level. Therefore, we visualize the perpetrator's age from 2006 to 2020 and present a percentage of each educational level from 2010 to 2020. The association between the educational level and perpetrator's age group and victim's age is required more analysis.
 
 ## Place
 ```{r echo = FALSE, message = FALSE}
@@ -159,10 +186,10 @@ jurisdiction_code_plot=
 jurisdiction_code_plot
 ```
 
+*comment*  
 Most of the shooting incidences happened in the **patrol**, some of the shooting incidences in housing and only few cases were on transit.
 
 ## Hour in a day
-
 
 ```{r echo=FALSE, message=FALSE}
 incident_by_hour =
@@ -181,45 +208,17 @@ incident_by_hour =
 incident_by_hour
 ```
 
+*comment*  
 **Brooklyn** has most shooting incident, then is bronx. Staten island has least shooting incident since it does not have much population.
 Most of the shooting incidence happened at night and very early in the morning. For Bronx and Brooklyn,  the shooting incidence are gradually increasing after 12pm and reach to peaks around 10pm to 11pm. The shooting incidences in the morning are not as high as the shooting incidences at night. For queens and manhanttan, the shooting incidences in the morning reach to the highest peak and have a noteworthy amount until 5 am. We will provide more statistical analysis about which borought is the most dangerous in next section.
 
-
-# Perpetrator
-## Total incidence vs Perpetrator's age 
-Both of the perpetrators and victims might be influenced by the education level. Therefore, we visualize the perpetrator's age from 2006 to 2020 and present a percentage of each educational level from 2010 to 2020. The association between the educational level and perpetrator's age group and victim's age is required more analysis.
-
-```{r echo = FALSE, message=FALSE}
-perp_age_plot = 
-  data_hist %>% 
-  filter(year >= 2006,
-         perp_age_group != "NA",
-         perp_age_group != "UNKNOWN",
-         perp_age_group != "unknown",
-         perp_age_group != "940",
-         perp_age_group != "1020",
-         perp_age_group != "224"
-         ) %>% 
-  group_by(perp_age_group, year) %>%
-  summarise(n = n()) %>% 
-
-  ggplot(aes(x = year, y = n, color = perp_age_group))+ scale_x_continuous(breaks = seq(2006, 2020, by = 1)) + 
-  geom_point() + geom_line() +
-
-  labs(x = "Year",
-       y = "Total incident",
-       title = "Shooting Incident Trend By's Perpetrator's Age group"
-       )
-perp_age_plot
-
-```
 
 
 ```{r echo = FALSE, message=FALSE}
 education_plot = 
   educational %>%
   ggplot(aes(x = year, y = percent, color = boro)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
-
+  geom_line() +
   labs(
     title = "Education", 
     x =  "Year",
@@ -227,10 +226,19 @@ education_plot =
 
 education_plot
 ```
-overall, all borough show increase.  in 2015, brooklyn that has most shooting incident boro has a notability increase slope.
+
+*comment*  
+This plot shows the percentage change in each borough over the year that every person over 18 with high school education or above. All borough have the upward trend in last 10 years. However, brooklyn the one with most shooting incident borough has a notability increase slope in 2015, which matched our forecast about the association with age group and education. We conclude that when education increase, the shooting incident decrease.
 
 # Unemployment
-```{r}
-unemployment
+```{r echo=FALSE,message=FALSE}
+unemployment_plot = 
+  unemployment %>%
+  ggplot(aes(x = year, y = unemployment_rate)) +
+  geom_point() +
+  geom_smooth()
+unemployment_plot
 ```
 
+*comment*  
+According to the plot, we can see the unemployment rate was decreasing from 2010 to 2019. There is an exaggerated increase in the unemployment rate in 2020, which matched our forecast about the association with total shooting incident and unemployment rate. We conclude that when unemployment increase, the shooting incident increase. 
