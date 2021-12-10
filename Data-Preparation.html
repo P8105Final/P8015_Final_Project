@@ -378,26 +378,28 @@ div.tocify {
 </div>
 
 
+<p>For this project, we mainly looked at the shooting incident data that we acquired from <a href="https://opendata.cityofnewyork.us/data/">NYC open data</a>. During the project, we also acquired data from other sources to help explain and analyze the findings we have from the shooting incident data.The details of the data and our cleaning methods will be elaborated below.</p>
 <div id="data-sources" class="section level2">
 <h2>Data Sources</h2>
-<p>For this project, we acquired data from multiple source.</p>
-<ul>
-<li>For the shooting incident data:</li>
-</ul>
+<ol style="list-style-type: decimal">
+<li>NYC Shooting Incident Data:</li>
+</ol>
 <p><a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8">NYPD Shooting Incident Data (Historic)</a></p>
 <p>This data set contains 23,575 shooting incidents that occurred during January 01, 2016 to December 31, 2020. The data set was originally provided by the Police Department (NYPD). For each incident, information on the incident date, time, location (specific to the longitude and latitude of the incident), the perpetrator and the victim’s sex, race, and age group were provided.</p>
-<ul>
-<li>For Unemployment Rate</li>
-</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Unemployment Rate Data</li>
+</ol>
 <p><a href="https://fred.stlouisfed.org/series/NYUR">Unemployment Rate</a></p>
 <p>We downloaded the monthly unemployment rate in New York City from January ,2010 to December, 2020 from FRED, <a href="https://fred.stlouisfed.org/series/NYUR">Federal Reserve Bank of St. Louis</a>. The original source of the data is <a href="https://www.bls.gov/sae/">U.S. Bureau of Labor Statistics</a>.</p>
-<ul>
-<li>For Educational Attainment</li>
-</ul>
+<ol start="3" style="list-style-type: decimal">
+<li>Educational Attainment Data</li>
+</ol>
 <p><a href="https://data.census.gov/cedsci/table?q=Educational%20Attainment&amp;g=0500000US36005,36047,36061,36081,36085&amp;tid=ACSST1Y2019.S1501&amp;moe=false&amp;tp=false">Educational Attainment</a></p>
 <p>The source of our educational attainment data is <a href="https://data.census.gov/cedsci/">U.S Census Bureau</a>. We searched for educational attainment and acquired our data from table S1501. In the table, we filtered data by year and location. Namely, we filtered the educational attainment information for the five boroughs in NYC from 2010 to 2020.</p>
-<p><a href="https://github.com/nychealth/coronavirus-data/tree/master/trends">Covid-19 Cases</a></p>
-<p>This data set contains the citywide and borough-specific daily counts of COVID-19 cases from February 29, 2020 to December 05, 2020. The data set starts from February 29,2020 because it is the date that the Health Department classifies as the start of the COVID-19 outbreak in NYC. The source of this date is the NYC Department of Health and Mental Hygiene.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Population in each Police Precinct Data</li>
+</ol>
+<p>We downloaded a cleaned data set on population in each police precinct data from this <a href="https://johnkeefe.net/nyc-police-precinct-and-census-data">website</a>. It’s source is the <a href="https://data.census.gov/cedsci/">U.S Census Bureau</a>.</p>
 </div>
 <div id="data-cleaning-and-tidying" class="section level2">
 <h2>Data Cleaning and Tidying</h2>
@@ -428,7 +430,6 @@ div.tocify {
   arrange(year,month,day,hour,minute)
 
 write.csv(data_hist, &quot;.\\data\\NYPD_Shooting_Incident_Data_Clean.csv&quot;, row.names=FALSE)</code></pre>
-<p>data_hist = replace(data_hist, is.na(data_hist),“unknown”)</p>
 <ol start="2" style="list-style-type: decimal">
 <li>Unemployment Rate Data</li>
 </ol>
@@ -471,30 +472,12 @@ write.csv(unemployed_complete, &quot;data/unemployment/unemployed_complete.csv&q
 <p>We obtained our educational attainment data by searching for in the S1501 table of the U.S. census, setting the geography label to the five boroughs of NYC and the year filters from 2010 to 2020.</p>
 <pre class="r"><code>education_df = read_csv(&quot;data/education/educational_attainment.csv&quot;) %&gt;% mutate(year = as.character(year)) %&gt;% rename(&quot;edu&quot; = &quot;percent&quot;)</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>COVID-19 Data</li>
+<li>Population in each Police Precinct</li>
 </ol>
-<p>For the COVID-19 data set, we performed a similar process. We selected the variables of interest, cleaned and tidy the data set. Then, we wrote out a resulting csv file for the use of our project as well.</p>
-<pre class="r"><code>covid_df = read_csv(&quot;data/covid/cases-by-day.csv&quot;) %&gt;%
-  janitor::clean_names() %&gt;% 
-  select(1,2,6,10,14,18,22) %&gt;% 
-  rename(&quot;date&quot; = &quot;date_of_interest&quot;,
-        &quot;total_case&quot; = &quot;case_count&quot;) %&gt;% 
-  separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) %&gt;% 
-  pivot_longer(
-    cols = 5:9,
-    names_to = &quot;boro&quot;,
-    values_to = &quot;boro_case&quot;) %&gt;%
-  mutate(
-    boro = case_when(
-      str_starts(boro, &quot;bx&quot;) ~ &quot;bronx&quot;,
-      str_starts(boro, &quot;bk&quot;) ~ &quot;brooklyn&quot;,
-      str_starts(boro, &quot;mn&quot;) ~ &quot;manhattan&quot;,
-      str_starts(boro, &quot;qn&quot;) ~ &quot;queens&quot;,
-      str_starts(boro, &quot;si&quot;) ~ &quot;staten island&quot;
-    )
-  )
-
-write.csv(covid_df, &quot;data/covid/covid_cleaned.csv&quot;)</code></pre>
+<p>Since the data set is already cleaned when we found it, we didn’t have to do much tidying. However, the columns were cryptic. Therefore, we followed the code listed in the a Census Bureau PDF starting on this <a href="https://www.documentcloud.org/documents/87708-pl94-171-1.html#document/p64">page</a>, to re-code the column that we need to <code>total_pop</code>, which gives us the total population for each police precinct.</p>
+<pre class="r"><code>percinct_pop = read.csv(&quot;data/nyc_2010pop_2020precincts.csv&quot;) %&gt;%
+  select(precinct_2020, P0010001) %&gt;% 
+  rename(&quot;total_pop&quot; = &quot;P0010001&quot;)</code></pre>
 </div>
 <div id="data-description" class="section level2">
 <h2>Data description</h2>
@@ -514,7 +497,7 @@ write.csv(covid_df, &quot;data/covid/covid_cleaned.csv&quot;)</code></pre>
 <li><code>longitude</code> Longitude of the incident.</li>
 </ul>
 <p><strong>Other Data</strong></p>
-<p>We used the <code>unemployment rate</code>, <code>educational attainment</code>, and <code>COVID-19</code> data to analyze whether those variables have an association with the shooting incident.</p>
+<p>We used the <code>unemployment rate</code>, <code>educational attainment</code>, and <code>police precint</code> data to further explore and analyze the findings that we obtained from our main <code>shooting incident</code> data. They are used in both the descriptive and statistical analysis in our project. <code>unemployment rate</code> has the monthly unemployment rate of NYC from 2010 to 2020. <code>educational attainment</code> has the percentage of adults(aged 18 and above) who received high school or higher education in each borough.Finally,<code>police precinct</code> has the total population of each police precinct in NYC.</p>
 </div>
 
 
