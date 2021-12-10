@@ -209,6 +209,6 @@ From both Pre-COVID and COVID time, the shooting are most centered at night, esp
 
 ## Which age group of people is the most dangerous?
 
-From the the visualization in the section of descriptive, we see that age group 18-24 and age group 25-44 have the highest shooting incidences. However, more statistical analysis are required to indicate if the age group 18-24 and group 25-44 are more dangerous or they have the larger proportion in the population.
+From the the visualization in the section of descriptive, we see that age group 18-24 and age group 25-44 have the highest shooting incidences. However, more statistical analysis are required to indicate if the age group 18-24 and group 25-44 are more dangerous or those two groups have larger proportion in the population.
 
 
