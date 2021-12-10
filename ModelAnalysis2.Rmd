@@ -1,0 +1,158 @@
+---
+title: "Statistical analysis"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE
+)
+```
+
+# Goal
+
+In this section we will analysis the shooting case by the factor of the shooting, and carry out statistical analysis and data visualization about the shooting in New York City. We will asking some questions, and answer them using facts and plots.
+
+# Question 1: Which boros is most dangerous?
+
+
+```{r}
+library(dplyr)
+library(forcats)
+library(readr)
+library(ggplot2)
+library(plotly)
+library(lubridate)
+
+toDate <- function(year, month, day) {
+    ISOdate(year, month, day)
+}
+
+data_hist = 
+  read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
+  mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
+  )
+library(dplyr)
+data = 
+  data_hist %>%
+  dplyr::select(month, day, year, hour, boro,
+         location_desc, perp_age_group,
+         perp_sex, perp_race) %>% 
+  mutate(date = toDate(year, month, day)) %>%
+  mutate(weekday = wday(date, label = TRUE, abbr = TRUE)) %>%
+  mutate(COVID = date >= toDate(2020, 4, 1))
+  
+#unique(data_hist$boro)
+
+```
+
+```{r}
+p1 = 
+  data %>%
+  count(boro) %>%
+  mutate(
+    proportion = round(n / sum(n), 2) 
+  )  %>%
+  top_n(n = 10, wt = n) %>%
+  mutate(
+    District = fct_reorder(as.factor(boro), n, .desc = TRUE)
+  ) %>%
+  ggplot(aes(x = District, y = n, fill = District)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none") +
+  labs(
+    
+    x = "",
+    y = ""
+  )
+
+ll1 = data %>%
+  count(boro) %>%
+  mutate(
+    proportion = round(n / sum(n), 2) 
+  )  %>%
+  top_n(n = 10, wt = n) %>%
+  mutate(
+    District = fct_reorder(as.factor(boro), n, .desc = TRUE)
+  )
+
+ll1$event_by_thousand_pop = ll1$n / c(1472654,
+        2736074, 1694251, 2405464, 495747) * 1000
+
+p2 = ll1 %>% 
+  top_n(n = 10, wt = event_by_thousand_pop) %>%
+  ggplot(aes(x = District, y = event_by_thousand_pop, fill = District)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none") +
+  labs(
+    x = "",
+    y = ""
+  )
+
+
+subplot(p1, p2, nrows = 1) %>% 
+  plotly::layout(title = 'Bar plot of shooting (left), shooting / population (thousands) (right), by districts')
+```
+
+
+
+```{r}
+p1 = 
+  data %>%
+  count(location_desc) %>%
+  mutate(
+    proportion = round(n / sum(n), 2) 
+  )  %>%
+  top_n(n = 10, wt = n) %>%
+  mutate(
+    location = fct_reorder(as.factor(location_desc), n, .desc = TRUE)
+  ) %>%
+  ggplot(aes(x = location, y = proportion)) +
+  geom_bar(stat = "identity")+
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none") +
+  labs(
+    title = "Top Ten Places to occur shooting",
+    x = "",
+    y = ""
+  )
+
+ggplotly(p1, tooltip = c("x", "y")) 
+```
+
+
+```{r}
+heat_maps = function(dataset, title) {
+  pre = 
+  dataset %>%
+  filter(COVID == FALSE) %>%
+  plot_ly(
+    x = ~hour, y = ~weekday, z = ~shooting, type = "heatmap", colors = "BuPu"
+  ) %>%
+  colorbar(title = "Pre-COVID", x = 1, y = 1) 
+
+covid = 
+  dataset %>%
+  filter(COVID == TRUE) %>%
+  plot_ly(
+    x = ~hour, y = ~weekday, z = ~shooting, type = "heatmap", colors = "YlGn"
+  ) %>%
+  colorbar(title = "COVID", x = 1, y = 0.5) 
+
+subplot(pre, covid, nrows = 2, margin = .05) %>%
+  layout(title = title)
+}
+
+d2 = 
+  data %>%
+  group_by(COVID, hour, weekday) %>%
+  summarise(
+    shooting = n()
+  )  
+
+heat_maps(dataset = d2, title = "Heat Maps of Shootings")
+```

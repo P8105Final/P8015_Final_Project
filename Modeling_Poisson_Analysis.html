@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="tianwei zhao" />
+
+
+<title>Modeling_Poisson_Analysis</title>
+
+<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="analysis.html">Descriptive Analysis</a>
+</li>
+<li>
+  <a href="ModelAnalysis2.html">Statistical Analysis</a>
+</li>
+<li>
+  <a href="model.html">Regression Model</a>
+</li>
+<li>
+  <a href="https://ym2813.shinyapps.io/interactive_map_p8105_final/">Interactive Map</a>
+</li>
+<li>
+  <a href="report.html">Report</a>
+</li>
+<li>
+  <a href="https://www.youtube.com/">
+    <span class="fa fa-youtube fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://github.com/P8105Final/P8015_Final_Project">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Modeling_Poisson_Analysis</h1>
+<h4 class="author">tianwei zhao</h4>
+<h4 class="date">12/9/2021</h4>
+
+</div>
+
+
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+## ✓ tibble  3.1.4     ✓ dplyr   1.0.7
+## ✓ tidyr   1.1.3     ✓ stringr 1.4.0
+## ✓ readr   2.0.1     ✓ forcats 0.5.1</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<div id="goal" class="section level2">
+<h2>Goal</h2>
+<p>My goal was to compare the rate of death in a gunshoot in recent years,such as 2019 to the same month in 2020 (e.g., rate of death in January 2019 v. rate of death in January 2020).Additionally,I stratified these rate ratio estimates by borough.</p>
+<p>To accomplish this, I filtered the tidy data to create one dataset for male victims and one for female victims.I created nested datasets by month, and, in each of these datasets, I mapped Poisson models to extract rate ratio estimates for number of death in each borough. Finally, I unnessted these models to extract the desired coefficients: rate ratios and standard errors (used to compute 95% confidence intervals).</p>
+<p>tidy functions to filter either male or female victims.</p>
+<pre class="r"><code>mydata = read.csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;% 
+mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, &quot;FALSE&quot; = &quot;1&quot;,&quot;TRUE&quot; = &quot;0&quot;)
+  ) %&gt;% 
+  mutate(statistical_murder_flag = as.numeric(statistical_murder_flag)) 
+
+
+male_based = mydata%&gt;% 
+  filter(vic_sex == &quot;male&quot;)
+
+female_based = mydata %&gt;% 
+  filter(vic_sex == &quot;female&quot;)
+
+month_df=
+  tibble(
+    month = 1:12,
+    month_name = factor(month.name, ordered = TRUE, levels = month.name)
+  )</code></pre>
+<div id="for-male-victims-in-differnent-boro-death-rate" class="section level3">
+<h3>For male victims in differnent boro death rate</h3>
+<pre class="r"><code>male_data = male_based %&gt;%
+  filter(year %in% c(2019,2020)) %&gt;%
+  mutate(boro = str_to_title(boro)) %&gt;%
+  group_by(year) %&gt;%
+  mutate(year = year - 2019) %&gt;%
+  nest(data = -month) %&gt;%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = &quot;poisson&quot;, data = .x)),
+         models = map(models, broom::tidy)) %&gt;% 
+  select(-data) %&gt;% 
+  unnest(models) %&gt;%
+  select(month, term, estimate, std.error, p.value) %&gt;% 
+  mutate(term = str_replace(term, &quot;year:boro&quot;, &quot;Boro: &quot;)) %&gt;% 
+  left_join(month_df, by = &quot;month&quot;) %&gt;%
+  select(-month) %&gt;%
+  rename(month = month_name) %&gt;%
+  select(month, everything())</code></pre>
+<pre class="r"><code>male_data %&gt;% 
+  filter(term != &quot;(Intercept)&quot;) %&gt;%
+  mutate(term = str_replace(term, &quot;2019 v. 2020, &quot;, &quot;&quot;)) %&gt;%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype=&quot;dashed&quot;, 
+                color = &quot;darkred&quot;, size = 1, alpha = .7) +
+  labs(
+    title = &quot;Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 Based on Male Victims&quot;,
+    x = &quot;Month&quot;,
+    y = &quot;2019 v. 2020 Difference&quot;
+  ) +
+  ylim(0, 5) +
+  theme(legend.position=&quot;right&quot;, legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)</code></pre>
+<p><img src="Modeling_Poisson_Analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Based on the figure above, no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in male victims. In part, this could be due to very wide confidence intervals.</p>
+</div>
+<div id="for-female-victims-in-differnent-boro-death-rate" class="section level3">
+<h3>For female victims in differnent boro death rate</h3>
+<pre class="r"><code>female_data = female_based %&gt;%
+  filter(year %in% c(2019,2020)) %&gt;%
+  mutate(boro = str_to_title(boro)) %&gt;%
+  group_by(year) %&gt;%
+  mutate(year = year - 2019) %&gt;%
+  nest(data = -month) %&gt;%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = &quot;poisson&quot;, data = .x)),
+         models = map(models, broom::tidy)) %&gt;% 
+  select(-data) %&gt;% 
+  unnest(models) %&gt;%
+  select(month, term, estimate, std.error, p.value) %&gt;% 
+  mutate(term = str_replace(term, &quot;year:boro&quot;, &quot;Boro: &quot;)) %&gt;% 
+  left_join(month_df, by = &quot;month&quot;) %&gt;%
+  select(-month) %&gt;%
+  rename(month = month_name) %&gt;%
+  select(month, everything())</code></pre>
+<pre class="r"><code>female_data %&gt;% 
+  filter(term != &quot;(Intercept)&quot;) %&gt;%
+  mutate(term = str_replace(term, &quot;2019 v. 2020, &quot;, &quot;&quot;)) %&gt;%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype=&quot;dashed&quot;, 
+                color = &quot;darkred&quot;, size = 1, alpha = .7) +
+  labs(
+    title = &quot;Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 Based on Female Victims&quot;,
+    x = &quot;Month&quot;,
+    y = &quot;2019 v. 2020 Difference&quot;
+  ) +
+  ylim(0, 5) +
+  theme(legend.position=&quot;right&quot;, legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)</code></pre>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="Modeling_Poisson_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Based on the figure above, also no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in female victims.</p>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>In conclusion, there was no major evidence that rates of death per gunshoot differed between 2019 and 2020 for gunshoot that involved either male or female.</p>
+<div id="assorted-version" class="section level3">
+<h3>assorted version</h3>
+<pre class="r"><code>my_data = mydata %&gt;%
+  filter(year %in% c(2019,2020)) %&gt;%
+  mutate(boro = str_to_title(boro)) %&gt;%
+  group_by(year) %&gt;%
+  mutate(year = year - 2019) %&gt;%
+  nest(data = -month) %&gt;%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = &quot;poisson&quot;, data = .x)),
+         models = map(models, broom::tidy)) %&gt;% 
+  select(-data) %&gt;% 
+  unnest(models) %&gt;%
+  select(month, term, estimate, std.error, p.value) %&gt;% 
+  mutate(term = str_replace(term, &quot;year:boro&quot;, &quot;Boro: &quot;)) %&gt;% 
+  left_join(month_df, by = &quot;month&quot;) %&gt;%
+  select(-month) %&gt;%
+  rename(month = month_name) %&gt;%
+  select(month, everything())</code></pre>
+<pre class="r"><code>my_data %&gt;% 
+  filter(term != &quot;(Intercept)&quot;) %&gt;%
+  mutate(term = str_replace(term, &quot;2019 v. 2020, &quot;, &quot;&quot;)) %&gt;%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype=&quot;dashed&quot;, 
+                color = &quot;darkred&quot;, size = 1, alpha = .7) +
+  labs(
+    title = &quot;Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 in Different Boro&quot;,
+    x = &quot;Month&quot;,
+    y = &quot;2019 v. 2020 Difference&quot;
+  ) +
+  ylim(0, 5) +
+  theme(legend.position=&quot;right&quot;, legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)</code></pre>
+<p><img src="Modeling_Poisson_Analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

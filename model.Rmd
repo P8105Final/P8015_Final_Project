@@ -5,3 +5,237 @@ output:
     toc: true
     toc_float: true
 ---
+
+<<<<<<< HEAD
+=======
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE
+)
+```
+
+# Goal
+
+In this section the goal is to apply the time series analysis to fit a model to predict future New York shooting occurrences in one month. We will use the data from New York police department and count the shooting events for each month from Jan 2006 to Dec 2020. 
+
+We want to use the SARIMA model to fit the seasonal pattern of the shooting occurrences plus forecast the future monthly occurrences. Model selection and diagnostic will be performed to obtain a good quality model.
+
+We are also interested about whether the COVID affects the shooting patterns. So we use the 2006 - 2018 data as the training set, and 2019-2020 data as the test set to compare with the prediction of the SARIMA model.
+
+
+```{r}
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(forecast)
+library(plotly)
+data_hist = 
+
+  read_csv("./data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
+  mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, "FALSE" = "survived","TRUE" = "murdered")
+  )
+#unique(data_hist$boro)
+
+murder_count = data_hist %>% count(year, month)
+murder_count_time_series = ts(murder_count$n, start = c(2006,1), frequency = 12)
+murder_count_time_series_train = ts(murder_count$n[1:(12*13)], start = c(2006,1), frequency = 12)
+murder_count_time_series_test = murder_count$n[(12*13+1):(length( murder_count$n))]
+```
+
+# Data visualization
+
+First we make a time series plot about the data and try to observe the trend, variability and the seasonality.
+
+```{r}
+l1 = autoplot(murder_count_time_series)+
+  ylab("Shoots") +
+  ggtitle("Shoooting in New York 2006-2020")
+ggplotly(l1, tooltip = c("x", "y")) 
+```
+
+From this plot we can observe:
+
+1. For the trend, the average shooting events is actually decreasing overtime, except the last year 2020, after COVID outbreak, there was a huge spike of occurrences.
+
+2. For the variation, it seems except the last year, the variation tends to decrease.
+
+3. For the seasonality, there is a very significant seasonality that in winter there are less shootings and in summer there are more. Probably because winter people will not go out so much compared to summer.
+
+Also we can check the seasonality by plot each years data by different colors. From the plot below there is a clear spike in summer for all of the years.
+
+```{r}
+l1 = ggseasonplot(murder_count_time_series, year.labels=TRUE, year.labels.left=TRUE) +
+  ylab("Shoots") +
+  ggtitle("Seasonal Plot: Shoooting in New York 2006-2020")
+ggplotly(l1, tooltip = c("x", "y")) 
+```
+
+# Data transformation
+
+Now we need transformation to make the data suitable for fitting the SARIMA model. The SARIMA model assumes the data need to be stationary, without any seasonality trend, and have equal variance.
+
+
+First we check whether we need to apply a box-cox transformation to stablize the variance.
+
+```{r}
+library(MASS)
+lambda = boxcox(murder_count_time_series_train~1)
+optlambda = lambda$x[which.max(lambda$y)]
+train1 = (murder_count_time_series_train^optlambda - 1)/optlambda
+```
+
+As the 95% interval for the best lambda parameter of the box cox transformation does not include 1, so we should use the box cox transformation with lambda = `r round(optlambda,3)`.
+
+Then to remove the seasonality trend, we apply a log 12 difference. It does not seems very stationary, so we apply additional lag 1 difference. Now it looks quite good and we can proceed to select the model.
+
+```{r}
+train_lag12 = train1 %>% diff(lag = 12)  
+l1 =autoplot(train_lag12)+
+  ylab("train") +
+  ggtitle("Shoooting in New York 2006-2020, lag 12")
+ggplotly(l1, tooltip = c("x", "y")) 
+train_lag121 = train1 %>% diff(lag = 12)  %>% diff(lag = 1)  
+l1 =autoplot(train_lag121)+
+  ylab("train") +
+  ggtitle("Shoooting in New York 2006-2020, lag 12, then lag 1")
+ggplotly(l1, tooltip = c("x", "y")) 
+```
+
+# Model selection
+
+First let us check the sample ACF, PACF of the series after transformation:
+
+```{r}
+l1= tsdisplay(train_lag121)
+```
+
+The ACF plot, in non seasonality part (< lag 8), we have significant lag 1 only, and the seasonality part have significant lag 12 and marginally significant lag 24, so the MA part could be MA1, and the SMA part should be 1 or 2.
+
+The PACF plot, in non seasonality part (< lag 8), the lag tails off, and for the seasonality part, also we can observe the lag spike tails off, (or it's the first 2 significant). So the AR part should be 0 and the SAR part can be 0 or 2.
+
+So the most probable candidate models should be $SARIMA(p,1,q)(P,1,Q)_{12}$ with $p=0$, $q = 1,2$, $P = 0, 2$, $Q = 1,2$.
+
+We fit those models and calculate the AICc of those models fitted by R. The result is:
+
+```{r}
+# model selection
+AICc = 10000
+model_list = list(c(0,1,1,0,1,1), c(0,1,1,0,1,2),
+                  c(0,1,1,2,1,1), c(0,1,1,2,1,2),
+                  c(0,1,2,0,1,1), c(0,1,2,0,1,2),
+                  c(0,1,2,2,1,1), c(0,1,2,2,1,2))
+AICcs = c()
+fit1 = 1
+for(i in 1:length(model_list))
+{
+    result = tryCatch({
+      fit = Arima(train1,order=model_list[[i]][1:3],
+       seasonal = model_list[[i]][4:6],
+       method = "CSS-ML")
+      AICcs[i] = fit$aicc
+      
+      if(fit$aicc < AICc){
+      AICc = fit$aicc
+      fit1 = fit
+    }
+  }, error = function(e) {
+      fit = list()
+      fit$aicc = NA
+  })
+}
+
+df = data.frame(
+  Model = c(
+                  "SARIMA(0,1,1)(0,1,1)_12", "SARIMA(0,1,1)(0,1,2)_12",
+                  "SARIMA(0,1,1)(2,1,1)_12", "SARIMA(0,1,1)(2,1,2)_12",
+                  "SARIMA(0,1,2)(0,1,1)_12", "SARIMA(0,1,2)(0,1,2)_12",
+                  "SARIMA(0,1,2)(2,1,1)_12", "SARIMA(0,1,2)(2,1,2)_12"
+  ),
+  AICc = AICcs
+)
+```
+
+```{r}
+knitr::kable(df, caption = "AICCs of the models")
+```
+
+From the table, the model $SARIMA(0,1,1)(0,1,1)_{12}$ has the smallest AICc so it's the best. The model summary is:
+
+```{r}
+summary(fit1)
+```
+
+And the mathematical form is: (After box cox transformation with lambda = `r round(optlambda,3)`)
+
+$$
+(1-B)(1-B^{12})X_n=(1-0.7592B)(1-0.8463B^{12})Z_n
+$$
+
+$$ Z_n \overset{iid}\sim N[0,0.3194]$$
+
+# Model diagnostic
+
+First we check the ACF and PACF of the residual. The residual should assemble white noise so the AFC and PACF should not contain any significant spikes. From the ACF and PACF plot, except lag4 is marginally significant, all others are good, so we think the residual is similar to white noise for the ACF and PACF.
+
+```{r}
+residual = resid(fit1)
+tsdisplay(residual, lag.max = 28)
+```
+
+From the result, except for the lag 14 very marginally spike of the ACF and PACF (Which may because some complex patterns in the data), all other lags are insignificant, so we can believe the ACF and PACF of the residual is quite similar to the white noise.
+
+Then check the inverse polynomial roots. The characteristic roots should be outside the unit circle to assure the model stationary and invertible, thus the inverse characteristic roots should be inside the unit circle. From the plot below all the inverse characteristic roots are inside the unit circle. so the model is legible.
+
+```{r}
+autoplot(fit1)
+```
+
+Next we check the model residual independence:
+
+Use Box - Pierce test, Ljung - Box test and McLeod - Li test. The training data have 156 observations, model parameters 2, so the degree of freedom should be 12, 12, 14 respectively.
+
+```{r}
+# independence
+pv = c()
+pv[1]=Box.test(residual, lag = 14, type = c("Box-Pierce"),fitdf = 2)$p.value
+pv[2]=Box.test(residual, lag = 14, type = c("Ljung-Box"),fitdf = 2)$p.value
+pv[3]=Box.test(residual^2, lag = 14, type = c("Ljung-Box"),fitdf = 0)$p.value
+df = data.frame(tests = c("Box-Pierce","Ljung-Box","McLeod-Li"), p.value = pv, df = c(12,12,14))
+knitr::kable(df)
+```
+
+All of the independence tests pass with p value > 0.05, so our residual does not have any sequential correlation.
+
+# Forecast
+
+Now we forecast the model on the test set:
+
+```{r}
+# Forecast 
+n = length(murder_count_time_series_test)
+pred = predict(fit1, n.ahead=n)$pred
+se = predict(fit1, n.ahead=n)$se
+pred1 = exp(log(pred * optlambda + 1)/optlambda)
+pred1l = exp(log((pred-1.96*se) * optlambda + 1)/optlambda)
+pred1u = exp(log((pred+1.96*se) * optlambda + 1)/optlambda)
+ts.plot(murder_count_time_series_train, 
+        xlim = c(2015,2022), ylim = c(35,350), ylab = "shoots")
+title("Forecast Plot (red) and the Real Data (blue) For 2019-2020")
+points(2019+(1:n)/12,pred1,col = "red",
+       pch  = ".", cex= 4)
+lines(2019+(1:n)/12,pred1l,lty=2)
+lines(2019+(1:n)/12,pred1u,lty=2)
+points(2019+(1:n)/12,murder_count_time_series_test,col = "blue",
+       pch  = ".", cex= 4)
+lines(2019+(1:n)/12,murder_count_time_series_test,col = "blue",lty=2)
+```
+
+The forecast result shows that in 2019, all blue points (real values) are inside the 95% confidence interval, and actually quite close to the predicted red points. But in 2020, nearly all predicted value are smaller than the actual value, and in summer the actual value is much higher than the predicted ones.
+
+This is because after April the COVID outbreaks in US. The economy was greatly suffered so the social become violent thus much more shooting occurs. Our SARIMA model can't take that COVID event into consideration, and still predict it as the COVID does not exist, so that's why our predicted values are much smaller than the actual values. In fact, no model can forecast those black swarm events.
+
+Also from the disparity of the predicted and actual shooting numers in 2020, we can have a feeling of how big influence that COVID bring to US. 
+
+
+>>>>>>> 7979e4a7601266a96dfeb22d76a38a926babbfd5
