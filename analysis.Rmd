@@ -1,5 +1,5 @@
 ---
-title: "Analysis"
+title: "Descriptive Analysis"
 output: 
   html_document:
     toc: true
@@ -45,8 +45,8 @@ educational_attainment = read_csv("data/education/educational_attainment.csv")
 
 # Overall glance
 
-## Total shooting incident trends by murdered or survived from 2006 to 2020
-At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from 2006 to 2020 in New York City.
+At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from **2006 to 2020** in New York City.
+## Total shooting incident trends by murdered or survived 
 ```{r echo = FALSE, message=FALSE}
 year_plot = 
   data_hist %>% 
@@ -70,7 +70,7 @@ Murdered shooting incidence is much less than survived shooting incidence. From 
 Now, let's take a closer look on more details about the victims.
 
 # Victim
-## Total shooting incident by victim’s race
+## Race
 
 ```{r echo = FALSE, message= FALSE}
 vic_race_plot = 
@@ -88,10 +88,10 @@ vic_race_plot =
 vic_race_plot
 ```
 
-The majority of victim are black. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most in victim.
+The majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most in victim.
 
 
-## Total shooting incident by victim’s sex
+## Sex
 ```{r echo = FALSE, message=FALSE}
 vic_sex_plot = 
   data_hist %>% 
@@ -112,7 +112,7 @@ vic_sex_plot
 Male victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.
 
 
-## Total shooting incident by victim’s age group
+## Age
 
 ```{r echo = FALSE, message=FALSE}
 vic_age_plot = 
@@ -135,10 +135,10 @@ vic_age_plot
 ```
 
 The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65.
-From 2006-2014, age group 18-25 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-25 victims have been decreasing rapidly and become the second highest group among the total shooting incident which was referring to educational policy from 2015.
+From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.
 
 
-## Total shooting incident by jurisdiction_code
+## Place
 ```{r echo = FALSE, message = FALSE}
 jurisdiction_code_plot=
   data_hist %>%
@@ -160,7 +160,7 @@ jurisdiction_code_plot
 
 Most of the shooting incidences happened in the patrol, some of the shooting incidences in housing and only few cases were on transit.
 
-## Total shooting incident by hour in a day for each borough
+## Hour in a day
 
 
 ```{r echo=FALSE, message=FALSE}
@@ -195,7 +195,5 @@ education_plot =
 
 education_plot
 ```
-
-
 overall, all borough show increase.  in 2015, brooklyn that has most shooting incident boro has a notability increase slope.
 
