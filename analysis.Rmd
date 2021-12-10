@@ -46,16 +46,16 @@ unemployment <- read_csv("data/unemployment/unemployment_cleaned.csv")
 
 # Overall glance
 
-At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from **2010 to 2020** in New York City.
+At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from **2006 to 2020** in New York City.
 
 ```{r echo = FALSE, message=FALSE}
 year_plot = 
   data_hist %>% 
-  filter(year >= 2010 ) %>% 
+  filter(year >= 2006 ) %>% 
   group_by(year, statistical_murder_flag) %>%
   summarise(n = n()) %>% 
 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
   geom_point() + geom_line() +
   labs(x = "Year",
        y = "Total incident",
@@ -65,7 +65,7 @@ year_plot =
 year_plot
 ```
 
-Murdered shooting incidence is much less than survived shooting incidence.Both types of the shooting incidence were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it may be due to the outbreak of COVID-19 which led to a raise in unemployment and panic.
+Murdered shooting incidence is much less than survived shooting incidence. From 2006 to 2011, the survived shooting incidence was steadily fluctuate around 1500 and murdered shooting incidence was steadily fluctuate around 400.Both types of the shooting incidence were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it might be influenced by the outbreak of COVID-19 which led to a raise in unemployment and panic. We will do more statistical analysis on that later.
 
 
 Now, let's take a closer look on more details about the victims.
@@ -76,11 +76,11 @@ Now, let's take a closer look on more details about the victims.
 ```{r echo = FALSE, message= FALSE}
 vic_race_plot = 
   data_hist %>%
-  filter(year >= 2010,
+  filter(year >= 2006,
          vic_race %in% c("black","white hispanic","black hispanic","white","asian / pacific islander","white")) %>% 
   group_by(year, vic_race) %>%
   summarise(n = n()) %>%
-  ggplot(aes(x = year, y = n, fill= vic_race) ) + 
+  ggplot(aes(x = year, y = n, fill= vic_race) ) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
   geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Year",
        y = "Total incident",
@@ -89,18 +89,18 @@ vic_race_plot =
 vic_race_plot
 ```
 
-The majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most in victim.
+The majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most among all victim's race.
 
 
 ## Sex
 ```{r echo = FALSE, message=FALSE}
 vic_sex_plot = 
   data_hist %>% 
-  filter(year >= 2010,
+  filter(year >= 2006,
          vic_sex != "unknown") %>% 
   group_by(year, vic_sex) %>%
   summarise(n = n()) %>% 
-  ggplot(aes(x = year, y = n, fill = vic_sex)) + 
+  ggplot(aes(x = year, y = n, fill = vic_sex)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
   geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Year",
        y = "Total incident",
@@ -110,7 +110,7 @@ vic_sex_plot =
 vic_sex_plot
 ```
 
-**Male** victims are the majority and female victims have a very small proportion among the total victims in nyc across 2010 to 2020.
+**Male** victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.
 
 
 ## Age group
@@ -118,14 +118,14 @@ vic_sex_plot
 ```{r echo = FALSE, message=FALSE}
 vic_age_plot = 
   data_hist %>% 
-  filter(year >= 2010,
+  filter(year >= 2006,
          vic_age_group != "NA",
          vic_age_group != "UNKNOWN"
          ) %>% 
   group_by(vic_age_group, year) %>%
   summarise(n = n()) %>% 
 
-  ggplot(aes(x = year, y = n, color = vic_age_group)) + 
+  ggplot(aes(x = year, y = n, color = vic_age_group)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
   geom_point() + geom_line() +
 
   labs(x = "Year",
@@ -135,20 +135,20 @@ vic_age_plot =
 vic_age_plot
 ```
 
-The proportion of age group under 18 and 45-64 have been keeping consistently low across 2010 to 2020, and there are nearly zero incidence for age group over 65.
-From 2010-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.
+The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65.
+From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.
 
 
 ## Place
 ```{r echo = FALSE, message = FALSE}
 jurisdiction_code_plot=
   data_hist %>%
-  filter(year > 2010,
+  filter(year > 2006,
          vic_age_group != "NA",
          vic_age_group != "UNKNOWN") %>% 
   group_by(jurisdiction_code, vic_age_group) %>%
   summarise(n = n()) %>% 
-  ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) + 
+  ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) +
   geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Age group of victims",
        y = "Total incident",
@@ -167,7 +167,7 @@ Most of the shooting incidences happened in the **patrol**, some of the shooting
 ```{r echo=FALSE, message=FALSE}
 incident_by_hour =
   data_hist %>%
-  filter(year >= 2010) %>% 
+  filter(year >= 2006) %>% 
   group_by(hour) %>%
   mutate(n = n()) %>% 
   ggplot(aes(x = hour, group = n)) + 
@@ -187,7 +187,7 @@ Most of the shooting incidence happened at night and very early in the morning. 
 
 # Perpetrator
 ## Total incidence vs Perpetrator's age 
-Both of the perpetrator and victims might be influenced by the education level. Therefore, we visualize the perpetrator's age from 2006 to 2020 and present a percentage of each educational level from 2010 to 2020. The association between the educational level and perpetrator's age group.
+Both of the perpetrators and victims might be influenced by the education level. Therefore, we visualize the perpetrator's age from 2006 to 2020 and present a percentage of each educational level from 2010 to 2020. The association between the educational level and perpetrator's age group and victim's age is required more analysis.
 
 ```{r echo = FALSE, message=FALSE}
 perp_age_plot = 
