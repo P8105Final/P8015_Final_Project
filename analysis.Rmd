@@ -50,7 +50,7 @@ year_plot =
   data_hist %>% 
   filter(year >= 2010 ) %>% 
   group_by(year, statistical_murder_flag) %>%
-  mutate(n = n()) %>% 
+  summarise(n = n()) %>% 
 
   ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
   geom_point() + geom_line() +
@@ -75,7 +75,7 @@ vic_race_plot =
          vic_race %in% c("black","white hispanic","black hispanic","white","asian / pacific islander","white")) %>% 
   group_by(year, vic_race) %>%
   summarise(n = n()) %>%
-  ggplot(aes(x = year, y = n, fill= vic_race))+ 
+  ggplot(aes(x = year, y = n, fill= vic_race) ) + 
   geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Year",
        y = "Total incident",
@@ -127,31 +127,13 @@ vic_age_plot =
   ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
   geom_bar(width = 0.8, stat = "identity")+
 
-  labs(x = "Year",
+  labs(x = "Borough",
        y = "Total incident",
        title = "Shooting Incident Trend By Victim’s age"
        )
 vic_age_plot
 ```
 victims age group, 2010-2015 age 18-25 are the major victim but less in 2016-2018
-
-##2010-2020 total shooting incident by boro
-```{r}
-boro_plot = 
-  data_hist %>% 
-  filter(year >= 2010) %>% 
-  group_by(boro) %>%
-  summarise(n = n()) %>% 
-  ggplot(aes(x = boro, group = n)) + 
-  geom_bar(position = "dodge") +
-  labs(x = "Borough",
-       y = "Total incident",
-       title = "Shooting Incident By Borough"
-       )
-
-boro_plot
-```
-
 
 
 ##2010-2020 total shooting incident by jurisdiction_code

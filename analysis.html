@@ -374,16 +374,16 @@ div.tocify {
   data_hist %&gt;% 
   filter(year &gt;= 2010 ) %&gt;% 
   group_by(year, statistical_murder_flag) %&gt;%
-  mutate(n = n()) %&gt;% 
+  summarise(n = n()) %&gt;% 
 
   ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
   geom_point() + geom_line() +
   labs(x = &quot;Year&quot;,
        y = &quot;Total incident&quot;,
        title = &quot;Shooting Incident Trend By Year&quot;
-       )
-
-year_plot</code></pre>
+       )</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;year&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>year_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by victim’s race</p>
 <pre class="r"><code>vic_race_plot = 
@@ -392,7 +392,7 @@ year_plot</code></pre>
          vic_race %in% c(&quot;black&quot;,&quot;white hispanic&quot;,&quot;black hispanic&quot;,&quot;white&quot;,&quot;asian / pacific islander&quot;,&quot;white&quot;)) %&gt;% 
   group_by(year, vic_race) %&gt;%
   summarise(n = n()) %&gt;%
-  ggplot(aes(x = year, y = n, fill= vic_race))+ 
+  ggplot(aes(x = year, y = n, fill= vic_race) ) + 
   geom_bar(width = 0.8, stat = &quot;identity&quot;) +
   labs(x = &quot;Year&quot;,
        y = &quot;Total incident&quot;,
@@ -436,28 +436,13 @@ year_plot</code></pre>
   ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
   geom_bar(width = 0.8, stat = &quot;identity&quot;)+
 
-  labs(x = &quot;Year&quot;,
+  labs(x = &quot;Borough&quot;,
        y = &quot;Total incident&quot;,
        title = &quot;Shooting Incident Trend By Victim’s age&quot;
        )</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;vic_age_group&#39;. You can override using the `.groups` argument.</code></pre>
 <pre class="r"><code>vic_age_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /> victims age group, 2010-2015 age 18-25 are the major victim but less in 2016-2018</p>
-<p>##2010-2020 total shooting incident by boro</p>
-<pre class="r"><code>boro_plot = 
-  data_hist %&gt;% 
-  filter(year &gt;= 2010) %&gt;% 
-  group_by(boro) %&gt;%
-  summarise(n = n()) %&gt;% 
-  ggplot(aes(x = boro, group = n)) + 
-  geom_bar(position = &quot;dodge&quot;) +
-  labs(x = &quot;Borough&quot;,
-       y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident By Borough&quot;
-       )
-
-boro_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by jurisdiction_code</p>
 <pre class="r"><code>jurisdiction_code_plot=
   data_hist %&gt;%
@@ -474,7 +459,7 @@ boro_plot</code></pre>
        )</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;jurisdiction_code&#39;. You can override using the `.groups` argument.</code></pre>
 <pre class="r"><code>jurisdiction_code_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by hour in a day</p>
 <pre class="r"><code>incident_by_hour =
   data_hist %&gt;%
@@ -490,7 +475,7 @@ boro_plot</code></pre>
        )
   
 incident_by_hour</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <p>Most shooting incident happened at <strong>patrol</strong>, then is house.</p>
 <p><strong>brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incident since it dose not have much population</p>
 <pre class="r"><code>education_plot = 
@@ -503,7 +488,7 @@ incident_by_hour</code></pre>
     y = &quot;Percent&quot;) 
 
 education_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <p>overall, all borough show increase. in 2015, brooklyn that has most shooting incident boro has a notability increase slope.</p>
 </div>
 </div>
