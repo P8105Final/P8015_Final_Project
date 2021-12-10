@@ -1,5 +1,6 @@
 ---
 title: "Safe Map"
+author: Wen Cheng, Jiahao Fan, Yangruijue Ma (Anna), Renee Wang, Tianwei Zhao
 output: 
   html_document:
     toc: true
@@ -10,11 +11,6 @@ Insert a Picture Here??
 
 ## Motivation
 
-## Dateset
-Our data is from [NYC open data](https://opendata.cityofnewyork.us/) website. The data we use is [NYPD Shooting Incident Data](https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8)
-
-## Findings
-
 ## Website Overview 
 [Analysis](analysis.html):
 
@@ -23,8 +19,3 @@ Our data is from [NYC open data](https://opendata.cityofnewyork.us/) website. Th
 [Interactive Map](https://ym2813.shinyapps.io/interactive_map_p8105_final/):
 
 [Report](report.html):
-
-## Screencast
-brief overview of our website 
-
-### Contributors: Wen Cheng | Jiahao Fan | Yangruijue Ma (Anna) | Renee Wang | Tianwei Zhao

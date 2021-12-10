@@ -5,9 +5,6 @@ output:
     toc: true
     toc_float: true
 ---
-
-<<<<<<< HEAD
-=======
 ```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE
 )
@@ -237,5 +234,3 @@ This is because after April the COVID outbreaks in US. The economy was greatly s
 
 Also from the disparity of the predicted and actual shooting numers in 2020, we can have a feeling of how big influence that COVID bring to US. 
 
-
->>>>>>> 7979e4a7601266a96dfeb22d76a38a926babbfd5
