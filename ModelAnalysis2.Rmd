@@ -15,8 +15,9 @@ knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE
 
 In this section we will analysis the shooting case by the factor of the shooting, and carry out statistical analysis and data visualization about the shooting in New York City. We will asking some questions, and answer them using facts and plots.
 
-# Question 1: Which boros is most dangerous?
+#  Kruskal-Wallis analysis: Which boro is most dangerous?
 
+Due to recent raise in shooting events around the US, people become more conscious about their safety. In particular, students of Columbia university want to know whether the community around the university is comparably safe or danger in New York. Here we use bar plot to show the total shooting events from 2006 to 2020 in all 5 boros of New York: "bronx", "manhattan", "queens", "brooklyn" and"staten island".
 
 ```{r}
 library(dplyr)
@@ -39,7 +40,7 @@ data_hist =
 library(dplyr)
 data = 
   data_hist %>%
-  dplyr::select(month, day, year, hour, boro,
+  dplyr::select(month, day, year, hour, boro,precinct,
          location_desc, perp_age_group,
          perp_sex, perp_race) %>% 
   mutate(date = toDate(year, month, day)) %>%
@@ -95,10 +96,54 @@ p2 = ll1 %>%
 
 
 subplot(p1, p2, nrows = 1) %>% 
-  plotly::layout(title = 'Bar plot of shooting (left), shooting / population (thousands) (right), by districts')
+  plotly::layout(title = 'Bar plot of shooting by districts <br><sup>left: shooting , right: shooting / population (thousands) </sup>',
+                 autosize = T)
 ```
 
+In the bar plot above we realize that there are most shooting events in brooklyn, and second is bronx, where manhattan is only around forth of the shooting events in brooklyn. It seems ok. From the shooting events per thousand population bar chart, the highest is bronx and second is brooklyn, manhattan is significantly lower than those 2, so compared to those 2 boros, the manhattan district is relatively safer, that's a good news for all students in our university.
 
+Now we wanna use Kruskal-Wallis test to statistically test whether some districts are more dangerous than others. We will use the precincts shooting per thousand people as the sample, and apply Kruskal-Wallis test on that sample. The reason why we don's use ANOVA but use the non parametric analysis is because the data is not normally distributed.
+
+```{r}
+
+percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv")
+
+percinct_pop = percinct_pop %>% 
+  select(precinct_2020, P0010001)
+
+data1 = data %>%
+  count(boro, precinct) %>%
+  left_join(percinct_pop, 
+            by = c("precinct" = "precinct_2020"))
+
+data1$shoot_per_thousand = data1$n / data1$P0010001 * 1000
+
+library("ggpubr")
+p1 = ggline(data1, x = "boro", y = "shoot_per_thousand", 
+       add = c("mean_se", "jitter"), 
+       ylab = "shoot per thousand", xlab = "boros") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")
+ggplotly(p1, tooltip = c("x", "y")) 
+```
+
+Then we perform the kruskal.test.
+
+```{r}
+kruskal.test(shoot_per_thousand ~ boro, data = data1)
+```
+
+As the p-value is less than the significance level 0.05, we can conclude that there are significant differences in shooting rate between the boros. From the output of the Kruskal-Wallis test, we know that there is a significant difference between groups, but we don’t know which pairs of groups are different. So we use the pairwise wilcox test to calculate pairwise comparisons between boros with corrections for multiple testing.
+
+```{r}
+pairwise.wilcox.test(data1$shoot_per_thousand, data1$boro,
+                 p.adjust.method = "BH")
+```
+
+Under the 0.05 significance level, we know that there is a significant difference between shooting rate of manhattan and bronx, queens and bronx. And from the bar chart we know that difference means manhattan and queens are significantly safer than the bronx boro.
+
+# Visualization of Shooting time and places
+
+1. Where do the shooting most happens? (The last bar is not applicable) From the plot we know that first 3 places are apartment and houses, and of the public area, the first 3 are grocery stor, bar / night club and comercial buildings.
 
 ```{r}
 p1 = 
@@ -124,6 +169,7 @@ p1 =
 ggplotly(p1, tooltip = c("x", "y")) 
 ```
 
+2. When do most of the shooting happens?
 
 ```{r}
 heat_maps = function(dataset, title) {
@@ -156,3 +202,5 @@ d2 =
 
 heat_maps(dataset = d2, title = "Heat Maps of Shootings")
 ```
+
+From both Pre-COVID and COVID time, the shooting are most centered at night, especially 23 PM - 4 AM. For the Pre-COVID time, most of the shootings are in the midnight of weekends, and for COVID, it seems to be more dispersed in nights.
