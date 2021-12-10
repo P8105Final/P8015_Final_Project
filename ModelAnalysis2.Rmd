@@ -12,10 +12,12 @@ knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE
 ```
 
 # Goal
+After visualization of the shooting incidences data in section descriptive analysis, we will go to statistical analysis to answer several questions that most of the nyc residents might care about.
 
 In this section we will analysis the shooting case by the factor of the shooting, and carry out statistical analysis and data visualization about the shooting in New York City. We will asking some questions, and answer them using facts and plots.
 
-#  Kruskal-Wallis analysis: Which boro is most dangerous?
+#  Kruskal-Wallis analysis
+## Which boro is most dangerous?
 
 Due to recent raise in shooting events around the US, people become more conscious about their safety. In particular, students of Columbia university want to know whether the community around the university is comparably safe or danger in New York. Here we use bar plot to show the total shooting events from 2006 to 2020 in all 5 boros of New York: "bronx", "manhattan", "queens", "brooklyn" and"staten island".
 
@@ -142,8 +144,8 @@ pairwise.wilcox.test(data1$shoot_per_thousand, data1$boro,
 Under the 0.05 significance level, we know that there is a significant difference between shooting rate of manhattan and bronx, queens and bronx. And from the bar chart we know that difference means manhattan and queens are significantly safer than the bronx boro.
 
 # Visualization of Shooting time and places
-
-1. Where do the shooting most happens? (The last bar is not applicable) From the plot we know that first 3 places are apartment and houses, and of the public area, the first 3 are grocery stor, bar / night club and comercial buildings.
+## Where do the shooting most happens?
+Where do the shooting most happens? (The last bar is not applicable) From the plot we know that first 3 places are apartment and houses, and of the public area, the first 3 are grocery stor, bar / night club and comercial buildings.
 
 ```{r}
 p1 = 
@@ -169,7 +171,7 @@ p1 =
 ggplotly(p1, tooltip = c("x", "y")) 
 ```
 
-2. When do most of the shooting happens?
+## When do most of the shooting happens?
 
 ```{r}
 heat_maps = function(dataset, title) {
@@ -204,3 +206,9 @@ heat_maps(dataset = d2, title = "Heat Maps of Shootings")
 ```
 
 From both Pre-COVID and COVID time, the shooting are most centered at night, especially 23 PM - 4 AM. For the Pre-COVID time, most of the shootings are in the midnight of weekends, and for COVID, it seems to be more dispersed in nights.
+
+## Which age group of people is the most dangerous?
+
+From the the visualization in the section of descriptive, we see that age group 18-24 and age group 25-44 have the highest shooting incidences. However, more statistical analysis are required to indicate if the age group 18-24 and group 25-44 are more dangerous or they have the larger proportion in the population.
+
+
