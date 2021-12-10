@@ -109,13 +109,13 @@ Now we wanna use Kruskal-Wallis test to statistically test whether some district
 
 ```{r}
 
-percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
+precinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
   rename("total_pop" = "P0010001") %>% 
-  select(precinct_2020, total_pop)
+  dplyr::select(c(precinct_2020,total_pop))
 
 data1 = data %>%
   count(boro, precinct) %>%
-  left_join(percinct_pop, 
+  left_join(precinct_pop, 
             by = c("precinct" = "precinct_2020"))
 
 data1$shoot_per_thousand = data1$n / data1$total_pop * 1000
