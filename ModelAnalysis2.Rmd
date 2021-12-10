@@ -4,6 +4,7 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -108,17 +109,16 @@ Now we wanna use Kruskal-Wallis test to statistically test whether some district
 
 ```{r}
 
-percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv")
-
-percinct_pop = percinct_pop %>% 
-  select(precinct_2020, P0010001)
+percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
+  select(precinct_2020, P0010001) %>% 
+  rename("total_pop" = "P0010001")
 
 data1 = data %>%
   count(boro, precinct) %>%
   left_join(percinct_pop, 
             by = c("precinct" = "precinct_2020"))
 
-data1$shoot_per_thousand = data1$n / data1$P0010001 * 1000
+data1$shoot_per_thousand = data1$n / data1$total_pop * 1000
 
 library("ggpubr")
 p1 = ggline(data1, x = "boro", y = "shoot_per_thousand", 

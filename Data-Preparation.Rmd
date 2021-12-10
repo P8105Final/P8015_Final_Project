@@ -25,32 +25,32 @@ scale_fill_discrete = scale_fill_viridis_d
 theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = element_text(face = "bold")))
 ```
 
+For this project, we mainly looked at the shooting incident data that we acquired from [NYC open data](https://opendata.cityofnewyork.us/data/). During the project, we also acquired data from other sources to help explain and analyze the findings we have from the shooting incident data.The details of the data and our cleaning methods will be elaborated below. 
+
 ## Data Sources
 
-For this project, we acquired data from multiple source.   
-
-* For the shooting incident data: 
+1. NYC Shooting Incident Data: 
 
 [NYPD Shooting Incident Data (Historic)](https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8)
 
 This data set contains 23,575 shooting incidents that occurred during January 01, 2016 to December 31, 2020. The data set was originally provided by the Police Department (NYPD). For each incident, information on the incident date, time, location (specific to the longitude and latitude of the incident), the perpetrator and the victim's sex, race, and age group were provided. 
 
 
-* For Unemployment Rate 
+2. Unemployment Rate Data
 
 [Unemployment Rate](https://fred.stlouisfed.org/series/NYUR)
 
 We downloaded the monthly unemployment rate in New York City from January ,2010 to December, 2020 from FRED, [Federal Reserve Bank of St. Louis](https://fred.stlouisfed.org/series/NYUR). The original source of the data is [U.S. Bureau of Labor Statistics](https://www.bls.gov/sae/).
 
-* For Educational Attainment  
+3. Educational Attainment Data
 
 [Educational Attainment](https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false)
 
 The source of our educational attainment data is [U.S Census Bureau](https://data.census.gov/cedsci/). We searched for educational attainment and acquired our data from table S1501. In the table, we filtered data by year and location. Namely, we filtered the educational attainment information for the five boroughs in NYC from 2010 to 2020. 
 
-[Covid-19 Cases](https://github.com/nychealth/coronavirus-data/tree/master/trends)
+4. Population in each Police Precinct Data
 
-This data set contains the citywide and borough-specific daily counts of COVID-19 cases from February 29, 2020 to December 05, 2020. The data set starts from February 29,2020 because it is the date that the Health Department classifies as the start of the COVID-19 outbreak in NYC. The source of this date is the NYC Department of Health and Mental Hygiene.
+We downloaded a cleaned data set on population in each police precinct data from this [website](https://johnkeefe.net/nyc-police-precinct-and-census-data). It's source is the [U.S Census Bureau](https://data.census.gov/cedsci/). 
 
 ## Data Cleaning and Tidying
 
@@ -83,8 +83,6 @@ data_hist =
 
 write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names=FALSE)
 ```
-
-data_hist = replace(data_hist, is.na(data_hist),"unknown")
 
 2. Unemployment Rate Data
 
@@ -137,33 +135,16 @@ We obtained our educational attainment data by searching for in the S1501 table 
 education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year)) %>% rename("edu" = "percent")
 ```
 
-4. COVID-19 Data
+4. Population in each Police Precinct 
 
-For the COVID-19 data set, we performed a similar process. We selected the variables of interest, cleaned and tidy the data set. Then, we wrote out a resulting csv file for the use of our project as well.
+Since the data set is already cleaned when we found it, we didn't have to do much tidying. However, the columns were cryptic. Therefore, we followed the code listed in the a Census Bureau PDF starting on this [page](https://www.documentcloud.org/documents/87708-pl94-171-1.html#document/p64), to re-code the column that we need to `total_pop`, which gives us the total population for each police precinct. 
 
 ```{r eval=FALSE}
-covid_df = read_csv("data/covid/cases-by-day.csv") %>%
-  janitor::clean_names() %>% 
-  select(1,2,6,10,14,18,22) %>% 
-  rename("date" = "date_of_interest",
-        "total_case" = "case_count") %>% 
-  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
-  pivot_longer(
-    cols = 5:9,
-    names_to = "boro",
-    values_to = "boro_case") %>%
-  mutate(
-    boro = case_when(
-      str_starts(boro, "bx") ~ "bronx",
-      str_starts(boro, "bk") ~ "brooklyn",
-      str_starts(boro, "mn") ~ "manhattan",
-      str_starts(boro, "qn") ~ "queens",
-      str_starts(boro, "si") ~ "staten island"
-    )
-  )
-
-write.csv(covid_df, "data/covid/covid_cleaned.csv")
+percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
+  select(precinct_2020, P0010001) %>% 
+  rename("total_pop" = "P0010001")
 ```
+
 
 ## Data description
 
@@ -185,5 +166,5 @@ The cleaned resulting data set contains 23,585 incidents and 22 variables. Some 
   
 **Other Data**
 
-We used the `unemployment rate`, `educational attainment`, and `COVID-19` data to analyze whether those variables have an association with the shooting incident. 
+We used the `unemployment rate`, `educational attainment`, and `police precint` data to further explore and analyze the findings that we obtained from our main `shooting incident` data. They are used in both the descriptive and statistical analysis in our project. `unemployment rate` has the monthly unemployment rate of NYC from 2010 to 2020. `educational attainment` has the percentage of adults(aged 18 and above) who received high school or higher education in each borough.Finally,`police precinct` has the total population of each police precinct in NYC. 
   

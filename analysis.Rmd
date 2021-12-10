@@ -1,5 +1,5 @@
 ---
-title: "Analysis"
+title: "Descriptive Analysis"
 output: 
   html_document:
     toc: true
@@ -7,6 +7,7 @@ output:
 ---
 ```{r include=FALSE, echo = FALSE}
 library(tidyverse)
+library(readr)
 knitr::opts_chunk$set(
 	echo = TRUE,
 	warning = FALSE,
@@ -26,8 +27,6 @@ theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = elemen
 
 ```{r,include=FALSE, echo = FALSE}
 data_hist = 
-
- 
   read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
   mutate(
     statistical_murder_flag = as.character(statistical_murder_flag),
@@ -39,22 +38,24 @@ data_hist =
 
 
 ```{r, include=FALSE}
-educational_attainment = read_csv("data/education/educational_attainment.csv") 
+educational = read_csv("data/education/educational_attainment.csv") 
+
+unemployment <- read_csv("data/unemployment/unemployment_cleaned.csv")
 ```
  
 
 # Overall glance
 
-## Total shooting incident trends by murdered or survived from 2006 to 2020
-At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from 2006 to 2020 in New York City.
+At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from **2010 to 2020** in New York City.
+
 ```{r echo = FALSE, message=FALSE}
 year_plot = 
   data_hist %>% 
-  filter(year >= 2006 ) %>% 
+  filter(year >= 2010 ) %>% 
   group_by(year, statistical_murder_flag) %>%
   summarise(n = n()) %>% 
 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
   geom_point() + geom_line() +
   labs(x = "Year",
        y = "Total incident",
@@ -64,18 +65,18 @@ year_plot =
 year_plot
 ```
 
-Murdered shooting incidence is much less than survived shooting incidence. From 2006 to 2011, the survived shooting incidence was steadily fluctuate around 1500 and murdered shooting incidence was steadily fluctuate around 400. Both types of the shooting incidence were decreasing gradually from 2011 to 2019. However, there is a huge dramatically increase in 2020 for both types of the shooting incidence. 
+Murdered shooting incidence is much less than survived shooting incidence.Both types of the shooting incidence were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it may be due to the outbreak of COVID-19 which led to a raise in unemployment and panic.
 
 
 Now, let's take a closer look on more details about the victims.
 
 # Victim
-## Total shooting incident by victim’s race
+## Race
 
 ```{r echo = FALSE, message= FALSE}
 vic_race_plot = 
   data_hist %>%
-  filter(year >= 2006,
+  filter(year >= 2010,
          vic_race %in% c("black","white hispanic","black hispanic","white","asian / pacific islander","white")) %>% 
   group_by(year, vic_race) %>%
   summarise(n = n()) %>%
@@ -88,14 +89,14 @@ vic_race_plot =
 vic_race_plot
 ```
 
-The majority of victim are black. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most in victim.
+The majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most in victim.
 
 
-## Total shooting incident by victim’s sex
+## Sex
 ```{r echo = FALSE, message=FALSE}
 vic_sex_plot = 
   data_hist %>% 
-  filter(year >= 2006,
+  filter(year >= 2010,
          vic_sex != "unknown") %>% 
   group_by(year, vic_sex) %>%
   summarise(n = n()) %>% 
@@ -109,15 +110,15 @@ vic_sex_plot =
 vic_sex_plot
 ```
 
-Male victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.
+**Male** victims are the majority and female victims have a very small proportion among the total victims in nyc across 2010 to 2020.
 
 
-## Total shooting incident by victim’s age group
+## Age group
 
 ```{r echo = FALSE, message=FALSE}
 vic_age_plot = 
   data_hist %>% 
-  filter(year >= 2006,
+  filter(year >= 2010,
          vic_age_group != "NA",
          vic_age_group != "UNKNOWN"
          ) %>% 
@@ -134,11 +135,11 @@ vic_age_plot =
 vic_age_plot
 ```
 
-The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65.
-From 2006-2014, age group 18-25 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-25 victims have been decreasing rapidly and become the second highest group among the total shooting incident which was referring to educational policy from 2015.
+The proportion of age group under 18 and 45-64 have been keeping consistently low across 2010 to 2020, and there are nearly zero incidence for age group over 65.
+From 2010-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.
 
 
-## Total shooting incident by jurisdiction_code
+## Place
 ```{r echo = FALSE, message = FALSE}
 jurisdiction_code_plot=
   data_hist %>%
@@ -158,9 +159,9 @@ jurisdiction_code_plot=
 jurisdiction_code_plot
 ```
 
-Most of the shooting incidences happened in the patrol, some of the shooting incidences in housing and only few cases were on transit.
+Most of the shooting incidences happened in the **patrol**, some of the shooting incidences in housing and only few cases were on transit.
 
-## Total shooting incident by hour in a day for each borough
+## Hour in a day
 
 
 ```{r echo=FALSE, message=FALSE}
@@ -180,8 +181,9 @@ incident_by_hour =
 incident_by_hour
 ```
 
-Brooklyn has most shooting incident, then is bronx. Staten island has least shooting incident since it does not have much population.
+**Brooklyn** has most shooting incident, then is bronx. Staten island has least shooting incident since it does not have much population.
 Most of the shooting incidence happened at night and very early in the morning. For Bronx and Brooklyn,  the shooting incidence are gradually increasing after 12pm and reach to peaks around 10pm to 11pm. The shooting incidences in the morning are not as high as the shooting incidences at night. For queens and manhanttan, the shooting incidences in the morning reach to the highest peak and have a noteworthy amount until 5 am. We will provide more statistical analysis about which borought is the most dangerous in next section.
+
 
 # Perpetrator
 ## Total incidence vs Perpetrator's age 
@@ -215,9 +217,9 @@ perp_age_plot
 
 ```{r echo = FALSE, message=FALSE}
 education_plot = 
-  educational_attainment %>%
-  ggplot(aes(x = year, y = percent, color = boro)) + scale_x_continuous(breaks = seq(20, 2020, by = 1)) +
-  geom_line() +
+  educational %>%
+  ggplot(aes(x = year, y = percent, color = boro)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
+
   labs(
     title = "Education", 
     x =  "Year",
@@ -225,7 +227,10 @@ education_plot =
 
 education_plot
 ```
-
-
 overall, all borough show increase.  in 2015, brooklyn that has most shooting incident boro has a notability increase slope.
+
+# Unemployment
+```{r}
+unemployment
+```
 
