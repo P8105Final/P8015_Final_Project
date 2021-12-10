@@ -5,7 +5,7 @@ output:
     toc: true
     toc_float: true
 ---
-```{r include=FALSE}
+```{r include=FALSE, echo = FALSE}
 library(tidyverse)
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -24,7 +24,7 @@ theme_set(theme_minimal() + theme(legend.position = "bottom",plot.title = elemen
 ```
 
 
-```{r,include=FALSE}
+```{r,include=FALSE, echo = FALSE}
 data_hist = 
 
  
@@ -43,16 +43,18 @@ educational_attainment = read_csv("data/education/educational_attainment.csv")
 ```
  
 
-## Trend
-### 2010-2020 total shooting incident trends by year
-```{r}
+### Overall glance
+
+## 2010-2020 total shooting incident trends by murdered or survived from 2006 to 2020
+At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from 2006 to 2020 in New York City.
+```{r echo = FALSE, message=FALSE}
 year_plot = 
   data_hist %>% 
-  filter(year >= 2010 ) %>% 
+  filter(year >= 2006 ) %>% 
   group_by(year, statistical_murder_flag) %>%
   summarise(n = n()) %>% 
 
-  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
   geom_point() + geom_line() +
   labs(x = "Year",
        y = "Total incident",
@@ -62,16 +64,18 @@ year_plot =
 year_plot
 ```
 
+Murdered shooting incidence is much less than survived shooting incidence. From 2006 to 2011, the survived shooting incidence was steadily fluctuate around 1500 and murdered shooting incidence was steadily fluctuate around 400. Both types of the shooting incidence were decreasing gradually from 2011 to 2019. However, there is a huge dramatically increase in 2020 for both types of the shooting incidence. 
 
 
+Now, let's take a closer look on more details about the victims.
 
+### Victim
+## 2010-2020 total shooting incident by victim’s race
 
-##2010-2020 total shooting incident by victim’s race
-
-```{r}
+```{r echo = FALSE, message= FALSE}
 vic_race_plot = 
   data_hist %>%
-  filter(year >= 2010,
+  filter(year >= 2006,
          vic_race %in% c("black","white hispanic","black hispanic","white","asian / pacific islander","white")) %>% 
   group_by(year, vic_race) %>%
   summarise(n = n()) %>%
@@ -84,15 +88,14 @@ vic_race_plot =
 vic_race_plot
 ```
 
-the majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim
+The majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim.
 
 
-## Victim
-### 2010-2020 total shooting incident by victim’s sex
-```{r}
+## 2010-2020 total shooting incident by victim’s sex
+```{r echo = FALSE, message=FALSE}
 vic_sex_plot = 
   data_hist %>% 
-  filter(year >= 2010,
+  filter(year >= 2006,
          vic_sex != "unknown") %>% 
   group_by(year, vic_sex) %>%
   summarise(n = n()) %>% 
@@ -106,38 +109,37 @@ vic_sex_plot =
 vic_sex_plot
 ```
 
+Male victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.
 
 
+## 2010-2020 totalshooting incident by victim’s age group
 
-
-
-
-### 2010-2020 totalshooting incident by victim’s age group
-
-```{r}
+```{r echo = FALSE, message=FALSE}
 vic_age_plot = 
   data_hist %>% 
-  filter(year >= 2010,
+  filter(year >= 2006,
          vic_age_group != "NA",
          vic_age_group != "UNKNOWN"
          ) %>% 
-  group_by(vic_age_group, boro) %>%
+  group_by(vic_age_group, year) %>%
   summarise(n = n()) %>% 
 
-  ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
-  geom_bar(width = 0.8, stat = "identity")+
+  ggplot(aes(x = year, y = n, color = vic_age_group)) + 
+  geom_point() + geom_line() +
 
-  labs(x = "Borough",
+  labs(x = "Year",
        y = "Total incident",
-       title = "Shooting Incident Trend By Victim’s age"
+       title = "Shooting Incident Trend By victim's group"
        )
 vic_age_plot
 ```
-victims age group, 2010-2015 age 18-25 are the major victim but less in 2016-2018
+
+The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65.
+From 2006-2014, age group 18-25 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-25 victims have been decreasing rapidly and become the second highest group among the total shooting incident which was referring to educational policy from 2015.
 
 
-##2010-2020 total shooting incident by jurisdiction_code
-```{r}
+## 2010-2020 total shooting incident by jurisdiction_code
+```{r echo = FALSE, message = FALSE}
 jurisdiction_code_plot=
   data_hist %>%
   filter(year > 2010,
@@ -158,10 +160,10 @@ jurisdiction_code_plot
 
 
 
-##2010-2020 total shooting incident by hour in a day
+##2010-2020 total shooting incident by hour in a day for each borough
 
 
-```{r}
+```{r echo=FALSE, message=FALSE}
 incident_by_hour =
   data_hist %>%
   filter(year >= 2010) %>% 
