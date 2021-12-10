@@ -43,7 +43,7 @@ educational_attainment = read_csv("data/education/educational_attainment.csv")
 ```
  
 
-### Overall glance
+# Overall glance
 
 ## 2010-2020 total shooting incident trends by murdered or survived from 2006 to 2020
 At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from 2006 to 2020 in New York City.
@@ -69,7 +69,7 @@ Murdered shooting incidence is much less than survived shooting incidence. From 
 
 Now, let's take a closer look on more details about the victims.
 
-### Victim
+# Victim
 ## 2010-2020 total shooting incident by victim’s race
 
 ```{r echo = FALSE, message= FALSE}
@@ -160,7 +160,7 @@ jurisdiction_code_plot
 
 
 
-##2010-2020 total shooting incident by hour in a day for each borough
+## 2010-2020 total shooting incident by hour in a day for each borough
 
 
 ```{r echo=FALSE, message=FALSE}
