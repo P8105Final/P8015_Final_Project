@@ -73,16 +73,18 @@ vic_race_plot =
   data_hist %>%
   filter(year >= 2010,
          vic_race %in% c("black","white hispanic","black hispanic","white","asian / pacific islander","white")) %>% 
-  group_by(year,vic_race) %>%
-  mutate(n = n()) %>%
-  ggplot(aes(x = year, y = n, fill = vic_race)) + 
-  geom_bar(width = 0.8, stat = "identity")+
+  group_by(year, vic_race) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(x = year, y = n, fill= vic_race))+ 
+  geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Year",
        y = "Total incident",
        title = "Shooting Incident Trend By Victim’s Race")
        
 vic_race_plot
 ```
+
+the majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim
 
 
 ## Victim
@@ -92,8 +94,8 @@ vic_sex_plot =
   data_hist %>% 
   filter(year >= 2010,
          vic_sex != "unknown") %>% 
-  group_by(vic_sex) %>%
-  mutate(n = n()) %>% 
+  group_by(year, vic_sex) %>%
+  summarise(n = n()) %>% 
   ggplot(aes(x = year, y = n, fill = vic_sex)) + 
   geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Year",
@@ -106,26 +108,9 @@ vic_sex_plot
 
 
 
-### 2010-2020 total shooting incident by victim’s race
 
-```{r}
-vic_race_plot = 
-  data_hist %>% 
-  filter(year >= 2010,
-        vic_race != "unknown") %>% 
-  group_by(vic_race) %>%
-  mutate(n = n()) %>% 
-  ggplot(aes(x = year, y = n,fill = vic_race)) + 
-  geom_bar(width = 0.8, stat = "identity") +
 
-  labs(x = "Year",
-       y = "Total incident",
-       title = "Shooting Incident Trend By Victim’s Race"
-       )
 
-vic_race_plot
-```
-the majority of victim are **black**. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim
 
 ### 2010-2020 totalshooting incident by victim’s age group
 
@@ -137,7 +122,7 @@ vic_age_plot =
          vic_age_group != "UNKNOWN"
          ) %>% 
   group_by(vic_age_group, boro) %>%
-  mutate(n = n()) %>% 
+  summarise(n = n()) %>% 
 
   ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
   geom_bar(width = 0.8, stat = "identity")+
@@ -156,7 +141,7 @@ boro_plot =
   data_hist %>% 
   filter(year >= 2010) %>% 
   group_by(boro) %>%
-  mutate(n = n()) %>% 
+  summarise(n = n()) %>% 
   ggplot(aes(x = boro, group = n)) + 
   geom_bar(position = "dodge") +
   labs(x = "Borough",
@@ -177,7 +162,7 @@ jurisdiction_code_plot=
          vic_age_group != "NA",
          vic_age_group != "UNKNOWN") %>% 
   group_by(jurisdiction_code, vic_age_group) %>%
-  mutate(n = n()) %>% 
+  summarise(n = n()) %>% 
   ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) + 
   geom_bar(width = 0.8, stat = "identity") +
   labs(x = "Age group of victims",

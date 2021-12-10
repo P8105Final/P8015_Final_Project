@@ -390,16 +390,17 @@ year_plot</code></pre>
   data_hist %&gt;%
   filter(year &gt;= 2010,
          vic_race %in% c(&quot;black&quot;,&quot;white hispanic&quot;,&quot;black hispanic&quot;,&quot;white&quot;,&quot;asian / pacific islander&quot;,&quot;white&quot;)) %&gt;% 
-  group_by(year,vic_race) %&gt;%
-  mutate(n = n()) %&gt;%
-  ggplot(aes(x = year, y = n, fill = vic_race)) + 
-  geom_bar(width = 0.8, stat = &quot;identity&quot;)+
+  group_by(year, vic_race) %&gt;%
+  summarise(n = n()) %&gt;%
+  ggplot(aes(x = year, y = n, fill= vic_race))+ 
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
   labs(x = &quot;Year&quot;,
        y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident Trend By Victim’s Race&quot;)
-       
-vic_race_plot</code></pre>
+       title = &quot;Shooting Incident Trend By Victim’s Race&quot;)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;year&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>vic_race_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p>the majority of victim are <strong>black</strong>. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim</p>
 </div>
 </div>
 <div id="victim" class="section level2">
@@ -410,36 +411,16 @@ vic_race_plot</code></pre>
   data_hist %&gt;% 
   filter(year &gt;= 2010,
          vic_sex != &quot;unknown&quot;) %&gt;% 
-  group_by(vic_sex) %&gt;%
-  mutate(n = n()) %&gt;% 
+  group_by(year, vic_sex) %&gt;%
+  summarise(n = n()) %&gt;% 
   ggplot(aes(x = year, y = n, fill = vic_sex)) + 
   geom_bar(width = 0.8, stat = &quot;identity&quot;) +
   labs(x = &quot;Year&quot;,
        y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident Trend By Victim’s Sex&quot;)
-
-
-vic_sex_plot</code></pre>
+       title = &quot;Shooting Incident Trend By Victim’s Sex&quot;)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;year&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>vic_sex_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-</div>
-<div id="total-shooting-incident-by-victims-race" class="section level3">
-<h3>2010-2020 total shooting incident by victim’s race</h3>
-<pre class="r"><code>vic_race_plot = 
-  data_hist %&gt;% 
-  filter(year &gt;= 2010,
-        vic_race != &quot;unknown&quot;) %&gt;% 
-  group_by(vic_race) %&gt;%
-  mutate(n = n()) %&gt;% 
-  ggplot(aes(x = year, y = n,fill = vic_race)) + 
-  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
-
-  labs(x = &quot;Year&quot;,
-       y = &quot;Total incident&quot;,
-       title = &quot;Shooting Incident Trend By Victim’s Race&quot;
-       )
-
-vic_race_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /> the majority of victim are <strong>black</strong>. In 2010, 2011 and 2014, white people are the second highest number of victim. the rest of years, white hispanic are the second most in victim</p>
 </div>
 <div id="totalshooting-incident-by-victims-age-group" class="section level3">
 <h3>2010-2020 totalshooting incident by victim’s age group</h3>
@@ -450,7 +431,7 @@ vic_race_plot</code></pre>
          vic_age_group != &quot;UNKNOWN&quot;
          ) %&gt;% 
   group_by(vic_age_group, boro) %&gt;%
-  mutate(n = n()) %&gt;% 
+  summarise(n = n()) %&gt;% 
 
   ggplot(aes(x = boro, y = n, fill = vic_age_group)) + 
   geom_bar(width = 0.8, stat = &quot;identity&quot;)+
@@ -458,15 +439,16 @@ vic_race_plot</code></pre>
   labs(x = &quot;Year&quot;,
        y = &quot;Total incident&quot;,
        title = &quot;Shooting Incident Trend By Victim’s age&quot;
-       )
-vic_age_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /> victims age group, 2010-2015 age 18-25 are the major victim but less in 2016-2018</p>
+       )</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;vic_age_group&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>vic_age_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /> victims age group, 2010-2015 age 18-25 are the major victim but less in 2016-2018</p>
 <p>##2010-2020 total shooting incident by boro</p>
 <pre class="r"><code>boro_plot = 
   data_hist %&gt;% 
   filter(year &gt;= 2010) %&gt;% 
   group_by(boro) %&gt;%
-  mutate(n = n()) %&gt;% 
+  summarise(n = n()) %&gt;% 
   ggplot(aes(x = boro, group = n)) + 
   geom_bar(position = &quot;dodge&quot;) +
   labs(x = &quot;Borough&quot;,
@@ -475,7 +457,7 @@ vic_age_plot</code></pre>
        )
 
 boro_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by jurisdiction_code</p>
 <pre class="r"><code>jurisdiction_code_plot=
   data_hist %&gt;%
@@ -483,17 +465,16 @@ boro_plot</code></pre>
          vic_age_group != &quot;NA&quot;,
          vic_age_group != &quot;UNKNOWN&quot;) %&gt;% 
   group_by(jurisdiction_code, vic_age_group) %&gt;%
-  mutate(n = n()) %&gt;% 
+  summarise(n = n()) %&gt;% 
   ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) + 
   geom_bar(width = 0.8, stat = &quot;identity&quot;) +
   labs(x = &quot;Age group of victims&quot;,
        y = &quot;Total incident&quot;,
        title = &quot;Shooting Incident By Location Of The Incident&quot;
-       )
-
-  
-jurisdiction_code_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+       )</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;jurisdiction_code&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>jurisdiction_code_plot</code></pre>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <p>##2010-2020 total shooting incident by hour in a day</p>
 <pre class="r"><code>incident_by_hour =
   data_hist %&gt;%
@@ -509,7 +490,7 @@ jurisdiction_code_plot</code></pre>
        )
   
 incident_by_hour</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <p>Most shooting incident happened at <strong>patrol</strong>, then is house.</p>
 <p><strong>brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incident since it dose not have much population</p>
 <pre class="r"><code>education_plot = 
@@ -522,7 +503,7 @@ incident_by_hour</code></pre>
     y = &quot;Percent&quot;) 
 
 education_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 <p>overall, all borough show increase. in 2015, brooklyn that has most shooting incident boro has a notability increase slope.</p>
 </div>
 </div>
