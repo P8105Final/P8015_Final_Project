@@ -47,6 +47,10 @@ We downloaded the monthly unemployment rate in New York City from January ,2010 
 
 We downloaded a cleaned data set on population in each police precinct data from this [website](https://johnkeefe.net/nyc-police-precinct-and-census-data). It's source is the [U.S Census Bureau](https://data.census.gov/cedsci/). 
 
+4. NYC Population by age group
+We downloaded a clean data set on population in each age group from this
+[Projected Population 2010-2040 - Total By Age Groups](https://data.cityofnewyork.us/City-Government/Projected-Population-2010-2040-Total-By-Age-Groups/97pn-acdf)
+
 ## Data Cleaning and Tidying
 
 1. Shooting Incident Data
@@ -81,7 +85,7 @@ write.csv(data_hist, ".\\data\\NYPD_Shooting_Incident_Data_Clean.csv", row.names
 
 2. Unemployment Rate Data
 
-We initially found data from the [Nee York State Department of Labor](https://dol.ny.gov/labor-statistics-new-york-city-region) and cleaned it for a resulting data set. However, this set only contains data from 2015 to 2020. 
+We initially found data from the [New York State Department of Labor](https://dol.ny.gov/labor-statistics-new-york-city-region) and cleaned it for a resulting data set. However, this set only contains data from 2015 to 2020. 
 
 ```{r eval=FALSE}
 library(readxl)
@@ -132,6 +136,21 @@ percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
   rename("total_pop" = "P0010001")
 ```
 
+4. Population by age group
+
+The data set [Projected Population 2010-2040 - Total By Age Groups](https://data.cityofnewyork.us/City-Government/Projected-Population-2010-2040-Total-By-Age-Groups/97pn-acdf) is already cleaned , but the age group interval are smaller than we used in analysis. Therefore, we add the population group from this data set together to fit the larger age group interval in our analysis.
+
+```{r eval=FALSE}
+age_census = read.csv("data/population_nyc.csv")%>%
+  janitor::clean_names()%>%
+  filter(borough == "NYC Total")%>%
+  select(borough, age, x2010)
+
+age_clean_census = data.frame("age_group"= c("0-18","19-24","25-44","45-64","65+"), "population" = c(age_census$x2010[1]+age_census$x2010[2], age_census$x2010[3],age_census$x2010[4]+age_census$x2010[5]+age_census$x2010[6]+age_census$x2010[7],age_census$x2010[8]+age_census$x2010[9]+age_census$x2010[10]+age_census$x2010[11],age_census$x2010[12]+age_census$x2010[13]+age_census$x2010[14]+age_census$x2010[15]+age_census$x2010[16]))%>%
+  mutate(population = as.integer(population))
+
+
+```
 
 ## Data description
 
@@ -153,5 +172,5 @@ The cleaned resulting data set contains 23,585 incidents and 22 variables. Some 
   
 **Other Data**
 
-We used the `unemployment rate` and `police precint` data to further explore and analyze the findings that we obtained from our main `shooting incident` data. They are used in both the descriptive and statistical analysis in our project. `unemployment rate` has the monthly unemployment rate of NYC from 2010 to 2020.`police precinct` has the total population of each police precinct in NYC. 
+We used the `unemployment rate` , `population by age group` and `police precint` data to further explore and analyze the findings that we obtained from our main `shooting incident` data. They are used in both the descriptive and statistical analysis in our project. `unemployment rate` has the monthly unemployment rate of NYC from 2010 to 2020.`police precinct` has the total population of each police precinct in NYC. 
   
