@@ -211,7 +211,7 @@ From both Pre-COVID and COVID time, the shooting are most centered at night, esp
 
 From the the visualization in the section of descriptive, we see that age group 18-24 and age group 25-44 have the highest shooting incidences. However, more statistical analysis are required to indicate if the age group 18-24 and group 25-44 are more dangerous or those two groups have larger proportion in the population.
 
-```{r echo = FALSE, message=FALSE}
+```{r}
 age_census = read.csv("data/population_nyc.csv")%>%
   janitor::clean_names()%>%
   filter(borough == "NYC Total")%>%
@@ -221,7 +221,7 @@ age_census = read.csv("data/population_nyc.csv")%>%
 
 This is new york census data in 2010 for each age group from NYC open data which was used as population reference.
 
-```{r echo = FALSE, message=FALSE}
+```{r}
 age_clean_census = data.frame("age_group"= c("0-18","19-24","25-44","45-64","65+"), "population" = c(age_census$x2010[1]+age_census$x2010[2], age_census$x2010[3],age_census$x2010[4]+age_census$x2010[5]+age_census$x2010[6]+age_census$x2010[7],age_census$x2010[8]+age_census$x2010[9]+age_census$x2010[10]+age_census$x2010[11],age_census$x2010[12]+age_census$x2010[13]+age_census$x2010[14]+age_census$x2010[15]+age_census$x2010[16]))%>%
   mutate(population = as.integer(population))
 
@@ -230,7 +230,7 @@ age_clean_census = data.frame("age_group"= c("0-18","19-24","25-44","45-64","65+
 
 
 
-```{r echo = FALSE, include= FALSE}
+```{r }
 vic_age_data = 
   data_hist %>% 
   filter(year >= 2006,
@@ -240,7 +240,7 @@ vic_age_data =
   group_by(vic_age_group) %>%
   summarise(incident_case = n()) %>%
   mutate(
-    prop = incident_case/ (age_clean_census$population *100000/15)) %>%
+    prop = (incident_case/age_clean_census$population * 1000000 )/15) %>%
   
   ggplot(aes(vic_age_group, y = prop))  + geom_col() +
   labs(x = "Victim age group",
