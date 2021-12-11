@@ -115,18 +115,27 @@ data_unem = read_csv("data/unemployment/unemployed_complete.csv") %>% select(-..
 
 data_ana = left_join(data,data_unem, by = c("year")) %>% mutate(m = m*100)
 
+unemployment = "sienna2"
+total_incident = "steelblue2"
+
 data_ana %>% 
   ggplot() +
-  geom_line(mapping = aes(x = year,y = n_obs))+
-  geom_line(mapping = aes(x = year,y = m*200), color = "blue")+
+  geom_line(mapping = aes(x = year,y = n_obs), color = "steelblue2")+
+  geom_line(mapping = aes(x = year,y = m*200), color = "sienna2")+
+  scale_x_continuous(limits = c(2010, 2020), breaks = seq(2010, 2020, by = 1))+
   scale_y_continuous(
-    
-    # Features of the first axis
-    name = "total_incident",
-    
+    # First axis
+    name = "Total Number of Incidents",
     # Add a second axis and specify its features
-    sec.axis = sec_axis(trans = ~ ./200,name="unemployment_rate")
+    sec.axis = sec_axis(trans = ~ ./200,name = "Unemployment Rate (%)")
+  ) +
+  geom_text(x = 2013, y = 1000, label = "Unemployment Rate (%)", color = "sienna2") + 
+geom_text(x = 2016, y = 1500, label = "Total Incident", color = "steelblue2")+
+  theme(
+    axis.title.y = element_text(color = "steelblue2"),
+    axis.title.y.right = element_text(color = "sienna2")
   )
+
 ```
 
 ```{r}
@@ -149,6 +158,73 @@ data_hm
 ```
 
 ```{r}
-
+nyc =
+  parking %>%
+  drop_na(long, lat) %>%
+  summarise(
+    lon_max = max(long),
+    lon_min = min(long),
+    lat_max = max(lat),
+    lat_min = min(lat)
+  )
+nyc =
+  ggmap::get_map(location = c(
+    right = pull(nyc, lon_max),
+    left = pull(nyc, lon_min),
+    top = pull(nyc, lat_max),
+    bottom = pull(nyc, lat_min)
+  ))
+set.seed(100)
+read_csv(here::here("data/parking_vio2021_cleanv1.csv")) %>%
+  drop_na(address) %>% 
+  filter(hour != 12.3) %>%
+  filter(hour <= 24) %>%
+  drop_na(borough,lat,long,hour) %>% 
+  sample_n(1e+5) %>% 
+  mutate(text_label = str_c("borough:", borough, ",address:", address)) %>% 
+  plot_ly()  %>% 
+    add_markers(
+    y = ~ lat,
+    x = ~ long,
+    text = ~ text_label,
+    alpha = 0.02,
+    frame = ~ hour,
+    mode = "marker",
+    color = ~borough,
+    colors = viridis::viridis(4,option = "C")
+  ) %>%
+  layout(
+    images = list(
+      source = raster2uri(nyc),
+      xref = "x",
+      yref = "y",
+      y = 40.5,
+      x = -74.28	,
+      sizey = 0.4,
+      sizex = 0.58,
+      sizing = "stretch",
+      xanchor = "left",
+      yanchor = "bottom",
+      opacity = 0.4,
+      layer = "below"
+    )
+  )%>%
+  animation_opts(transition = 0,frame = 24)
 ```
 
+# Education
+```{r}
+education_plot = 
+  educational %>%
+  ggplot(aes(x = year, y = percent, color = boro)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
+  geom_line() +
+  labs(
+    title = "Education", 
+    x =  "Year",
+    y = "Percentage of adults with high school education or higher") 
+
+education_plot
+```
+
+ 
+This plot shows the percentage change in each borough over the year that every person over 18 with high school education or above. All borough have the upward trend in last 10 years. However, brooklyn the one with most shooting incident borough has a notability increase slope in 2015, which matched our forecast about the association with age group and education. We conclude that when education increase, the shooting incident decrease.
