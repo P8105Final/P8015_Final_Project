@@ -74,7 +74,7 @@ Now, let's take a closer look on more details about the victims.
 # Victim
 ## Race
 
-```{r echo = FALSE, message= FALSE}
+```{r echo = FALSE, message=FALSE}
 vic_race_plot = 
   data_hist %>%
   filter(year >= 2006,
