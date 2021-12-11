@@ -27,6 +27,9 @@ Some of the other related work that inspired us includes:
 
 * The app [Citizen](https://citizen.com/), which provides instant notifications of nearby crimes and incidents to its user, also inspired us. Although we are not able to create features like Citizen, we can explore the risk factors associated with shooting incidents. For example, we can find the locations, times, and other factors that are usually related to high chance of shooting incidents. Those information can be used to alert us and live more safely. 
 
+* Another motivation that prompts us to look at the life-threatening crimes and arises safety awareness is the recent tragic of [Davide Giri](https://www.nytimes.com/2021/12/03/nyregion/columbia-student-stabbed.html). The graduate student, Davide Giri, from our Columbia University was killed near Manhattan campus last Thursday night. Send our deepest condolences to Davide’s family.
+
+
 ## Research Questions
 Initially, we wanted to compile data on the shooting incident in NYC from 2006-2010, and mark them on the map. Then based on the data, we try to find patterns of shooting incidents by year, sex, age, gender, location, hour of day. We hoped by understanding these to better protect ourselves.
 
@@ -40,8 +43,8 @@ Initially, we wanted to compile data on the shooting incident in NYC from 2006-2
 **New Questions**:  
 
 1.. Is there a relationship between unemployment rate and the incline of shooting incidents in 2020？  
-2. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough？
-2. Can we predict future New York shooting occurrences by construct time series analysis model？
+2. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough？  
+3. Can we predict future New York shooting occurrences by construct time series analysis model？
 
 ## Data  
 
