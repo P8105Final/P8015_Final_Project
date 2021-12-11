@@ -1,12 +1,10 @@
 ---
 title: "Modeling Poisson Analysis"
-author: "tianwei zhao"
-date: "12/9/2021"
 output: github_document
 ---
 
 
-```{r}
+```{r include=FALSE, echo = FALSE}
 library(tidyverse)
 library(dplyr)
 ```
@@ -24,7 +22,7 @@ To accomplish this, I filtered the tidy data to create one dataset for male vict
 
 tidy functions to filter either male or female victims.
 
-```{r}
+```{r echo = FALSE, message=FALSE}
 mydata = read.csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>% 
 mutate(
     statistical_murder_flag = as.character(statistical_murder_flag),
@@ -51,7 +49,7 @@ month_df=
 
 ### For male victims in differnent boro death rate
 
-```{r}
+```{r echo = FALSE, message=FALSE}
 male_data = male_based %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
@@ -73,7 +71,7 @@ male_data = male_based %>%
 
 ```
 
-```{r}
+```{r echo = FALSE, message=FALSE}
 male_data %>% 
   filter(term != "(Intercept)") %>%
   mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
@@ -102,7 +100,7 @@ Based on the figure above, no majot discernable pattern was covered, suggesting 
 
 ### For female victims in differnent boro death rate
 
-```{r}
+```{r echo = FALSE, message=FALSE, warning=FALSE}
 female_data = female_based %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
@@ -123,7 +121,7 @@ female_data = female_based %>%
 ```
 
 
-```{r}
+```{r echo = FALSE, message=FALSE, warning=FALSE}
 female_data %>% 
   filter(term != "(Intercept)") %>%
   mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
@@ -156,7 +154,7 @@ In conclusion, there was no major evidence that rates of death per gunshoot diff
 
 ### assorted version 
 
-```{r}
+```{r echo = FALSE, message=FALSE}
 my_data = mydata %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
@@ -178,7 +176,7 @@ my_data = mydata %>%
 
 
 
-```{r}
+```{r echo = FALSE, message=FALSE}
 my_data %>% 
   filter(term != "(Intercept)") %>%
   mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%

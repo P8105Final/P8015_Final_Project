@@ -28,19 +28,22 @@ Some of the other related work that inspired us includes:
 ## Research Questions
 Initially, we wanted to compile data on the shooting incident in NYC from 2006-2010, and mark them on the map. Then based on the data, we try to find patterns of shooting incidents by year, sex, age, gender, location, hour of day. We hoped by understanding these to better protect ourselves.
 
-**Initial Questions**:   
+**Initial Questions**:  
+
 1. Which borough is most dangerous?  
 2. Where do the shooting most happens?  
 3. When do most of the shooting happens?  
 4. Which age group of people is the most dangerous? 
 
 **New Questions**:  
+
 1. Is there a relationship between education and the decline in crime rate among 18-24 age group after 2015？  
 2. Is there a relationship between unemployment rate and the incline of shooting incidents in 2020？   
 3. Can we predict future New York shooting occurrences by construct time series analysis model
+4. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough
 
 
-## Data
+## Data  
 
 ## Analysis
 
