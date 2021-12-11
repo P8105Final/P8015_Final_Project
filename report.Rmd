@@ -27,6 +27,8 @@ Some of the other related work that inspired us includes:
 
 * The app [Citizen](https://citizen.com/), which provides instant notifications of nearby crimes and incidents to its user, also inspired us. Although we are not able to create features like Citizen, we can explore the risk factors associated with shooting incidents. For example, we can find the locations, times, and other factors that are usually related to high chance of shooting incidents. Those information can be used to alert us and live more safely. 
 
+* The tragic [news](https://www.nytimes.com/2021/12/03/nyregion/columbia-student-stabbed.html) that a graduate student, Davide Giri, from our Columbia University was killed near campus last Thursday. While we feel sad for him and his family, it also raises our awareness about security.
+
 ## Research Questions
 Initially, we wanted to compile data on the shooting incident in NYC from 2006-2010, and mark them on the map. Then based on the data, we try to find patterns of shooting incidents by year, sex, age, gender, location, hour of day. We hoped by understanding these to better protect ourselves.
 
