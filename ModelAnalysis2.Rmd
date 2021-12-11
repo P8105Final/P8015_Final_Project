@@ -211,4 +211,45 @@ From both Pre-COVID and COVID time, the shooting are most centered at night, esp
 
 From the the visualization in the section of descriptive, we see that age group 18-24 and age group 25-44 have the highest shooting incidences. However, more statistical analysis are required to indicate if the age group 18-24 and group 25-44 are more dangerous or those two groups have larger proportion in the population.
 
+```{r echo = FALSE, message=FALSE}
+age_census = read.csv("data/population_nyc.csv")%>%
+  janitor::clean_names()%>%
+  filter(borough == "NYC Total")%>%
+  select(borough, age, x2010)
+ 
+```
+
+This is new york census data in 2010 for each age group from NYC open data which was used as population reference.
+
+```{r echo = FALSE, message=FALSE}
+age_clean_census = data.frame("age_group"= c("0-18","19-24","25-44","45-64","65+"), "population" = c(age_census$x2010[1]+age_census$x2010[2], age_census$x2010[3],age_census$x2010[4]+age_census$x2010[5]+age_census$x2010[6]+age_census$x2010[7],age_census$x2010[8]+age_census$x2010[9]+age_census$x2010[10]+age_census$x2010[11],age_census$x2010[12]+age_census$x2010[13]+age_census$x2010[14]+age_census$x2010[15]+age_census$x2010[16]))%>%
+  mutate(population = as.integer(population))
+
+
+```
+
+
+
+```{r echo = FALSE, message=FALSE}
+vic_age_data = 
+  data_hist %>% 
+  filter(year >= 2006,
+         vic_age_group != "NA",
+         vic_age_group != "UNKNOWN"
+         ) %>% 
+  group_by(vic_age_group) %>%
+  summarise(incident_case = n()) %>%
+  mutate(
+    prop = incident_case/ (age_clean_census$population *100000/15)) %>%
+  
+  ggplot(aes(vic_age_group, y = prop))  + geom_col() +
+  labs(x = "Victim age group",
+       y = "Incident rate  per 100,000 people",
+       title = "Incident rate per 100,000 people vs Victim age group"
+       )
+
+vic_age_data
+```
+
+The age group 18-24 have the highest incidents rate which 92.7 shooting incidents per 100,000 persons a year from 2006 to 2020 in New york city. The age 65+ have the lowest incidents rate which 1.02 shooting incidents per 100,000 persons a year from 2006 to 2020 in New york city. The age group least than 18 , 25-44, 45-64 have incidents rate of  15.9, 26.7, 5.10 shooting incidents per 100,000 persons a year from 2006 to 2020 in New york city. This statistical analysis indicates that age 18-24 is the most dangerous group in nyc.
 
