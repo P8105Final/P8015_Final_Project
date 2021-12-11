@@ -215,7 +215,7 @@ From the the visualization in the section of descriptive, we see that age group 
 age_census = read.csv("data/population_nyc.csv")%>%
   janitor::clean_names()%>%
   filter(borough == "NYC Total")%>%
-  select(borough, age, x2010)
+  dplyr::select(borough, age, x2010)
  
 ```
 

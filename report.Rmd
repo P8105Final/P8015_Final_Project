@@ -144,7 +144,7 @@ unemployed_complete= read_csv("data/unemployment/NYUR.csv") %>%
   separate(date, into = c("year", "month", "date"), sep = "-") %>% 
   rename("unemployment_rate" = "nyur") %>% 
   mutate(unemployment_rate = round(unemployment_rate/100,3)) %>% 
-  select(-date)
+  dplyr::select(-date)
 
 write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
 ```
@@ -155,7 +155,7 @@ Since the data set is already cleaned when we found it, we didn't have to do muc
 
 ```{r eval=FALSE}
 percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
-  select(precinct_2020, P0010001) %>% 
+  dplyr::select(precinct_2020, P0010001) %>% 
   rename("total_pop" = "P0010001")
 ```
 
@@ -167,7 +167,7 @@ The data set [Projected Population 2010-2040 - Total By Age Groups](https://data
 age_census = read.csv("data/population_nyc.csv")%>%
   janitor::clean_names()%>%
   filter(borough == "NYC Total")%>%
-  select(borough, age, x2010)
+  dplyr::select(borough, age, x2010)
 
 age_clean_census = data.frame("age_group"= c("0-18","19-24","25-44","45-64","65+"), "population" = c(age_census$x2010[1]+age_census$x2010[2], age_census$x2010[3],age_census$x2010[4]+age_census$x2010[5]+age_census$x2010[6]+age_census$x2010[7],age_census$x2010[8]+age_census$x2010[9]+age_census$x2010[10]+age_census$x2010[11],age_census$x2010[12]+age_census$x2010[13]+age_census$x2010[14]+age_census$x2010[15]+age_census$x2010[16]))%>%
   mutate(population = as.integer(population))
@@ -402,7 +402,7 @@ data = read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
   summarise(n_obs = n())
 
 data_unem = read_csv("data/unemployment/unemployed_complete.csv")%>% 
-  select(-...1) %>% 
+  dplyr::select(-...1) %>% 
   group_by(year) %>% 
   summarise(mean_rate = mean(unemployment_rate))
 
@@ -632,7 +632,7 @@ From the the visualization in the section of descriptive, we see that age group 
 age_census = read.csv("data/population_nyc.csv")%>%
   janitor::clean_names()%>%
   filter(borough == "NYC Total")%>%
-  select(borough, age, x2010)
+  dplyr::select(borough, age, x2010)
  
 ```
 

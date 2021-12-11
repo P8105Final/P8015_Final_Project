@@ -41,14 +41,6 @@ data_hist =
 ```
 
 
-
-```{r, include=FALSE}
-educational = read_csv("data/education/educational_attainment.csv") 
-
-unemployment <- read_csv("data/unemployment/unemployed_complete.csv")
-```
- 
-
 # Overall glance
 
 At the very beginning, let's have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from **2006 to 2020** in New York City.
