@@ -18,3 +18,8 @@ So, for this project, we are motivated to explore the shooting incidents in NYC,
 
 ## Screencast
 
+
+<iframe 
+width="840" height="472.5"
+src="https://www.youtube.com/embed/8pWuVAJHhyI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
