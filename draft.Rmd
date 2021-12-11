@@ -105,3 +105,50 @@ data_hist %>%
   geom_point()
 ```
 
+```{r}
+data = read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>% 
+  filter(year >= 2010) %>% 
+  group_by(year) %>% 
+  summarise(n_obs = n())
+
+data_unem = read_csv("data/unemployment/unemployed_complete.csv") %>% select(-...1) %>% group_by(year) %>% summarise(m=mean(unemployment_rate))
+
+data_ana = left_join(data,data_unem, by = c("year")) %>% mutate(m = m*100)
+
+data_ana %>% 
+  ggplot() +
+  geom_line(mapping = aes(x = year,y = n_obs))+
+  geom_line(mapping = aes(x = year,y = m*200), color = "blue")+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "total_incident",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans = ~ ./200,name="unemployment_rate")
+  )
+```
+
+```{r}
+data_hm = read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>% 
+  filter(year == 2020) %>%
+  plot_ly(
+    lon = ~longitude, 
+    lat = ~latitude,  
+    type = 'densitymapbox',
+    radius = 3) %>% 
+  layout(
+    mapbox = 
+      list(
+        style = 'open-street-map',
+        zoom = 9,
+        center = list(lat = 40.71, lon = -73.97)),
+      title = "Density Heatmap of Shooting Incident in 2020")
+data_hm
+
+```
+
+```{r}
+
+```
+

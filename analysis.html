@@ -13,8 +13,8 @@
 
 <title>Descriptive Analysis</title>
 
-<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -535,34 +535,42 @@ incident_by_hour</code></pre>
        )
 perp_age_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
-<p>From the plot we can see same situation happened and more obvious. From 2006-2014, majority perpetrator are from age group 18-24 in the shooting incident. But since 2015, the amount of group 18-24 perpetrator have been decreasing rapidly. we infer that both of the perpetrators and victims might be influenced by the education level. Therefore, we visualize educational plot to verify our deduction. The association between the educational level and perpetrator’s age group and victim’s age is required more analysis.</p>
-</div>
-</div>
-<div id="education" class="section level1">
-<h1>Education</h1>
-<pre class="r"><code>education_plot = 
-  educational %&gt;%
-  ggplot(aes(x = year, y = percent, color = boro)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
-  geom_line() +
-  labs(
-    title = &quot;Education&quot;, 
-    x =  &quot;Year&quot;,
-    y = &quot;Percent&quot;) 
+<p>From the plot we observed an interesting trend that we explored further. From 2006-2014, majority perpetrator are from age group 18-24 in the shooting incident. However, since 2015, the amount of group 18-24 perpetrator have been decreasing rapidly. We hypothesized that this decrease might be related to factors such as employment, which closely relates to this age group. That is, maybe people aged from 18-24 are having better chance of getting employed after 2015, which potentially stables the society and decreases shooting incident rates.</p>
+<p>To explore our hypothesis, we acquired unemployment rate data from 2010 to 2020 and mapped it with the total incidents conducted by perpetrators, in age group 18-24, in this time interval.</p>
+<pre class="r"><code>data = read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;% 
+  filter(year &gt;= 2010, perp_age_group == &quot;18-24&quot;) %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(n_obs = n())
 
-education_plot</code></pre>
+data_unem = read_csv(&quot;data/unemployment/unemployed_complete.csv&quot;)%&gt;% 
+  select(-...1) %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(mean_rate = mean(unemployment_rate))
+
+data_ana = left_join(data,data_unem, by = c(&quot;year&quot;)) %&gt;% 
+  mutate(mean_rate = mean_rate*100)
+
+data_ana %&gt;% 
+  ggplot() +
+  geom_line(mapping = aes(x = year,y = n_obs), color = &quot;steelblue2&quot;)+
+  geom_line(mapping = aes(x = year,y = mean_rate*50), color = &quot;sienna2&quot;)+
+  scale_x_continuous(limits = c(2010, 2020), breaks = seq(2010, 2020, by = 1))+
+  scale_y_continuous(
+    # First axis
+    name = &quot;Total Number of Incidents&quot;,
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans = ~ ./50,name = &quot;Unemployment Rate (%)&quot;)
+  ) +
+  geom_text(x = 2012, y = 275, label = &quot;Unemployment Rate (%)&quot;, color = &quot;sienna2&quot;) + 
+geom_text(x = 2017, y = 325, label = &quot;Total Incident&quot;, color = &quot;steelblue2&quot;)+
+  theme(
+    axis.title.y = element_text(color = &quot;steelblue2&quot;),
+    axis.title.y.right = element_text(color = &quot;sienna2&quot;)
+  ) + 
+  labs(title = &quot;Unemployment Rate vs. Total incident by perpetrators aged 18-24&quot;)</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
-<p>This plot shows the percentage change in each borough over the year that every person over 18 with high school education or above. All borough have the upward trend in last 10 years. However, brooklyn the one with most shooting incident borough has a notability increase slope in 2015, which matched our forecast about the association with age group and education. We conclude that when education increase, the shooting incident decrease.</p>
+<p>In the plot, the blue line represent the total incident conducted by perpetrator in the age group 18-24 throughout each year. The orange line represent the unemployment rate (in percentage), throughout the years. From the plot, we can see that generally the number of incidents decreases as unemployment rates decrease; and the number of incidents increase as unemployment rates increases as well. So, we can infer that there might be a correlation between the number of shooting incidents and unemployment rates during 2010 to 2020. However, although we can see that the total incident conducted by perpetrator aged 18-24 decreased rather rapidly after 2015, the slope of the unemployment rate is not as steep, or even not as steep as it was during 2012 to 2015. Therefore, unemployment rate is not the only factor that influenced the total incident by 18-24 years old perpetrators, our current hypothesis does not stand. Further research is required.</p>
 </div>
-<div id="unemployment" class="section level1">
-<h1>Unemployment</h1>
-<pre class="r"><code>unemployment_plot = 
-  unemployment %&gt;%
-  ggplot(aes(x = year, y = unemployment_rate)) +
-  geom_point() +
-  geom_smooth()
-unemployment_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
-<p>According to the plot, we can see the unemployment rate was decreasing from 2010 to 2019. There is an exaggerated increase in the unemployment rate in 2020, which matched our forecast about the association with total shooting incident and unemployment rate. We conclude that when unemployment increase, the shooting incident increase.</p>
 </div>
 
 
