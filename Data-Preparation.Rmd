@@ -48,6 +48,7 @@ We downloaded the monthly unemployment rate in New York City from January ,2010 
 We downloaded a cleaned data set on population in each police precinct data from this [website](https://johnkeefe.net/nyc-police-precinct-and-census-data). It's source is the [U.S Census Bureau](https://data.census.gov/cedsci/). 
 
 4. NYC Population by age group
+
 We downloaded a clean data set on population in each age group from this
 [Projected Population 2010-2040 - Total By Age Groups](https://data.cityofnewyork.us/City-Government/Projected-Population-2010-2040-Total-By-Age-Groups/97pn-acdf)
 
