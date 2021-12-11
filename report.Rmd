@@ -5,7 +5,49 @@ output:
     toc: true
     toc_float: true
 ---
-## Introduction
+## Motivation
+
+Living in NYC, we hear about all kinds of different crimes happening around us all the time. Out of those crimes, the shooting incidents concerns us the most because of its life-threatening nature. 
+So, for this project, we are motivated to explore the shooting incidents in NYC, analyze general trends and characteristics of those incidents, and find risk factors that are potentially associated with them. By doing so, we intend to find some information on how to keep our own safety and avoid risky times, areas, and other factors that are closely related to shooting incidents.We hope the audience of our website will learn useful information about the profiles of shooting incidents, be aware of them, and stay safe!
+
+**Project goals**
+
+1. Visualizing the distribution of the shooting incidents in NYC. 
+2. Understanding and analyzing the risk factors that are related to shooting incidents.
+3. Discussing the correlation between risk factors and shooting incidents to analyze the measure we can take to keep our own safety.
+4. Building a model to predict the number of shooting incidents.
+
+## Related Work
+
+Some of the other related work that inspired us includes:
+
+* The [news article from NY Daily News](https://www.nydailynews.com/new-york/nyc-crime/ny-nypd-closes-book-on-2020-20210101-hbaknpnvxfflvj432oum6s3ewe-story.html), stating that "New York City endured a soul-crushing crime surge in 2020 — a 97% jump in shootings and a 45% surge in murders." The statistics in this article is shocking and makes the shootings in NYC seems a pressing concern, which motivates us to explore the topic ourselves. 
+
+* The app [Citizen](https://citizen.com/), which provides instant notifications of nearby crimes and incidents to its user, also inspired us. Although we are not able to create features like Citizen, we can explore the risk factors associated with shooting incidents. For example, we can find the locations, times, and other factors that are usually related to high chance of shooting incidents. Those information can be used to alert us and live more safely. 
+
+## Research Questions
+Initially, we wanted to compile data on the shooting incident in NYC from 2006-2010, and mark them on the map. Then based on the data, we try to find patterns of shooting incidents by year, sex, age, gender, location, hour of day. We hoped by understanding these to better protect ourselves.
+
+**Initial Questions**:  
+
+1. Which borough is most dangerous?  
+2. Where do the shooting most happens?  
+3. When do most of the shooting happens?  
+4. Which age group of people is the most dangerous? 
+
+**New Questions**:  
+
+1. Is there a relationship between education and the decline in crime rate among 18-24 age group after 2015？  
+2. Is there a relationship between unemployment rate and the incline of shooting incidents in 2020？   
+3. Can we predict future New York shooting occurrences by construct time series analysis model
+4. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough
+
+
+## Data  
+
+## Analysis
+
+## Discussion
 
 **report的要求**
 

@@ -1,28 +1,31 @@
----
-title: "Modeling Poisson Analysis"
-output: github_document
----
+Modeling\_Poisson\_Analysis
+================
+tianwei zhao
+12/9/2021
 
-
-```{r include=FALSE, echo = FALSE}
+``` r
 library(tidyverse)
 library(dplyr)
 ```
 
-
-
 ## Goal
 
-My goal was to compare the rate of death in a gunshoot in recent years,such as 2019 to the same month in 2020 (e.g., rate of death in January 2019 v. rate of death in January 2020).Additionally,I stratified these rate ratio estimates by borough.
+My goal was to compare the rate of death in a gunshoot in recent
+years,such as 2019 to the same month in 2020 (e.g., rate of death in
+January 2019 v. rate of death in January 2020).Additionally,I stratified
+these rate ratio estimates by borough.
 
-
-To accomplish this, I filtered the tidy data to create one dataset for male victims and one for female victims.I created nested datasets by month, and, in each of these datasets, I mapped Poisson models to extract rate ratio estimates for number of death in each borough. Finally, I unnessted these models to extract the desired coefficients: rate ratios and standard errors (used to compute 95% confidence intervals).
-
-
+To accomplish this, I filtered the tidy data to create one dataset for
+male victims and one for female victims.I created nested datasets by
+month, and, in each of these datasets, I mapped Poisson models to
+extract rate ratio estimates for number of death in each borough.
+Finally, I unnessted these models to extract the desired coefficients:
+rate ratios and standard errors (used to compute 95% confidence
+intervals).
 
 tidy functions to filter either male or female victims.
 
-```{r}
+``` r
 mydata = read.csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>% 
 mutate(
     statistical_murder_flag = as.character(statistical_murder_flag),
@@ -42,14 +45,11 @@ month_df=
     month = 1:12,
     month_name = factor(month.name, ordered = TRUE, levels = month.name)
   )
-
-
 ```
-
 
 ### For male victims in differnent boro death rate
 
-```{r}
+``` r
 male_data = male_based %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
@@ -67,11 +67,9 @@ male_data = male_based %>%
   dplyr::select(-month) %>%
   rename(month = month_name) %>%
   dplyr::select(month, everything())
-
-
 ```
 
-```{r}
+``` r
 male_data %>% 
   filter(term != "(Intercept)") %>%
   mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
@@ -91,16 +89,18 @@ male_data %>%
         text = element_text(size = 9),
         axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
   facet_grid(. ~ term)
-
 ```
 
+![](Modeling_Poisson_Analysis_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-Based on the figure above, no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in male victims. In part, this could be due to very wide confidence intervals.
-
+Based on the figure above, no majot discernable pattern was covered,
+suggesting that rates of death per gunshoot did not differ between 2019
+and 2020 in male victims. In part, this could be due to very wide
+confidence intervals.
 
 ### For female victims in differnent boro death rate
 
-```{r}
+``` r
 female_data = female_based %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
@@ -120,8 +120,7 @@ female_data = female_based %>%
   dplyr::select(month, everything())
 ```
 
-
-```{r warning=FALSE}
+``` r
 female_data %>% 
   filter(term != "(Intercept)") %>%
   mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
@@ -143,18 +142,23 @@ female_data %>%
   facet_grid(. ~ term)
 ```
 
-Based on the figure above, also no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in female victims. 
+    ## Warning: Removed 4 rows containing missing values (geom_point).
 
+![](Modeling_Poisson_Analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
+Based on the figure above, also no majot discernable pattern was
+covered, suggesting that rates of death per gunshoot did not differ
+between 2019 and 2020 in female victims.
 
 ## Summary
-In conclusion, there was no major evidence that rates of death per gunshoot differed between 2019 and 2020 for gunshoot that involved either male or female.
 
+In conclusion, there was no major evidence that rates of death per
+gunshoot differed between 2019 and 2020 for gunshoot that involved
+either male or female.
 
+### assorted version
 
-### assorted version 
-
-```{r}
+``` r
 my_data = mydata %>%
   filter(year %in% c(2019,2020)) %>%
   mutate(boro = str_to_title(boro)) %>%
@@ -174,9 +178,7 @@ my_data = mydata %>%
   dplyr::select(month, everything())
 ```
 
-
-
-```{r}
+``` r
 my_data %>% 
   filter(term != "(Intercept)") %>%
   mutate(term = str_replace(term, "2019 v. 2020, ", "")) %>%
@@ -198,6 +200,4 @@ my_data %>%
   facet_grid(. ~ term)
 ```
 
-
-
-
+![](Modeling_Poisson_Analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->

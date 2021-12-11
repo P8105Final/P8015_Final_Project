@@ -8,7 +8,11 @@ navbar:
     - text: "Descriptive Analysis"
       href: analysis.html
     - text: "Statistical Analysis"
-      href: ModelAnalysis2.html
+      menu:
+        - text: 'Kruskal-Wallis Analysis'
+          href: ModelAnalysis2.html
+        - text: 'Modeling Poisson Analysis'
+          href: Modeling_Poisson_Analysis.html 
     - text: "Regression Model"
       href: model.html
     - text: "Interactive Map"
@@ -22,3 +26,4 @@ navbar:
 output:
   html_document:
     theme: lumen
+    code_folding: hide
