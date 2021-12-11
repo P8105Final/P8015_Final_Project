@@ -42,13 +42,8 @@ This data set contains 23,575 shooting incidents that occurred during January 01
 
 We downloaded the monthly unemployment rate in New York City from January ,2010 to December, 2020 from FRED, [Federal Reserve Bank of St. Louis](https://fred.stlouisfed.org/series/NYUR). The original source of the data is [U.S. Bureau of Labor Statistics](https://www.bls.gov/sae/).
 
-3. Educational Attainment Data
 
-[Educational Attainment](https://data.census.gov/cedsci/table?q=Educational%20Attainment&g=0500000US36005,36047,36061,36081,36085&tid=ACSST1Y2019.S1501&moe=false&tp=false)
-
-The source of our educational attainment data is [U.S Census Bureau](https://data.census.gov/cedsci/). We searched for educational attainment and acquired our data from table S1501. In the table, we filtered data by year and location. Namely, we filtered the educational attainment information for the five boroughs in NYC from 2010 to 2020. 
-
-4. Population in each Police Precinct Data
+3. Population in each Police Precinct Data
 
 We downloaded a cleaned data set on population in each police precinct data from this [website](https://johnkeefe.net/nyc-police-precinct-and-census-data). It's source is the [U.S Census Bureau](https://data.census.gov/cedsci/). 
 
@@ -127,15 +122,7 @@ unemployed_complete= read_csv("data/unemployment/NYUR.csv") %>%
 write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
 ```
 
-3. Educational Attainment Data
- 
-We obtained our educational attainment data by searching for in the S1501 table of the U.S. census, setting the geography label to the five boroughs of NYC and the year filters from 2010 to 2020.
-
-```{r eval=FALSE}
-education_df = read_csv("data/education/educational_attainment.csv") %>% mutate(year = as.character(year)) %>% rename("edu" = "percent")
-```
-
-4. Population in each Police Precinct 
+3. Population in each Police Precinct 
 
 Since the data set is already cleaned when we found it, we didn't have to do much tidying. However, the columns were cryptic. Therefore, we followed the code listed in the a Census Bureau PDF starting on this [page](https://www.documentcloud.org/documents/87708-pl94-171-1.html#document/p64), to re-code the column that we need to `total_pop`, which gives us the total population for each police precinct. 
 
@@ -166,5 +153,5 @@ The cleaned resulting data set contains 23,585 incidents and 22 variables. Some 
   
 **Other Data**
 
-We used the `unemployment rate`, `educational attainment`, and `police precint` data to further explore and analyze the findings that we obtained from our main `shooting incident` data. They are used in both the descriptive and statistical analysis in our project. `unemployment rate` has the monthly unemployment rate of NYC from 2010 to 2020. `educational attainment` has the percentage of adults(aged 18 and above) who received high school or higher education in each borough.Finally,`police precinct` has the total population of each police precinct in NYC. 
+We used the `unemployment rate` and `police precint` data to further explore and analyze the findings that we obtained from our main `shooting incident` data. They are used in both the descriptive and statistical analysis in our project. `unemployment rate` has the monthly unemployment rate of NYC from 2010 to 2020.`police precinct` has the total population of each police precinct in NYC. 
   
