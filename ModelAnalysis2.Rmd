@@ -240,7 +240,7 @@ vic_age_data =
   group_by(vic_age_group) %>%
   summarise(incident_case = n()) %>%
   mutate(
-    prop = incident_case/ (age_clean_census$population *100000/15)) %>%
+    prop = (incident_case/age_clean_census$population * 1000000 )/15) %>%
   
   ggplot(aes(vic_age_group, y = prop))  + geom_col() +
   labs(x = "Victim age group",
