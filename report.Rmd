@@ -145,7 +145,7 @@ unemployed_complete= read_csv("data/unemployment/NYUR.csv") %>%
   separate(date, into = c("year", "month", "date"), sep = "-") %>% 
   rename("unemployment_rate" = "nyur") %>% 
   mutate(unemployment_rate = round(unemployment_rate/100,3)) %>% 
-  select(-date)
+  dplyr::select(-date)
 
 write.csv(unemployed_complete, "data/unemployment/unemployed_complete.csv")
 ```
@@ -156,7 +156,7 @@ Since the data set is already cleaned when we found it, we didn't have to do muc
 
 ```{r eval=FALSE}
 percinct_pop = read.csv("data/nyc_2010pop_2020precincts.csv") %>%
-  select(precinct_2020, P0010001) %>% 
+  dplyr::select(precinct_2020, P0010001) %>% 
   rename("total_pop" = "P0010001")
 ```
 
@@ -168,7 +168,7 @@ The data set [Projected Population 2010-2040 - Total By Age Groups](https://data
 age_census = read.csv("data/population_nyc.csv")%>%
   janitor::clean_names()%>%
   filter(borough == "NYC Total")%>%
-  select(borough, age, x2010)
+  dplyr::select(borough, age, x2010)
 
 age_clean_census = data.frame("age_group"= c("0-18","19-24","25-44","45-64","65+"), "population" = c(age_census$x2010[1]+age_census$x2010[2], age_census$x2010[3],age_census$x2010[4]+age_census$x2010[5]+age_census$x2010[6]+age_census$x2010[7],age_census$x2010[8]+age_census$x2010[9]+age_census$x2010[10]+age_census$x2010[11],age_census$x2010[12]+age_census$x2010[13]+age_census$x2010[14]+age_census$x2010[15]+age_census$x2010[16]))%>%
   mutate(population = as.integer(population))
@@ -403,7 +403,7 @@ data = read_csv("data/NYPD_Shooting_Incident_Data_Clean.csv") %>%
   summarise(n_obs = n())
 
 data_unem = read_csv("data/unemployment/unemployed_complete.csv")%>% 
-  select(-...1) %>% 
+  dplyr::select(-...1) %>% 
   group_by(year) %>% 
   summarise(mean_rate = mean(unemployment_rate))
 
@@ -633,7 +633,7 @@ From the the visualization in the section of descriptive, we see that age group 
 age_census = read.csv("data/population_nyc.csv")%>%
   janitor::clean_names()%>%
   filter(borough == "NYC Total")%>%
-  select(borough, age, x2010)
+  dplyr::select(borough, age, x2010)
  
 ```
 
@@ -1084,10 +1084,16 @@ We used `leaflet` in `shinyApp` to visualize the distribution of the shooting in
   For the section of descriptive analysis, we find numerous of trends that meet our interests.
 Murdered shooting incidents are much less than survived shooting incidents and have a steady amount across past 15 years. The total incidents decrease gradually but have a sudden increase in 2020 but we have no significant evidence that rates of death per gunshoot differed between 2019 and 2020 for gunshoot that involved either male or female under modeling poisson analysis.
 Black male are the major victims in nyc in past 15 years. The most dangerous hour in a day is from 10pm to 2 am which time periods might not have enough police power as the day time. Moreover, amygdala are more sensitive during the night time which leads to more emotional response including fear, anxiety and aggression. Shooting incidents across each borough have a lowest amount around 12pm and gradually increased in the afternoon.
+<<<<<<< HEAD
 
   For the section of statistical analysis,in the bar plot, we find that there are most shooting events in brooklyn, and second is bronx, where manhattan is only around forth of the shooting events in brooklyn. From the shooting events per thousand population bar chart, the highest is bronx and second is brooklyn, manhattan is significantly lower than those 2, so compared to those 2 boros, the manhattan district is relatively safer, that’s a good news for all students in our university. From the plot we also know that the shooting most happens in first 3 places are apartment and houses, and of the public area, the first 3 are grocery stor, bar / night club and commercial buildings. From both Pre-COVID and COVID time, the shooting are most centered at night, especially 23 PM - 4 AM. For the Pre-COVID time, most of the shootings are in the midnight of weekends, and for COVID, it seems to be more dispersed in nights.
   
   Then we use the time series plot and find the average shooting events is actually decreasing overtime, except the last year 2020, after COVID outbreak, there was a huge spike of occurrences. For the seasonality, there is a very significant seasonality that in winter there are less shootings and in summer there are more. Probably because winter people will not go out so much compared to summer. Also, we use SARIMA model to predict future New York shooting occurrences and find the result in 2019 is quite close to the real value, but in 2020, nearly all predicted value are smaller than the actual value, and in summer the actual value is much higher than the predicted ones.  Furthermore, I want to find different boros’ time series analysis and find more factors of shooting.
   
   Moreover, in the statistical analysis for age group the most dangerous people are within the age group from 18-24 which have a leading incidents rate than other's age group. Hoever, behavior factors need to be in consideration. For example, most of people are more aggressive and energetic in their 20s. There is larger proportion of young people to do the out-door activity which have more chance to encounter shooting incidents.
+=======
+  For the section of statistical analysis,in the bar plot, we find that there are most shooting events in Brooklyn, and second is Bronx, where Manhattan is only around forth of the shooting events in Brooklyn. From the shooting events per thousand population bar chart, the highest is Bronx and second is Brooklyn, Manhattan is significantly lower than those 2, so compared to those 2 boroughs, the Manhattan district is relatively safer, that’s a good news for all students in our university. From the plot we also know that the shooting most happens in first 3 places are apartment and houses, and of the public area, the first 3 are grocery store, bar / night club and commercial buildings. From both Pre-COVID and COVID time, the shooting are most centered at night, especially 23 PM - 4 AM. For the Pre-COVID time, most of the shootings are in the midnight of weekends, and for COVID, it seems to be more dispersed in nights.
+  Then we use the time series plot and find the average shooting events is actually decreasing overtime, except the last year 2020, after COVID outbreak, there was a huge spike of occurrences. For the seasonality, there is a very significant seasonality that in winter there are less shootings and in summer there are more. Probably because winter people will not go out so much compared to summer. Also, we use SARIMA model to predict future New York shooting occurrences and find the result in 2019 is quite close to the real value, but in 2020, nearly all predicted value are smaller than the actual value, and in summer the actual value is much higher than the predicted ones.  Furthermore, I want to find different boroughs’ time series analysis and find more factors of shooting.
+  Moreover, in the statistical analysis for age group the most dangerous people are within the age group from 18-24 which have a leading incidents rate than other age group. However, behavior factors need to be in consideration. For example, most of people are more aggressive and energetic in their 20s. There is larger proportion of young people to do the out-door activity which have more chance to encounter shooting incidents.
+>>>>>>> 14b5582890743061e0e0ff7bde84e7cd1a98a750
 

@@ -357,7 +357,7 @@ div.tocify {
   <a href="report.html">Report</a>
 </li>
 <li>
-  <a href="https://www.youtube.com/">
+  <a href="https://youtu.be/8pWuVAJHhyI">
     <span class="fa fa-youtube fa-lg"></span>
      
   </a>
@@ -407,7 +407,7 @@ div.tocify {
        )
 
 year_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
 <p>Murdered shooting incidents are much less than survived shooting incident. From 2006 to 2011, the survived shooting incidents were steadily fluctuate around 1500 and murdered shooting incidents were steadily fluctuate around 400.Both types of the shooting incidents were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it might be influenced by the outbreak of COVID-19 which led to a raise in unemployment and panic. We will do more statistical analysis on that later.</p>
 <p>Now, let’s take a closer look on more details about the victims.</p>
 </div>
@@ -428,7 +428,7 @@ year_plot</code></pre>
        title = &quot;Shooting Incident Trend By Victim’s Race&quot;)
        
 vic_race_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <p>The majority of victim are <strong>black</strong>. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most among all victim’s race.</p>
 </div>
 <div id="sex" class="section level2">
@@ -447,7 +447,7 @@ vic_race_plot</code></pre>
 
 
 vic_sex_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
 <p><strong>Male</strong> victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.</p>
 </div>
 <div id="age" class="section level2">
@@ -469,7 +469,7 @@ vic_sex_plot</code></pre>
        title = &quot;Shooting Incident Trend By victim&#39;s Age group&quot;
        )
 vic_age_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
 <p>The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65. From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.Then we want to see what happened in perpetrator later.</p>
 </div>
 <div id="place" class="section level2">
@@ -490,7 +490,7 @@ vic_age_plot</code></pre>
 
   
 jurisdiction_code_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <p>Most of the shooting incidents happened in the <strong>patrol</strong>, some of the shooting incidents in housing and only few cases were on transit.</p>
 </div>
 <div id="hour-in-a-day" class="section level2">
@@ -509,7 +509,7 @@ jurisdiction_code_plot</code></pre>
        )
   
 incident_by_hour</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <p><strong>Brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incidents since it does not have much population. Most of the shooting incidents happened at night and very early in the morning. For Bronx and Brooklyn, the shooting incidents are gradually increasing after 12pm and reach to peaks around 10pm to 11pm. The shooting incidences in the morning are not as high as the shooting incidents at night. For queens and manhanttan, the shooting incidents in the morning reach to the highest peak and have a noteworthy amount until 5 am. We will provide more statistical analysis about which borought is the most dangerous in next section.</p>
 </div>
 </div>
@@ -534,7 +534,7 @@ incident_by_hour</code></pre>
        title = &quot;Shooting Incident Trend By Perpetrator&#39;s Age group&quot;
        )
 perp_age_plot</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <p>From the plot we observed an interesting trend that we explored further. From 2006-2014, majority perpetrator are from age group 18-24 in the shooting incident. However, since 2015, the amount of group 18-24 perpetrator have been decreasing rapidly. We hypothesized that this decrease might be related to factors such as employment, which closely relates to this age group. That is, maybe people aged from 18-24 are having better chance of getting employed after 2015, which potentially stables the society and decreases shooting incident rates.</p>
 <p>To explore our hypothesis, we acquired unemployment rate data from 2010 to 2020 and mapped it with the total incidents conducted by perpetrators, in age group 18-24, in this time interval.</p>
 <pre class="r"><code>data = read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;% 
@@ -568,7 +568,7 @@ geom_text(x = 2017, y = 325, label = &quot;Total Incidents&quot;, color = &quot;
     axis.title.y.right = element_text(color = &quot;sienna2&quot;)
   ) + 
   labs(title = &quot;Unemployment Rate vs. Total incident by perpetrators aged 18-24&quot;)</code></pre>
-<p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <p>In the plot, the blue line represent the total incident conducted by perpetrator in the age group 18-24 throughout each year. The orange line represent the unemployment rate (in percentage), throughout the years. From the plot, we can see that generally the number of incidents decreases as unemployment rates decrease; and the number of incidents increase as unemployment rates increases as well. So, we can infer that there might be a correlation between the number of shooting incidents and unemployment rates during 2010 to 2020. However, although we can see that the total incident conducted by perpetrator aged 18-24 decreased rather rapidly after 2015, the slope of the unemployment rate is not as steep, or even not as steep as it was during 2012 to 2015. Therefore, unemployment rate is not the only factor that influenced the total incident by 18-24 years old perpetrators, our current hypothesis does not stand. Further research is required.</p>
 </div>
 </div>
