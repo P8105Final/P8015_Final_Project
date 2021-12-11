@@ -5,9 +5,9 @@ account: ym2813
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5272424
-bundleId: 5331212
+bundleId: 5358420
 url: https://ym2813.shinyapps.io/interactive_map_p8105_final/
-when: 1638748580.9784
-lastSyncTime: 1638748580.97842
+when: 1639198355.14569
+lastSyncTime: 1639198355.14571
 asMultiple: FALSE
 asStatic: FALSE

@@ -28,7 +28,7 @@ data_hist =
             jurisdiction_code == 1 ~ "transit",
             jurisdiction_code == 2 ~ "housing")
     ) %>% 
-    filter(year > 2014) %>% 
+    filter(year >=2006) %>% 
     arrange(year,month,day,hour,minute)
 
 data_map = 
@@ -80,8 +80,8 @@ shinyApp(options = list(height = 1000),
                      sliderInput(
                          "date_choice", 
                          label = h3("Choose a date range"), 
-                         min = 2015, max = 2020, 
-                         value = c(2015, 2020)),
+                         min = 2006, max = 2020, 
+                         value = c(2006, 2020)),
                      
                      #select time range
                      
