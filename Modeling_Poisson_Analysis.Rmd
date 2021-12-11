@@ -1,6 +1,6 @@
 ---
 title: "Modeling Poisson Analysis"
-output: github_document
+output: html_document
 ---
 
 

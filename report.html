@@ -9,6 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Wen Cheng, Jiahao Fan, Yangruijue Ma (Anna), Renee Wang, Tianwei Zhao" />
 
 
 <title>Project Report</title>
@@ -36,6 +37,13 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.10.0/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="site_libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.5.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotly-main-2.5.1/plotly-latest.min.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -386,6 +394,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Project Report</h1>
+<h4 class="author">Wen Cheng, Jiahao Fan, Yangruijue Ma (Anna), Renee Wang, Tianwei Zhao</h4>
 
 </div>
 
@@ -423,26 +432,956 @@ div.tocify {
 <li>Which age group of people is the most dangerous?</li>
 </ol>
 <p><strong>New Questions</strong>:</p>
-<ol style="list-style-type: decimal">
-<li>Is there a relationship between education and the decline in crime rate among 18-24 age group after 2015？<br />
-</li>
-<li>Is there a relationship between unemployment rate and the incline of shooting incidents in 2020？<br />
-</li>
-<li>Can we predict future New York shooting occurrences by construct time series analysis model</li>
-<li>Is the rates of death per gunshoot differed between 2019 and 2020 in different borough</li>
-</ol>
+<p>1.. Is there a relationship between unemployment rate and the incline of shooting incidents in 2020？<br />
+2. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough？ 2. Can we predict future New York shooting occurrences by construct time series analysis model？</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
+<p>For this project, we mainly looked at the shooting incident data that we acquired from <a href="https://opendata.cityofnewyork.us/data/">NYC open data</a>. During the project, we also acquired data from other sources to help explain and analyze the findings we have from the shooting incident data.The details of the data and our cleaning methods will be elaborated below.</p>
+<div id="data-sources" class="section level3">
+<h3>Data Sources</h3>
+<ol style="list-style-type: decimal">
+<li>NYC Shooting Incident Data:</li>
+</ol>
+<p><a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8">NYPD Shooting Incident Data (Historic)</a></p>
+<p>This data set contains 23,575 shooting incidents that occurred during January 01, 2016 to December 31, 2020. The data set was originally provided by the Police Department (NYPD). For each incident, information on the incident date, time, location (specific to the longitude and latitude of the incident), the perpetrator and the victim’s sex, race, and age group were provided.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Unemployment Rate Data</li>
+</ol>
+<p><a href="https://fred.stlouisfed.org/series/NYUR">Unemployment Rate</a></p>
+<p>We downloaded the monthly unemployment rate in New York City from January ,2010 to December, 2020 from FRED, <a href="https://fred.stlouisfed.org/series/NYUR">Federal Reserve Bank of St. Louis</a>. The original source of the data is <a href="https://www.bls.gov/sae/">U.S. Bureau of Labor Statistics</a>.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Population in each Police Precinct Data</li>
+</ol>
+<p>We downloaded a cleaned data set on population in each police precinct data from this <a href="https://johnkeefe.net/nyc-police-precinct-and-census-data">website</a>. It’s source is the <a href="https://data.census.gov/cedsci/">U.S Census Bureau</a>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>NYC Population by age group We downloaded a clean data set on population in each age group from this <a href="https://data.cityofnewyork.us/City-Government/Projected-Population-2010-2040-Total-By-Age-Groups/97pn-acdf">Projected Population 2010-2040 - Total By Age Groups</a></li>
+</ol>
+</div>
+<div id="data-cleaning-and-tidying" class="section level3">
+<h3>Data Cleaning and Tidying</h3>
+<ol style="list-style-type: decimal">
+<li>Shooting Incident Data</li>
+</ol>
+<p>The main data set we used is the Shooting Incident Data. After downloading our data, we cleaned the data by renamed a few variable with reasonable names, re-coded some variables to present clear information, and wrote out a csv file with the cleaned data as the resulting data set that we will be using in the project.</p>
+<pre class="r"><code>data_hist = 
+  read_csv(&quot;data/NYPD_Shooting_Incident_Data__Historic_.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;%
+  rename(&quot;date&quot; = &quot;occur_date&quot;,
+         &quot;time&quot; = &quot;occur_time&quot;) %&gt;%
+  separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) %&gt;%
+  separate(time, into = c(&quot;hour&quot;, &quot;minute&quot;), sep = &quot;:&quot;) %&gt;% 
+  mutate(
+          boro = str_to_lower(boro),
+          location_desc = str_to_lower(location_desc),
+          perp_race = str_to_lower(perp_race),
+          vic_race = str_to_lower(vic_race),
+          perp_age_group = str_replace(perp_age_group, &quot;UNKNOWN&quot;,&quot;unknown&quot;),
+          perp_sex = recode(perp_sex, &quot;M&quot; = &quot;male&quot;,&quot;F&quot; = &quot;female&quot;,&quot;U&quot; = &quot;unknown&quot;), 
+          vic_sex = recode(vic_sex, &quot;M&quot; = &quot;male&quot;,&quot;F&quot; = &quot;female&quot;,&quot;U&quot; = &quot;unknown&quot;),
+          jurisdiction_code = case_when(
+            jurisdiction_code == 0 ~ &quot;patrol&quot;, 
+            jurisdiction_code == 1 ~ &quot;transit&quot;,
+            jurisdiction_code == 2 ~ &quot;housing&quot;)
+          ) %&gt;% 
+  arrange(year,month,day,hour,minute)
+
+write.csv(data_hist, &quot;.\\data\\NYPD_Shooting_Incident_Data_Clean.csv&quot;, row.names=FALSE)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Unemployment Rate Data</li>
+</ol>
+<p>We initially found data from the <a href="https://dol.ny.gov/labor-statistics-new-york-city-region">New York State Department of Labor</a> and cleaned it for a resulting data set. However, this set only contains data from 2015 to 2020.</p>
+<pre class="r"><code>library(readxl)
+
+path = &quot;data/unemployment/borough_labor_force.xlsx&quot;
+
+unemployment_df = bind_rows(path %&gt;% 
+  excel_sheets() %&gt;% 
+  set_names() %&gt;% 
+  map(read_excel, path = path)) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  drop_na() %&gt;%
+  subset(month != &quot;Avg&quot;) %&gt;% 
+  rename(&quot;boro&quot; = &quot;area&quot;,&quot;unemployment_rate&quot; =&quot;unemployment_percent&quot;) %&gt;% 
+  mutate( boro = case_when(
+    str_starts(boro,&quot;B&quot;) ~ &quot;bronx&quot;,
+    str_starts(boro,&quot;K&quot;) ~ &quot;brooklyn&quot;,
+    str_starts(boro,&quot;Q&quot;) ~ &quot;queens&quot;,
+    str_starts(boro,&quot;R&quot;) ~ &quot;staten island&quot;,
+    str_starts(boro,&quot;N&quot;) ~ &quot;manhattan&quot;),
+    month = str_to_lower(month),
+    unemployment_rate = round(unemployment_rate/100,3)
+    )
+
+write.csv(unemployment_df, &quot;data/unemployment/unemployment_cleaned.csv&quot;)</code></pre>
+<p>Therefore, we went back and looked for another source. Eventually, we used data from the<a href="https://fred.stlouisfed.org/series/NYUR">Federal Reserve Bank of St. Louis</a>, which was a pretty cleaned data set to start with. We also wrote out a resulting csv file for our use in the project as well.</p>
+<pre class="r"><code>unemployed_complete= read_csv(&quot;data/unemployment/NYUR.csv&quot;) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  separate(date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;date&quot;), sep = &quot;-&quot;) %&gt;% 
+  rename(&quot;unemployment_rate&quot; = &quot;nyur&quot;) %&gt;% 
+  mutate(unemployment_rate = round(unemployment_rate/100,3)) %&gt;% 
+  select(-date)
+
+write.csv(unemployed_complete, &quot;data/unemployment/unemployed_complete.csv&quot;)</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Population in each Police Precinct</li>
+</ol>
+<p>Since the data set is already cleaned when we found it, we didn’t have to do much tidying. However, the columns were cryptic. Therefore, we followed the code listed in the a Census Bureau PDF starting on this <a href="https://www.documentcloud.org/documents/87708-pl94-171-1.html#document/p64">page</a>, to re-code the column that we need to <code>total_pop</code>, which gives us the total population for each police precinct.</p>
+<pre class="r"><code>percinct_pop = read.csv(&quot;data/nyc_2010pop_2020precincts.csv&quot;) %&gt;%
+  select(precinct_2020, P0010001) %&gt;% 
+  rename(&quot;total_pop&quot; = &quot;P0010001&quot;)</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Population by age group</li>
+</ol>
+<p>The data set <a href="https://data.cityofnewyork.us/City-Government/Projected-Population-2010-2040-Total-By-Age-Groups/97pn-acdf">Projected Population 2010-2040 - Total By Age Groups</a> is already cleaned , but the age group interval are smaller than we used in analysis. Therefore, we add the population group from this data set together to fit the larger age group interval in our analysis.</p>
+<pre class="r"><code>age_census = read.csv(&quot;data/population_nyc.csv&quot;)%&gt;%
+  janitor::clean_names()%&gt;%
+  filter(borough == &quot;NYC Total&quot;)%&gt;%
+  select(borough, age, x2010)
+
+age_clean_census = data.frame(&quot;age_group&quot;= c(&quot;0-18&quot;,&quot;19-24&quot;,&quot;25-44&quot;,&quot;45-64&quot;,&quot;65+&quot;), &quot;population&quot; = c(age_census$x2010[1]+age_census$x2010[2], age_census$x2010[3],age_census$x2010[4]+age_census$x2010[5]+age_census$x2010[6]+age_census$x2010[7],age_census$x2010[8]+age_census$x2010[9]+age_census$x2010[10]+age_census$x2010[11],age_census$x2010[12]+age_census$x2010[13]+age_census$x2010[14]+age_census$x2010[15]+age_census$x2010[16]))%&gt;%
+  mutate(population = as.integer(population))</code></pre>
+</div>
+<div id="data-description" class="section level3">
+<h3>Data description</h3>
+<p><strong>Shooting Incident Data</strong></p>
+<p>The cleaned resulting data set contains 23,585 incidents and 22 variables. Some of the variables that we are interested in are:</p>
+<ul>
+<li><code>year</code> Year of the incident</li>
+<li><code>month</code> Month of the incident</li>
+<li><code>day</code> Day of the incident</li>
+<li><code>hour</code> Time(hour) of the incident</li>
+<li><code>boro</code> The borough where the incident happens</li>
+<li><code>statistical_murder_flag</code> the outcome of the incident. TRUE means that the victim dies from the shooting, and FALSE means the opposite</li>
+<li><code>perp_age_group</code> Perpetrator’s age group</li>
+<li><code>perp_sex</code> Perpetrator’s sex</li>
+<li><code>perp_race</code>Perpetrator’s race</li>
+<li><code>latitude</code> Latitude of the incident</li>
+<li><code>longitude</code> Longitude of the incident.</li>
+</ul>
+<p><strong>Other Data</strong></p>
+<p>We used the <code>unemployment rate</code> , <code>population by age group</code> and <code>police precint</code> data to further explore and analyze the findings that we obtained from our main <code>shooting incident</code> data. They are used in both the descriptive and statistical analysis in our project. <code>unemployment rate</code> has the monthly unemployment rate of NYC from 2010 to 2020.<code>police precinct</code> has the total population of each police precinct in NYC.</p>
+</div>
 </div>
 <div id="analysis" class="section level2">
 <h2>Analysis</h2>
+<div id="exploratory-analysis" class="section level3">
+<h3>1. Exploratory analysis</h3>
+<p><strong>Overall glance</strong></p>
+<p>At the very beginning, let’s have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from <strong>2006 to 2020</strong> in New York City.</p>
+<pre class="r"><code>year_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006 ) %&gt;% 
+  group_by(year, statistical_murder_flag) %&gt;%
+  summarise(n = n()) %&gt;% 
+
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_point() + geom_line() +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Year&quot;
+       )
+
+year_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Murdered shooting incidents are much less than survived shooting incident. From 2006 to 2011, the survived shooting incidents were steadily fluctuate around 1500 and murdered shooting incidents were steadily fluctuate around 400.Both types of the shooting incidents were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it might be influenced by the outbreak of COVID-19 which led to a raise in unemployment and panic. We will do more statistical analysis on that later.</p>
+<p>Now, let’s take a closer look on more details about the victims.</p>
+<div id="victim" class="section level4">
+<h4>Victim</h4>
+<div id="race" class="section level5">
+<h5>Race</h5>
+<pre class="r"><code>vic_race_plot = 
+  data_hist %&gt;%
+  filter(year &gt;= 2006,
+         vic_race %in% c(&quot;black&quot;,&quot;white hispanic&quot;,&quot;black hispanic&quot;,&quot;white&quot;,&quot;asian / pacific islander&quot;,&quot;white&quot;)) %&gt;% 
+  group_by(year, vic_race) %&gt;%
+  summarise(n = n()) %&gt;%
+  ggplot(aes(x = year, y = n, fill= vic_race) ) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Race&quot;)
+       
+vic_race_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>The majority of victim are <strong>black</strong>. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most among all victim’s race.</p>
+</div>
+<div id="sex" class="section level5">
+<h5>Sex</h5>
+<pre class="r"><code>vic_sex_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         vic_sex != &quot;unknown&quot;) %&gt;% 
+  group_by(year, vic_sex) %&gt;%
+  summarise(n = n()) %&gt;% 
+  ggplot(aes(x = year, y = n, fill = vic_sex, color = vic_sex)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_point() + geom_line() +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total Incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Sex&quot;)
+
+
+vic_sex_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><strong>Male</strong> victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.</p>
+</div>
+<div id="age" class="section level5">
+<h5>Age</h5>
+<pre class="r"><code>vic_age_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;
+         ) %&gt;% 
+  group_by(vic_age_group, year) %&gt;%
+  summarise(n = n()) %&gt;% 
+
+  ggplot(aes(x = year, y = n, color = vic_age_group)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_point() + geom_line() +
+
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By victim&#39;s Age group&quot;
+       )
+vic_age_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65. From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.Then we want to see what happened in perpetrator later.</p>
+</div>
+</div>
+<div id="place" class="section level4">
+<h4>Place</h4>
+<pre class="r"><code>jurisdiction_code_plot=
+  data_hist %&gt;%
+  filter(year &gt; 2006,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;) %&gt;% 
+  group_by(jurisdiction_code, vic_age_group) %&gt;%
+  summarise(n = n()) %&gt;% 
+  ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) +
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
+  labs(x = &quot;Age group of victims&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident By Location Of The Incident&quot;
+       )
+
+  
+jurisdiction_code_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Most of the shooting incidents happened in the <strong>patrol</strong>, some of the shooting incidents in housing and only few cases were on transit.</p>
+</div>
+<div id="hour-in-a-day" class="section level4">
+<h4>Hour in a day</h4>
+<pre class="r"><code>incident_by_hour =
+  data_hist %&gt;%
+  filter(year &gt;= 2006) %&gt;% 
+  group_by(hour) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = hour, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  facet_grid(rows = vars(boro)) +
+  labs(x = &quot;Hour&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Hour In Day&quot;
+       )
+  
+incident_by_hour</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><strong>Brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incidents since it does not have much population. Most of the shooting incidents happened at night and very early in the morning. For Bronx and Brooklyn, the shooting incidents are gradually increasing after 12pm and reach to peaks around 10pm to 11pm. The shooting incidences in the morning are not as high as the shooting incidents at night. For queens and manhanttan, the shooting incidents in the morning reach to the highest peak and have a noteworthy amount until 5 am. We will provide more statistical analysis about which borought is the most dangerous in next section.</p>
+</div>
+<div id="perpetrator" class="section level4">
+<h4>Perpetrator</h4>
+<div id="age-1" class="section level5">
+<h5>Age</h5>
+<pre class="r"><code>perp_age_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         perp_age_group != &quot;NA&quot;,
+         perp_age_group != &quot;unknown&quot;
+         ) %&gt;% 
+  group_by(perp_age_group, year) %&gt;%
+  summarise(n = n()) %&gt;% 
+
+  ggplot(aes(x = year, y = n, color = perp_age_group)) + 
+  geom_point() + geom_line() +
+
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Perpetrator&#39;s Age group&quot;
+       )
+perp_age_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>From the plot we observed an interesting trend that we explored further. From 2006-2014, majority perpetrator are from age group 18-24 in the shooting incident. However, since 2015, the amount of group 18-24 perpetrator have been decreasing rapidly. We hypothesized that this decrease might be related to factors such as employment, which closely relates to this age group. That is, maybe people aged from 18-24 are having better chance of getting employed after 2015, which potentially stables the society and decreases shooting incident rates.</p>
+<p>To explore our hypothesis, we acquired unemployment rate data from 2010 to 2020 and mapped it with the total incidents conducted by perpetrators, in age group 18-24, in this time interval.</p>
+<pre class="r"><code>data = read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;% 
+  filter(year &gt;= 2010, perp_age_group == &quot;18-24&quot;) %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(n_obs = n())
+
+data_unem = read_csv(&quot;data/unemployment/unemployed_complete.csv&quot;)%&gt;% 
+  select(-...1) %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(mean_rate = mean(unemployment_rate))
+
+data_ana = left_join(data,data_unem, by = c(&quot;year&quot;)) %&gt;% 
+  mutate(mean_rate = mean_rate*100)
+
+data_ana %&gt;% 
+  ggplot() +
+  geom_line(mapping = aes(x = year,y = n_obs), color = &quot;steelblue2&quot;)+
+  geom_line(mapping = aes(x = year,y = mean_rate*50), color = &quot;sienna2&quot;)+
+  scale_x_continuous(limits = c(2010, 2020), breaks = seq(2010, 2020, by = 1))+
+  scale_y_continuous(
+    # First axis
+    name = &quot;Total Number of Incidents by Perpetrator aged 18-24&quot;,
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans = ~ ./50,name = &quot;Unemployment Rate (%)&quot;)
+  ) +
+  geom_text(x = 2012, y = 275, label = &quot;Unemployment Rate (%)&quot;, color = &quot;sienna2&quot;) + 
+geom_text(x = 2017, y = 325, label = &quot;Total Incidents&quot;, color = &quot;steelblue2&quot;)+
+  theme(
+    axis.title.y = element_text(color = &quot;steelblue2&quot;),
+    axis.title.y.right = element_text(color = &quot;sienna2&quot;)
+  ) + 
+  labs(title = &quot;Unemployment Rate vs. Total incident by perpetrators aged 18-24&quot;)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>In the plot, the blue line represent the total incident conducted by perpetrator in the age group 18-24 throughout each year. The orange line represent the unemployment rate (in percentage), throughout the years. From the plot, we can see that generally the number of incidents decreases as unemployment rates decrease; and the number of incidents increase as unemployment rates increases as well. So, we can infer that there might be a correlation between the number of shooting incidents and unemployment rates during 2010 to 2020. However, although we can see that the total incident conducted by perpetrator aged 18-24 decreased rather rapidly after 2015, the slope of the unemployment rate is not as steep, or even not as steep as it was during 2012 to 2015. Therefore, unemployment rate is not the only factor that influenced the total incident by 18-24 years old perpetrators, our current hypothesis does not stand. Further research is required.</p>
+</div>
+</div>
+</div>
+<div id="statistical-analysis" class="section level3">
+<h3>2. Statistical analysis</h3>
+<p><strong>Goal</strong></p>
+<p>After visualization of the shooting incidences data in section descriptive analysis, we will go to statistical analysis to answer several questions that most of the nyc residents might care about.</p>
+<p>In this section we will analysis the shooting case by the factor of the shooting, and carry out statistical analysis and data visualization about the shooting in New York City. We will asking some questions, and answer them using facts and plots.</p>
+<div id="kruskal-wallis-analysis" class="section level4">
+<h4>2.1 Kruskal-Wallis analysis</h4>
+<div id="which-boro-is-most-dangerous" class="section level5">
+<h5>Which boro is most dangerous?</h5>
+<p>Due to recent raise in shooting events around the US, people become more conscious about their safety. In particular, students of Columbia university want to know whether the community around the university is comparably safe or danger in New York. Here we use bar plot to show the total shooting events from 2006 to 2020 in all 5 boros of New York: “bronx”, “manhattan”, “queens”, “brooklyn” and“staten island”.</p>
+<pre class="r"><code>toDate &lt;- function(year, month, day) {
+    ISOdate(year, month, day)
+}
+
+data_hist = 
+  read_csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;%
+  mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, &quot;FALSE&quot; = &quot;survived&quot;,&quot;TRUE&quot; = &quot;murdered&quot;)
+  )
+library(dplyr)
+data = 
+  data_hist %&gt;%
+  dplyr::select(month, day, year, hour, boro,precinct,
+         location_desc, perp_age_group,
+         perp_sex, perp_race) %&gt;% 
+  mutate(date = toDate(year, month, day)) %&gt;%
+  mutate(weekday = wday(date, label = TRUE, abbr = TRUE)) %&gt;%
+  mutate(COVID = date &gt;= toDate(2020, 4, 1))
+  
+#unique(data_hist$boro)</code></pre>
+<pre class="r"><code>p1 = 
+  data %&gt;%
+  count(boro) %&gt;%
+  mutate(
+    proportion = round(n / sum(n), 2) 
+  )  %&gt;%
+  top_n(n = 10, wt = n) %&gt;%
+  mutate(
+    District = fct_reorder(as.factor(boro), n, .desc = TRUE)
+  ) %&gt;%
+  ggplot(aes(x = District, y = n, fill = District)) +
+  geom_bar(stat = &quot;identity&quot;) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = &quot;none&quot;) +
+  labs(
+    
+    x = &quot;&quot;,
+    y = &quot;&quot;
+  )
+
+ll1 = data %&gt;%
+  count(boro) %&gt;%
+  mutate(
+    proportion = round(n / sum(n), 2) 
+  )  %&gt;%
+  top_n(n = 10, wt = n) %&gt;%
+  mutate(
+    District = fct_reorder(as.factor(boro), n, .desc = TRUE)
+  )
+
+ll1$event_by_thousand_pop = ll1$n / c(1472654,
+        2736074, 1694251, 2405464, 495747) * 1000
+
+p2 = ll1 %&gt;% 
+  top_n(n = 10, wt = event_by_thousand_pop) %&gt;%
+  ggplot(aes(x = District, y = event_by_thousand_pop, fill = District)) +
+  geom_bar(stat = &quot;identity&quot;) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = &quot;none&quot;) +
+  labs(
+    x = &quot;&quot;,
+    y = &quot;&quot;
+  )
+
+
+subplot(p1, p2, nrows = 1) %&gt;% 
+  plotly::layout(title = &#39;Bar plot of shooting by districts &lt;br&gt;&lt;sup&gt;left: shooting , right: shooting / population (thousands) &lt;/sup&gt;&#39;,
+                 autosize = T)</code></pre>
+<div id="htmlwidget-96b32c4e9478f76f1425" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-96b32c4e9478f76f1425">{"x":{"data":[{"orientation":"v","width":0.9,"base":0,"x":[1],"y":[9734],"text":"District: brooklyn<br />n: 9734<br />District: brooklyn","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"brooklyn","legendgroup":"brooklyn","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[2],"y":[6701],"text":"District: bronx<br />n: 6701<br />District: bronx","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(163,165,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"bronx","legendgroup":"bronx","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[3],"y":[3532],"text":"District: queens<br />n: 3532<br />District: queens","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,191,125,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"queens","legendgroup":"queens","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[4],"y":[2922],"text":"District: manhattan<br />n: 2922<br />District: manhattan","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,176,246,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"manhattan","legendgroup":"manhattan","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[5],"y":[696],"text":"District: staten island<br />n:  696<br />District: staten island","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(231,107,243,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"staten island","legendgroup":"staten island","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[1],"y":[3.55765231495932],"text":"District: brooklyn<br />event_by_thousand_pop: 3.557652<br />District: brooklyn","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"brooklyn","legendgroup":"brooklyn","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[2],"y":[4.55028811927309],"text":"District: bronx<br />event_by_thousand_pop: 4.550288<br />District: bronx","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(163,165,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"bronx","legendgroup":"bronx","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[3],"y":[1.46832378285437],"text":"District: queens<br />event_by_thousand_pop: 1.468324<br />District: queens","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,191,125,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"queens","legendgroup":"queens","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[4],"y":[1.72465590989765],"text":"District: manhattan<br />event_by_thousand_pop: 1.724656<br />District: manhattan","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,176,246,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"manhattan","legendgroup":"manhattan","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[5],"y":[1.40394193005707],"text":"District: staten island<br />event_by_thousand_pop: 1.403942<br />District: staten island","type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(231,107,243,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"staten island","legendgroup":"staten island","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null}],"layout":{"xaxis":{"domain":[0,0.48],"automargin":true,"type":"linear","autorange":false,"range":[0.4,5.6],"tickmode":"array","ticktext":["brooklyn","bronx","queens","manhattan","staten island"],"tickvals":[1,2,3,4,5],"categoryorder":"array","categoryarray":["brooklyn","bronx","queens","manhattan","staten island"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-45,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","hoverformat":".2f"},"xaxis2":{"domain":[0.52,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,5.6],"tickmode":"array","ticktext":["brooklyn","bronx","queens","manhattan","staten island"],"tickvals":[1,2,3,4,5],"categoryorder":"array","categoryarray":["brooklyn","bronx","queens","manhattan","staten island"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-45,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y2","hoverformat":".2f"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.227514405963655,4.77780252523675],"tickmode":"array","ticktext":["0","1","2","3","4"],"tickvals":[0,1,2,3,4],"categoryorder":"array","categoryarray":["0","1","2","3","4"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x2","hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-486.7,10220.7],"tickmode":"array","ticktext":["0","2500","5000","7500","10000"],"tickvals":[5.6843418860808e-14,2500,5000,7500,10000],"categoryorder":"array","categoryarray":["0","2500","5000","7500","10000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","hoverformat":".2f"},"annotations":[],"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.48,"y0":0,"y1":1},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.52,"x1":1,"y0":0,"y1":1}],"images":[],"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":54.2657577007069,"l":16.8036529680365},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative","title":"Bar plot of shooting by districts <br><sup>left: shooting , right: shooting / population (thousands) <\/sup>","autosize":true},"attrs":{"8da0643fd68b":{"x":{},"y":{},"fill":{},"type":"bar"},"8da0275efb60":{"x":{},"y":{},"fill":{},"type":"bar"}},"source":"A","config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p>In the bar plot above we realize that there are most shooting events in brooklyn, and second is bronx, where manhattan is only around forth of the shooting events in brooklyn. It seems ok. From the shooting events per thousand population bar chart, the highest is bronx and second is brooklyn, manhattan is significantly lower than those 2, so compared to those 2 boros, the manhattan district is relatively safer, that’s a good news for all students in our university.</p>
+<p>Now we wanna use Kruskal-Wallis test to statistically test whether some districts are more dangerous than others. We will use the precincts shooting per thousand people as the sample, and apply Kruskal-Wallis test on that sample. The reason why we don’s use ANOVA but use the non parametric analysis is because the data is not normally distributed.</p>
+<pre class="r"><code>precinct_pop = read.csv(&quot;data/nyc_2010pop_2020precincts.csv&quot;) %&gt;%
+  rename(&quot;total_pop&quot; = &quot;P0010001&quot;) %&gt;% 
+  dplyr::select(c(precinct_2020,total_pop))
+
+data1 = data %&gt;%
+  count(boro, precinct) %&gt;%
+  left_join(precinct_pop, 
+            by = c(&quot;precinct&quot; = &quot;precinct_2020&quot;))
+
+data1$shoot_per_thousand = data1$n / data1$total_pop * 1000
+
+library(&quot;ggpubr&quot;)
+p1 = ggline(data1, x = &quot;boro&quot;, y = &quot;shoot_per_thousand&quot;, 
+       add = c(&quot;mean_se&quot;, &quot;jitter&quot;), 
+       ylab = &quot;shoot per thousand&quot;, xlab = &quot;boros&quot;) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = &quot;none&quot;)
+ggplotly(p1, tooltip = c(&quot;x&quot;, &quot;y&quot;)) </code></pre>
+<div id="htmlwidget-afd6b8bf2221e5d1ee43" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-afd6b8bf2221e5d1ee43">{"x":{"data":[{"x":[0.976530259754509,1.00094594899565,1.11628112802282,0.866797353699803,1.07162684556097,1.00273997588083,0.956147995311767,1.05488950712606,1.05710880225524,0.833552875835448,1.11173273315653,0.82030069893226,2.1444900745526,2.04960069255903,2.19318711161613,1.89854205762967,2.15441347025335,2.00262318477035,1.96944893384352,2.095318311546,1.98427670253441,2.10388032179326,1.87172233201563,2.19392172750086,1.96892986493185,2.17680831244215,1.97649262500927,1.97571279481053,1.92977188192308,1.97149479500949,2.00191831849515,1.87868029978126,2.01027735564858,1.84346404634416,1.86352124242112,2.91773675177246,2.9853459790349,2.8387685210444,2.97257323991507,2.96530618127435,2.96164928730577,2.91896426817402,3.11211551595479,2.94276320990175,3.10236607352272,3.07426131609827,2.85938105070964,2.91152687137946,2.97709771748632,3.04934287276119,3.10927181318402,3.15451023969799,2.80986943673342,3.1647608297877,3.07737670717761,2.97921655084938,2.99286059169099,4.16475817840546,4.16902759484947,3.87616532817483,3.95300460429862,4.04415892008692,3.80995227852836,4.02048261240125,3.94498418224975,4.09524259790778,4.13513023490086,3.82085079932585,4.12009456101805,4.15937644727528,4.15126200001687,3.86685832198709,4.03126736367121,5.18662115046754,5.05362495277077,4.91541045438498,4.87304494976997],"y":[8.29580282663877,7.98130925514654,9.08963040948148,3.8226969513441,5.7428452662421,1.22469390646395,6.07623893921969,5.36811068855324,7.66256244539116,2.57169178245175,1.24857874234416,3.56073314339472,3.06923456728248,0.814342237450714,0.334800887218508,2.31035103523055,0.21451063523113,7.09220147046794,0.216486705882229,4.805514891867,2.65725614681784,5.34411251797611,0.720397494827833,14.8492962634327,7.49985412185873,3.31870972901644,7.71398050402828,0.810075045451231,10.2034516262658,11.5113206614235,3.89794128574886,2.11599287412559,5.01774942612215,2.43919654084818,1.20901532113402,0.329642075286099,0.912945856356906,0.385988702008139,1.52618579865951,1.22921728170498,1.15532571877482,0.555097385642275,1.45290726814075,0.0758491480322151,0.480592595933282,0.0528433858632853,0.312092103436843,40.0001858610608,5.71804426188885,0.835799274088175,7.72063501515194,2.60574690743686,6.25300354399984,3.22975583957826,7.42832288555861,2.53377815148976,2.05150249590427,3.10975397941113,6.45642552084211,1.17908194698692,4.94322557089728,0.499194973644902,2.20090147585436,1.51098178056109,0.522466891161639,0.441632936838016,0.396291606869716,0.793255961167649,0.0519587056443832,0.169589631529338,6.00137395563779,1.55887454137379,0.850628487148692,4.54808023910014,0.825126779709864,0.417077563742305,0.264749592296478],"text":["boro: bronx<br />shoot_per_thousand:  8.29535395","boro: bronx<br />shoot_per_thousand:  7.98147227","boro: bronx<br />shoot_per_thousand:  9.08954139","boro: bronx<br />shoot_per_thousand:  3.82286982","boro: bronx<br />shoot_per_thousand:  5.74292719","boro: bronx<br />shoot_per_thousand:  1.22483097","boro: bronx<br />shoot_per_thousand:  6.07644306","boro: bronx<br />shoot_per_thousand:  5.36836993","boro: bronx<br />shoot_per_thousand:  7.66219105","boro: bronx<br />shoot_per_thousand:  2.57165772","boro: bronx<br />shoot_per_thousand:  1.24852536","boro: bronx<br />shoot_per_thousand:  3.56048153","boro: brooklyn<br />shoot_per_thousand:  3.06872015","boro: brooklyn<br />shoot_per_thousand:  0.81430674","boro: brooklyn<br />shoot_per_thousand:  0.33519983","boro: brooklyn<br />shoot_per_thousand:  2.31025532","boro: brooklyn<br />shoot_per_thousand:  0.21423122","boro: brooklyn<br />shoot_per_thousand:  7.09169608","boro: brooklyn<br />shoot_per_thousand:  0.21688315","boro: brooklyn<br />shoot_per_thousand:  4.80587121","boro: brooklyn<br />shoot_per_thousand:  2.65772046","boro: brooklyn<br />shoot_per_thousand:  5.34395351","boro: brooklyn<br />shoot_per_thousand:  0.72090628","boro: brooklyn<br />shoot_per_thousand: 14.84942406","boro: brooklyn<br />shoot_per_thousand:  7.50021819","boro: brooklyn<br />shoot_per_thousand:  3.31853344","boro: brooklyn<br />shoot_per_thousand:  7.71400864","boro: brooklyn<br />shoot_per_thousand:  0.81003240","boro: brooklyn<br />shoot_per_thousand: 10.20351639","boro: brooklyn<br />shoot_per_thousand: 11.51111253","boro: brooklyn<br />shoot_per_thousand:  3.89757977","boro: brooklyn<br />shoot_per_thousand:  2.11635820","boro: brooklyn<br />shoot_per_thousand:  5.01740534","boro: brooklyn<br />shoot_per_thousand:  2.43931665","boro: brooklyn<br />shoot_per_thousand:  1.20895337","boro: manhattan<br />shoot_per_thousand:  0.32993896","boro: manhattan<br />shoot_per_thousand:  0.91310303","boro: manhattan<br />shoot_per_thousand:  0.38569087","boro: manhattan<br />shoot_per_thousand:  1.52604028","boro: manhattan<br />shoot_per_thousand:  1.22967440","boro: manhattan<br />shoot_per_thousand:  1.15583898","boro: manhattan<br />shoot_per_thousand:  0.55531824","boro: manhattan<br />shoot_per_thousand:  1.45271415","boro: manhattan<br />shoot_per_thousand:  0.07582843","boro: manhattan<br />shoot_per_thousand:  0.48089372","boro: manhattan<br />shoot_per_thousand:  0.05281885","boro: manhattan<br />shoot_per_thousand:  0.31181790","boro: manhattan<br />shoot_per_thousand: 40.00000000","boro: manhattan<br />shoot_per_thousand:  5.71772495","boro: manhattan<br />shoot_per_thousand:  0.83599474","boro: manhattan<br />shoot_per_thousand:  7.72070457","boro: manhattan<br />shoot_per_thousand:  2.60563949","boro: manhattan<br />shoot_per_thousand:  6.25265179","boro: manhattan<br />shoot_per_thousand:  3.22979319","boro: manhattan<br />shoot_per_thousand:  7.42860365","boro: manhattan<br />shoot_per_thousand:  2.53384963","boro: manhattan<br />shoot_per_thousand:  2.05197148","boro: queens<br />shoot_per_thousand:  3.10980318","boro: queens<br />shoot_per_thousand:  6.45642287","boro: queens<br />shoot_per_thousand:  1.17879555","boro: queens<br />shoot_per_thousand:  4.94314906","boro: queens<br />shoot_per_thousand:  0.49944180","boro: queens<br />shoot_per_thousand:  2.20063421","boro: queens<br />shoot_per_thousand:  1.51093180","boro: queens<br />shoot_per_thousand:  0.52280834","boro: queens<br />shoot_per_thousand:  0.44169611","boro: queens<br />shoot_per_thousand:  0.39619331","boro: queens<br />shoot_per_thousand:  0.79358643","boro: queens<br />shoot_per_thousand:  0.05153267","boro: queens<br />shoot_per_thousand:  0.16953690","boro: queens<br />shoot_per_thousand:  6.00173143","boro: queens<br />shoot_per_thousand:  1.55844668","boro: queens<br />shoot_per_thousand:  0.85093486","boro: staten island<br />shoot_per_thousand:  4.54835056","boro: staten island<br />shoot_per_thousand:  0.82555514","boro: staten island<br />shoot_per_thousand:  0.41732023","boro: staten island<br />shoot_per_thousand:  0.26521952"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.66929133858268,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5],"y":[5.22038868499584,4.26809578026924,3.94757324106331,1.91785282518611,1.51411136291048],"text":["boro: bronx<br />shoot_per_thousand: 5.220389","boro: brooklyn<br />shoot_per_thousand: 4.268096","boro: manhattan<br />shoot_per_thousand: 3.947573","boro: queens<br />shoot_per_thousand: 1.917853","boro: staten island<br />shoot_per_thousand: 1.514111"],"type":"scatter","mode":"lines+markers","opacity":1,"line":{"color":"rgba(0,0,0,1)","width":1.88976377952756,"dash":"solid"},"error_y":{"array":[0.790587696390428,0.823297970388146,1.79062186382798,0.525060899700789,1.01830736989498],"arrayminus":[0.790587696390428,0.823297970388146,1.79062186382798,0.525060899700789,1.01830736989498],"type":"data","width":3.23076923076923,"symmetric":false,"color":"rgba(0,0,0,1)"},"showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","hoveron":"points","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":6.4251968503937,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)"}},"frame":null}],"layout":{"margin":{"t":27.1581569115816,"r":7.97011207970112,"b":86.1531814225082,"l":43.8356164383562},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.9402241594022},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,5.6],"tickmode":"array","ticktext":["bronx","brooklyn","manhattan","queens","staten island"],"tickvals":[1,2,3,4,5],"categoryorder":"array","categoryarray":["bronx","brooklyn","manhattan","queens","staten island"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.98505603985056,"tickwidth":0.724555643609193,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9402241594022},"tickangle":-45,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"boros","font":{"color":"rgba(0,0,0,1)","family":"","size":15.9402241594022}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-1.94545265212644,41.9975972188316],"tickmode":"array","ticktext":["0","10","20","30","40"],"tickvals":[0,10,20,30,40],"categoryorder":"array","categoryarray":["0","10","20","30","40"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.98505603985056,"tickwidth":0.724555643609193,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9402241594022},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"shoot per thousand","font":{"color":"rgba(0,0,0,1)","family":"","size":15.9402241594022}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":2.06156048675734,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8da0124d826e":{"x":{},"y":{},"type":"scatter"},"8da01eae0d25":{"x":{},"y":{}},"8da034e107df":{"x":{},"y":{}},"8da021cbdc98":{"x":{},"y":{}}},"cur_data":"8da0124d826e","visdat":{"8da0124d826e":["function (y) ","x"],"8da01eae0d25":["function (y) ","x"],"8da034e107df":["function (y) ","x"],"8da021cbdc98":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p>Then we perform the kruskal.test.</p>
+<pre class="r"><code>kruskal.test(shoot_per_thousand ~ boro, data = data1)</code></pre>
+<pre><code>## 
+##  Kruskal-Wallis rank sum test
+## 
+## data:  shoot_per_thousand by boro
+## Kruskal-Wallis chi-squared = 13.768, df = 4, p-value = 0.008072</code></pre>
+<p>As the p-value is less than the significance level 0.05, we can conclude that there are significant differences in shooting rate between the boros. From the output of the Kruskal-Wallis test, we know that there is a significant difference between groups, but we don’t know which pairs of groups are different. So we use the pairwise wilcox test to calculate pairwise comparisons between boros with corrections for multiple testing.</p>
+<pre class="r"><code>pairwise.wilcox.test(data1$shoot_per_thousand, data1$boro,
+                 p.adjust.method = &quot;BH&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using Wilcoxon rank sum exact test 
+## 
+## data:  data1$shoot_per_thousand and data1$boro 
+## 
+##               bronx brooklyn manhattan queens
+## brooklyn      0.240 -        -         -     
+## manhattan     0.034 0.240    -         -     
+## queens        0.012 0.093    0.609     -     
+## staten island 0.066 0.240    0.486     0.609 
+## 
+## P value adjustment method: BH</code></pre>
+<p>Under the 0.05 significance level, we know that there is a significant difference between shooting rate of manhattan and bronx, queens and bronx. And from the bar chart we know that difference means manhattan and queens are significantly safer than the bronx boro.</p>
+</div>
+</div>
+<div id="visualization-of-shooting-time-and-places" class="section level4">
+<h4>Visualization of Shooting time and places</h4>
+<div id="where-do-the-shooting-most-happens" class="section level5">
+<h5><strong>Where do the shooting most happens?</strong></h5>
+<p>Where do the shooting most happens? (The last bar is not applicable) From the plot we know that first 3 places are apartment and houses, and of the public area, the first 3 are grocery stor, bar / night club and comercial buildings.</p>
+<pre class="r"><code>p1 = 
+  data %&gt;%
+  count(location_desc) %&gt;%
+  mutate(
+    proportion = round(n / sum(n), 2) 
+  )  %&gt;%
+  top_n(n = 10, wt = n) %&gt;%
+  mutate(
+    location = fct_reorder(as.factor(location_desc), n, .desc = TRUE)
+  ) %&gt;%
+  ggplot(aes(x = location, y = proportion)) +
+  geom_bar(stat = &quot;identity&quot;)+
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = &quot;none&quot;) +
+  labs(
+    title = &quot;Top Ten Places to occur shooting&quot;,
+    x = &quot;&quot;,
+    y = &quot;&quot;
+  )
+
+ggplotly(p1, tooltip = c(&quot;x&quot;, &quot;y&quot;)) </code></pre>
+<div id="htmlwidget-04288d2c9a20953d4f7f" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-04288d2c9a20953d4f7f">{"x":{"data":[{"orientation":"v","width":[0.9,0.899999999999999,0.9,0.9,0.9,0.9,0.899999999999999,0.9,0.9,0.899999999999999],"base":[0,0,0,0,0,0,0,0,0,0],"x":[5,9,6,4,2,1,8,3,7,10],"y":[0.02,0,0.01,0.02,0.11,0.18,0.01,0.04,0.01,0.58],"text":["location: bar/night club<br />proportion: 0.02","location: beauty/nail salon<br />proportion: 0.00","location: commercial bldg<br />proportion: 0.01","location: grocery/bodega<br />proportion: 0.02","location: multi dwell - apt build<br />proportion: 0.11","location: multi dwell - public hous<br />proportion: 0.18","location: none<br />proportion: 0.01","location: pvt house<br />proportion: 0.04","location: restaurant/diner<br />proportion: 0.01","location: NA<br />proportion: 0.58"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(89,89,89,1)","line":{"width":1.88976377952756,"color":"transparent"}},"showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":90.8858941524698,"l":28.4931506849315},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":"Top Ten Places to occur shooting","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,10.6],"tickmode":"array","ticktext":["multi dwell - public hous","multi dwell - apt build","pvt house","grocery/bodega","bar/night club","commercial bldg","restaurant/diner","none","beauty/nail salon"],"tickvals":[1,2,3,4,5,6,7,8,9],"categoryorder":"array","categoryarray":["multi dwell - public hous","multi dwell - apt build","pvt house","grocery/bodega","bar/night club","commercial bldg","restaurant/diner","none","beauty/nail salon"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-45,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.029,0.609],"tickmode":"array","ticktext":["0%","20%","40%","60%"],"tickvals":[0,0.2,0.4,0.6],"categoryorder":"array","categoryarray":["0%","20%","40%","60%"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8da054142e53":{"x":{},"y":{},"type":"bar"}},"cur_data":"8da054142e53","visdat":{"8da054142e53":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="when-do-most-of-the-shooting-happens" class="section level5">
+<h5><strong>When do most of the shooting happens?</strong></h5>
+<pre class="r"><code>heat_maps = function(dataset, title) {
+  pre = 
+  dataset %&gt;%
+  filter(COVID == FALSE) %&gt;%
+  plot_ly(
+    x = ~hour, y = ~weekday, z = ~shooting, type = &quot;heatmap&quot;, colors = &quot;BuPu&quot;
+  ) %&gt;%
+  colorbar(title = &quot;Pre-COVID&quot;, x = 1, y = 1) 
+
+covid = 
+  dataset %&gt;%
+  filter(COVID == TRUE) %&gt;%
+  plot_ly(
+    x = ~hour, y = ~weekday, z = ~shooting, type = &quot;heatmap&quot;, colors = &quot;YlGn&quot;
+  ) %&gt;%
+  colorbar(title = &quot;COVID&quot;, x = 1, y = 0.5) 
+
+subplot(pre, covid, nrows = 2, margin = .05) %&gt;%
+  layout(title = title)
+}
+
+d2 = 
+  data %&gt;%
+  group_by(COVID, hour, weekday) %&gt;%
+  summarise(
+    shooting = n()
+  )  
+
+heat_maps(dataset = d2, title = &quot;Heat Maps of Shootings&quot;)</code></pre>
+<div id="htmlwidget-b6614f4262091bd455c7" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b6614f4262091bd455c7">{"x":{"data":[{"colorbar":{"title":"Pre-COVID","ticklen":2,"len":0.333333333333333,"lenmode":"fraction","y":1,"yanchor":"top","x":1},"colorscale":[["0","rgba(247,252,253,1)"],["0.0416666666666667","rgba(239,247,250,1)"],["0.0833333333333333","rgba(232,241,247,1)"],["0.125","rgba(224,236,244,1)"],["0.166666666666667","rgba(213,228,239,1)"],["0.208333333333333","rgba(202,219,235,1)"],["0.25","rgba(191,211,230,1)"],["0.291666666666667","rgba(180,203,226,1)"],["0.333333333333333","rgba(169,196,222,1)"],["0.375","rgba(158,188,218,1)"],["0.416666666666667","rgba(152,175,211,1)"],["0.458333333333333","rgba(146,163,205,1)"],["0.5","rgba(140,150,198,1)"],["0.541666666666667","rgba(141,136,191,1)"],["0.583333333333333","rgba(141,122,184,1)"],["0.625","rgba(140,107,177,1)"],["0.666666666666667","rgba(139,94,170,1)"],["0.708333333333333","rgba(138,80,164,1)"],["0.75","rgba(136,65,157,1)"],["0.791666666666667","rgba(134,52,146,1)"],["0.833333333333333","rgba(132,36,135,1)"],["0.875","rgba(129,15,124,1)"],["0.916666666666667","rgba(111,8,107,1)"],["0.958333333333333","rgba(94,3,91,1)"],["1","rgba(77,0,75,1)"]],"showscale":true,"x":["00","00","00","00","00","00","00","01","01","01","01","01","01","01","02","02","02","02","02","02","02","03","03","03","03","03","03","03","04","04","04","04","04","04","04","05","05","05","05","05","05","05","06","06","06","06","06","06","06","07","07","07","07","07","07","07","08","08","08","08","08","08","08","09","09","09","09","09","09","09","10","10","10","10","10","10","10","11","11","11","11","11","11","11","12","12","12","12","12","12","12","13","13","13","13","13","13","13","14","14","14","14","14","14","14","15","15","15","15","15","15","15","16","16","16","16","16","16","16","17","17","17","17","17","17","17","18","18","18","18","18","18","18","19","19","19","19","19","19","19","20","20","20","20","20","20","20","21","21","21","21","21","21","21","22","22","22","22","22","22","22","23","23","23","23","23","23","23"],"y":["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"z":[448,177,206,173,160,174,438,530,163,161,138,141,168,409,457,149,169,89,89,129,420,473,130,107,67,65,121,418,411,125,64,64,73,102,384,236,59,35,37,23,37,167,77,33,23,21,15,23,92,50,25,17,13,14,17,42,27,34,22,20,20,29,23,14,25,30,22,28,26,19,36,30,34,41,33,35,28,42,57,39,36,34,46,35,56,61,51,54,64,46,52,52,85,48,63,61,48,57,103,94,79,87,85,117,77,108,123,84,91,95,103,87,130,129,110,116,87,136,95,124,159,125,111,110,116,91,137,165,116,137,168,122,129,157,184,159,157,181,177,135,199,229,180,168,170,207,162,203,276,211,216,173,241,264,181,283,217,225,234,314,267,236,256,209,234,233,323,335],"type":"heatmap","xaxis":"x","yaxis":"y","frame":null},{"colorbar":{"title":"COVID","ticklen":2,"len":0.333333333333333,"lenmode":"fraction","y":0.5,"yanchor":"top","x":1},"colorscale":[["0","rgba(255,255,229,1)"],["0.0416666666666667","rgba(253,254,214,1)"],["0.0833333333333333","rgba(250,253,200,1)"],["0.125","rgba(247,252,185,1)"],["0.166666666666667","rgba(237,248,178,1)"],["0.208333333333333","rgba(227,244,170,1)"],["0.25","rgba(217,240,163,1)"],["0.291666666666667","rgba(202,234,156,1)"],["0.333333333333333","rgba(188,227,149,1)"],["0.375","rgba(173,221,142,1)"],["0.416666666666667","rgba(156,213,135,1)"],["0.458333333333333","rgba(138,206,128,1)"],["0.5","rgba(120,198,121,1)"],["0.541666666666667","rgba(103,189,112,1)"],["0.583333333333333","rgba(85,180,102,1)"],["0.625","rgba(65,171,93,1)"],["0.666666666666667","rgba(55,158,84,1)"],["0.708333333333333","rgba(45,145,76,1)"],["0.75","rgba(35,132,67,1)"],["0.791666666666667","rgba(26,123,63,1)"],["0.833333333333333","rgba(14,113,59,1)"],["0.875","rgba(0,104,55,1)"],["0.916666666666667","rgba(0,92,50,1)"],["0.958333333333333","rgba(0,80,46,1)"],["1","rgba(0,69,41,1)"]],"showscale":true,"x":["00","00","00","00","00","00","00","01","01","01","01","01","01","01","02","02","02","02","02","02","02","03","03","03","03","03","03","03","04","04","04","04","04","04","04","05","05","05","05","05","06","06","06","06","06","06","06","07","07","07","07","07","07","08","08","08","08","08","08","08","09","09","09","09","09","09","10","10","10","10","10","10","11","11","11","11","11","11","11","12","12","12","12","12","12","12","13","13","13","13","13","13","13","14","14","14","14","14","14","14","15","15","15","15","15","15","15","16","16","16","16","16","16","16","17","17","17","17","17","17","17","18","18","18","18","18","18","18","19","19","19","19","19","19","19","20","20","20","20","20","20","20","21","21","21","21","21","21","21","22","22","22","22","22","22","22","23","23","23","23","23","23","23"],"y":["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sun","Mon","Tue","Wed","Thu","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"z":[22,23,10,12,12,21,32,33,13,12,14,28,20,35,28,19,12,12,6,22,21,34,6,4,5,14,4,16,29,4,3,2,4,13,14,19,7,1,3,12,4,1,2,1,2,1,6,1,7,1,5,3,3,4,1,1,1,4,1,3,3,2,2,3,1,2,2,1,1,2,2,3,3,1,3,4,4,5,6,3,9,4,2,3,5,5,3,1,9,4,2,5,4,7,6,6,4,6,8,6,17,12,8,13,1,9,19,10,6,11,12,9,9,14,9,18,10,9,9,9,9,19,14,10,6,14,7,10,4,18,15,9,5,14,20,11,15,18,16,9,15,19,13,25,32,17,11,22,13,12,29,19,22,19,16,16,40,21,19,17,24,29,20],"type":"heatmap","xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"],"anchor":"y"},"xaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"],"anchor":"y2"},"yaxis2":{"domain":[0,0.45],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"anchor":"x2"},"yaxis":{"domain":[0.55,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"anchor":"x"},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"zaxis":{"title":"shooting"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.333333333333333},"title":"Heat Maps of Shootings"},"attrs":{"8da02defa862":{"x":{},"y":{},"z":{},"colors":"BuPu","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"heatmap"},"8da05117d17d":{"x":{},"y":{},"z":{},"colors":"YlGn","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"heatmap"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p>From both Pre-COVID and COVID time, the shooting are most centered at night, especially 23 PM - 4 AM. For the Pre-COVID time, most of the shootings are in the midnight of weekends, and for COVID, it seems to be more dispersed in nights.</p>
+</div>
+<div id="which-age-group-of-people-is-the-most-dangerous" class="section level5">
+<h5><strong>Which age group of people is the most dangerous?</strong></h5>
+<p>From the the visualization in the section of descriptive, we see that age group 18-24 and age group 25-44 have the highest shooting incidences. However, more statistical analysis are required to indicate if the age group 18-24 and group 25-44 are more dangerous or those two groups have larger proportion in the population.</p>
+<pre class="r"><code>vic_age_data = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;
+         ) %&gt;% 
+  group_by(vic_age_group) %&gt;%
+  summarise(incident_case = n()) %&gt;%
+  mutate(
+    prop = incident_case/age_clean_census$population * 100000 /15 ) %&gt;%
+  
+  ggplot(aes(vic_age_group, y = prop))  + geom_col() +
+  labs(x = &quot;Victim age group&quot;,
+       y = &quot;Incident rate  per 100,000 people&quot;,
+       title = &quot;Incident rate per 100,000 people vs Victim age group&quot;
+       )
+
+vic_age_data</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>The age group 18-24 have the highest incidents rate which 92.7 shooting incidents per 100,000 persons a year from 2006 to 2020 in New york city. The age 65+ have the lowest incidents rate which 1.02 shooting incidents per 100,000 persons a year from 2006 to 2020 in New york city. The age group least than 18 , 25-44, 45-64 have incidents rate of 15.9, 26.7, 5.10 shooting incidents per 100,000 persons a year from 2006 to 2020 in New York city. This statistical analysis indicates that age 18-24 is the most dangerous group in nyc. This results might be affected by behavior factor, such as, young people are more likely to do more out-door activity than children and older people, or people are also more aggressive in their 20s.</p>
+</div>
+</div>
+<div id="modeling-poisson-analysis" class="section level4">
+<h4>2.2 Modeling Poisson Analysis</h4>
+<p><strong>Goal</strong></p>
+<p>Our goal is to compare the rate of death in a gunshoot in recent years,such as 2019 to the same month in 2020 (e.g., rate of death in January 2019 v. rate of death in January 2020).Additionally,we stratified these rate ratio estimates by borough.</p>
+<p>To accomplish this, we filtered the tidy data to create one dataset for male victims and one for female victims. We created nested datasets by month, and, in each of these datasets, we mapped Poisson models to extract rate ratio estimates for number of death in each borough. Finally, we unnessted these models to extract the desired coefficients: rate ratios and standard errors (used to compute 95% confidence intervals).</p>
+<p>Tidy functions to filter either male or female victims.</p>
+<pre class="r"><code>mydata = read.csv(&quot;data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;% 
+mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, &quot;FALSE&quot; = &quot;1&quot;,&quot;TRUE&quot; = &quot;0&quot;)
+  ) %&gt;% 
+  mutate(statistical_murder_flag = as.numeric(statistical_murder_flag)) 
+
+
+male_based = mydata%&gt;% 
+  filter(vic_sex == &quot;male&quot;)
+
+female_based = mydata %&gt;% 
+  filter(vic_sex == &quot;female&quot;)
+
+month_df=
+  tibble(
+    month = 1:12,
+    month_name = factor(month.name, ordered = TRUE, levels = month.name)
+  )</code></pre>
+<div id="for-male-victims-in-differnent-boro-death-rate" class="section level5">
+<h5><strong>For male victims in differnent boro death rate</strong></h5>
+<pre class="r"><code>male_data = male_based %&gt;%
+  filter(year %in% c(2019,2020)) %&gt;%
+  mutate(boro = str_to_title(boro)) %&gt;%
+  group_by(year) %&gt;%
+  mutate(year = year - 2019) %&gt;%
+  nest(data = -month) %&gt;%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = &quot;poisson&quot;, data = .x)),
+         models = map(models, broom::tidy)) %&gt;% 
+  dplyr::select(-data) %&gt;% 
+  unnest(models) %&gt;%
+  dplyr::select(month, term, estimate, std.error, p.value) %&gt;% 
+  mutate(term = str_replace(term, &quot;year:boro&quot;, &quot;Boro: &quot;)) %&gt;% 
+  left_join(month_df, by = &quot;month&quot;) %&gt;%
+  dplyr::select(-month) %&gt;%
+  rename(month = month_name) %&gt;%
+  dplyr::select(month, everything())</code></pre>
+<pre class="r"><code>male_data %&gt;% 
+  filter(term != &quot;(Intercept)&quot;) %&gt;%
+  mutate(term = str_replace(term, &quot;2019 v. 2020, &quot;, &quot;&quot;)) %&gt;%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype=&quot;dashed&quot;, 
+                color = &quot;darkred&quot;, size = 1, alpha = .7) +
+  labs(
+    title = &quot;Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 Based on Male Victims&quot;,
+    x = &quot;Month&quot;,
+    y = &quot;2019 v. 2020 Difference&quot;
+  ) +
+  ylim(0, 5) +
+  theme(legend.position=&quot;right&quot;, legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p>Based on the figure above, no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in male victims. In part, this could be due to very wide confidence intervals.</p>
+</div>
+<div id="for-female-victims-in-differnent-boro-death-rate" class="section level5">
+<h5><strong>For female victims in differnent boro death rate</strong></h5>
+<pre class="r"><code>female_data = female_based %&gt;%
+  filter(year %in% c(2019,2020)) %&gt;%
+  mutate(boro = str_to_title(boro)) %&gt;%
+  group_by(year) %&gt;%
+  mutate(year = year - 2019) %&gt;%
+  nest(data = -month) %&gt;%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = &quot;poisson&quot;, data = .x)),
+         models = map(models, broom::tidy)) %&gt;% 
+  dplyr::select(-data) %&gt;% 
+  unnest(models) %&gt;%
+  dplyr::select(month, term, estimate, std.error, p.value) %&gt;% 
+  mutate(term = str_replace(term, &quot;year:boro&quot;, &quot;Boro: &quot;)) %&gt;% 
+  left_join(month_df, by = &quot;month&quot;) %&gt;%
+  dplyr::select(-month) %&gt;%
+  rename(month = month_name) %&gt;%
+  dplyr::select(month, everything())</code></pre>
+<pre class="r"><code>female_data %&gt;% 
+  filter(term != &quot;(Intercept)&quot;) %&gt;%
+  mutate(term = str_replace(term, &quot;2019 v. 2020, &quot;, &quot;&quot;)) %&gt;%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype=&quot;dashed&quot;, 
+                color = &quot;darkred&quot;, size = 1, alpha = .7) +
+  labs(
+    title = &quot;Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 Based on Female Victims&quot;,
+    x = &quot;Month&quot;,
+    y = &quot;2019 v. 2020 Difference&quot;
+  ) +
+  ylim(0, 5) +
+  theme(legend.position=&quot;right&quot;, legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p>Based on the figure above, also no majot discernable pattern was covered, suggesting that rates of death per gunshoot did not differ between 2019 and 2020 in female victims.</p>
+</div>
+<div id="summary" class="section level5">
+<h5>Summary</h5>
+<p>In conclusion, there was no major evidence that rates of death per gunshoot differed between 2019 and 2020 for gunshoot that involved either male or female.</p>
+</div>
+<div id="assorted-version" class="section level5">
+<h5>Assorted version</h5>
+<pre class="r"><code>my_data = mydata %&gt;%
+  filter(year %in% c(2019,2020)) %&gt;%
+  mutate(boro = str_to_title(boro)) %&gt;%
+  group_by(year) %&gt;%
+  mutate(year = year - 2019) %&gt;%
+  nest(data = -month) %&gt;%
+  mutate(models = map(data, ~glm( statistical_murder_flag~ year:boro,
+                                 family = &quot;poisson&quot;, data = .x)),
+         models = map(models, broom::tidy)) %&gt;% 
+  dplyr::select(-data) %&gt;% 
+  unnest(models) %&gt;%
+  dplyr::select(month, term, estimate, std.error, p.value) %&gt;% 
+  mutate(term = str_replace(term, &quot;year:boro&quot;, &quot;Boro: &quot;)) %&gt;% 
+  left_join(month_df, by = &quot;month&quot;) %&gt;%
+  dplyr::select(-month) %&gt;%
+  rename(month = month_name) %&gt;%
+  dplyr::select(month, everything())</code></pre>
+<pre class="r"><code>my_data %&gt;% 
+  filter(term != &quot;(Intercept)&quot;) %&gt;%
+  mutate(term = str_replace(term, &quot;2019 v. 2020, &quot;, &quot;&quot;)) %&gt;%
+  ggplot(aes(x = month, y = exp(estimate), color = term)) + 
+  geom_point(show.legend = FALSE, aes(size = estimate, alpha = .7)) +
+  geom_errorbar(aes(ymin = exp(estimate - (1.96*std.error)), 
+                    ymax = exp(estimate + (1.96*std.error)))) +
+  geom_hline(yintercept = 1, linetype=&quot;dashed&quot;, 
+                color = &quot;darkred&quot;, size = 1, alpha = .7) +
+  labs(
+    title = &quot;Difference in Rate of Death Per Gunshoot in 2019 vs. 2020 in Different Boro&quot;,
+    x = &quot;Month&quot;,
+    y = &quot;2019 v. 2020 Difference&quot;
+  ) +
+  ylim(0, 5) +
+  theme(legend.position=&quot;right&quot;, legend.title = element_blank(),
+        text = element_text(size = 9),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) + 
+  facet_grid(. ~ term)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="regression-analysis" class="section level3">
+<h3>3. Regression Analysis</h3>
+<p><strong>Goal</strong></p>
+<p>In this section the goal is to apply the time series analysis to fit a model to predict future New York shooting occurrences in one month. We will use the data from New York police department and count the shooting events for each month from Jan 2006 to Dec 2020.</p>
+<p>We want to use the SARIMA model to fit the seasonal pattern of the shooting occurrences plus forecast the future monthly occurrences. Model selection and diagnostic will be performed to obtain a good quality model.</p>
+<p>We are also interested about whether the COVID affects the shooting patterns. So we use the 2006 - 2018 data as the training set, and 2019-2020 data as the test set to compare with the prediction of the SARIMA model.</p>
+<pre class="r"><code>library(dplyr)
+library(readr)
+library(ggplot2)
+library(forecast)
+library(plotly)
+data_hist = 
+
+  read_csv(&quot;./data/NYPD_Shooting_Incident_Data_Clean.csv&quot;) %&gt;%
+  mutate(
+    statistical_murder_flag = as.character(statistical_murder_flag),
+    statistical_murder_flag = recode(statistical_murder_flag, &quot;FALSE&quot; = &quot;survived&quot;,&quot;TRUE&quot; = &quot;murdered&quot;)
+  )
+#unique(data_hist$boro)
+
+murder_count = data_hist %&gt;% count(year, month)
+murder_count_time_series = ts(murder_count$n, start = c(2006,1), frequency = 12)
+murder_count_time_series_train = ts(murder_count$n[1:(12*13)], start = c(2006,1), frequency = 12)
+murder_count_time_series_test = murder_count$n[(12*13+1):(length( murder_count$n))]</code></pre>
+<div id="data-visualization" class="section level4">
+<h4>Data visualization</h4>
+<p>First we make a time series plot about the data and try to observe the trend, variability and the seasonality.</p>
+<pre class="r"><code>l1 = autoplot(murder_count_time_series)+
+  ylab(&quot;Shoots&quot;) +
+  ggtitle(&quot;Shoooting in New York 2006-2020&quot;)
+ggplotly(l1, tooltip = c(&quot;x&quot;, &quot;y&quot;)) </code></pre>
+<div id="htmlwidget-6782d4525f729ee11143" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6782d4525f729ee11143">{"x":{"data":[{"x":[2006,2006.08333333333,2006.16666666667,2006.25,2006.33333333333,2006.41666666667,2006.5,2006.58333333333,2006.66666666667,2006.75,2006.83333333333,2006.91666666667,2007,2007.08333333333,2007.16666666667,2007.25,2007.33333333333,2007.41666666667,2007.5,2007.58333333333,2007.66666666667,2007.75,2007.83333333333,2007.91666666667,2008,2008.08333333333,2008.16666666667,2008.25,2008.33333333333,2008.41666666667,2008.5,2008.58333333333,2008.66666666667,2008.75,2008.83333333333,2008.91666666667,2009,2009.08333333333,2009.16666666667,2009.25,2009.33333333333,2009.41666666667,2009.5,2009.58333333333,2009.66666666667,2009.75,2009.83333333333,2009.91666666667,2010,2010.08333333333,2010.16666666667,2010.25,2010.33333333333,2010.41666666667,2010.5,2010.58333333333,2010.66666666667,2010.75,2010.83333333333,2010.91666666667,2011,2011.08333333333,2011.16666666667,2011.25,2011.33333333333,2011.41666666667,2011.5,2011.58333333333,2011.66666666667,2011.75,2011.83333333333,2011.91666666667,2012,2012.08333333333,2012.16666666667,2012.25,2012.33333333333,2012.41666666667,2012.5,2012.58333333333,2012.66666666667,2012.75,2012.83333333333,2012.91666666667,2013,2013.08333333333,2013.16666666667,2013.25,2013.33333333333,2013.41666666667,2013.5,2013.58333333333,2013.66666666667,2013.75,2013.83333333333,2013.91666666667,2014,2014.08333333333,2014.16666666667,2014.25,2014.33333333333,2014.41666666667,2014.5,2014.58333333333,2014.66666666667,2014.75,2014.83333333333,2014.91666666667,2015,2015.08333333333,2015.16666666667,2015.25,2015.33333333333,2015.41666666667,2015.5,2015.58333333333,2015.66666666667,2015.75,2015.83333333333,2015.91666666667,2016,2016.08333333333,2016.16666666667,2016.25,2016.33333333333,2016.41666666667,2016.5,2016.58333333333,2016.66666666667,2016.75,2016.83333333333,2016.91666666667,2017,2017.08333333333,2017.16666666667,2017.25,2017.33333333333,2017.41666666667,2017.5,2017.58333333333,2017.66666666667,2017.75,2017.83333333333,2017.91666666667,2018,2018.08333333333,2018.16666666667,2018.25,2018.33333333333,2018.41666666667,2018.5,2018.58333333333,2018.66666666667,2018.75,2018.83333333333,2018.91666666667,2019,2019.08333333333,2019.16666666667,2019.25,2019.33333333333,2019.41666666667,2019.5,2019.58333333333,2019.66666666667,2019.75,2019.83333333333,2019.91666666667,2020,2020.08333333333,2020.16666666667,2020.25,2020.33333333333,2020.41666666667,2020.5,2020.58333333333,2020.66666666667,2020.75,2020.83333333333,2020.91666666667],"y":[129,97,102,156,173,180,233,245,196,199,167,178,109,78,103,117,199,201,239,212,173,197,135,124,114,80,128,153,194,197,234,215,197,153,130,164,105,113,104,136,172,182,211,210,167,143,161,124,97,123,132,167,166,219,211,203,182,144,140,128,102,98,89,136,176,178,221,217,250,188,133,151,114,101,130,127,173,183,247,191,140,113,98,100,119,66,85,94,99,139,141,162,120,125,98,91,107,52,109,98,129,153,161,169,109,130,107,140,117,68,93,106,181,135,132,162,115,103,104,118,79,74,79,72,108,116,112,184,128,105,77,74,68,48,56,81,88,113,104,96,90,89,61,76,88,41,56,68,98,90,114,92,82,83,71,75,63,59,65,67,81,107,120,105,86,80,71,63,94,51,71,69,137,265,325,311,189,165,139,132],"text":["x: 2006.000<br />y: 129","x: 2006.083<br />y:  97","x: 2006.167<br />y: 102","x: 2006.250<br />y: 156","x: 2006.333<br />y: 173","x: 2006.417<br />y: 180","x: 2006.500<br />y: 233","x: 2006.583<br />y: 245","x: 2006.667<br />y: 196","x: 2006.750<br />y: 199","x: 2006.833<br />y: 167","x: 2006.917<br />y: 178","x: 2007.000<br />y: 109","x: 2007.083<br />y:  78","x: 2007.167<br />y: 103","x: 2007.250<br />y: 117","x: 2007.333<br />y: 199","x: 2007.417<br />y: 201","x: 2007.500<br />y: 239","x: 2007.583<br />y: 212","x: 2007.667<br />y: 173","x: 2007.750<br />y: 197","x: 2007.833<br />y: 135","x: 2007.917<br />y: 124","x: 2008.000<br />y: 114","x: 2008.083<br />y:  80","x: 2008.167<br />y: 128","x: 2008.250<br />y: 153","x: 2008.333<br />y: 194","x: 2008.417<br />y: 197","x: 2008.500<br />y: 234","x: 2008.583<br />y: 215","x: 2008.667<br />y: 197","x: 2008.750<br />y: 153","x: 2008.833<br />y: 130","x: 2008.917<br />y: 164","x: 2009.000<br />y: 105","x: 2009.083<br />y: 113","x: 2009.167<br />y: 104","x: 2009.250<br />y: 136","x: 2009.333<br />y: 172","x: 2009.417<br />y: 182","x: 2009.500<br />y: 211","x: 2009.583<br />y: 210","x: 2009.667<br />y: 167","x: 2009.750<br />y: 143","x: 2009.833<br />y: 161","x: 2009.917<br />y: 124","x: 2010.000<br />y:  97","x: 2010.083<br />y: 123","x: 2010.167<br />y: 132","x: 2010.250<br />y: 167","x: 2010.333<br />y: 166","x: 2010.417<br />y: 219","x: 2010.500<br />y: 211","x: 2010.583<br />y: 203","x: 2010.667<br />y: 182","x: 2010.750<br />y: 144","x: 2010.833<br />y: 140","x: 2010.917<br />y: 128","x: 2011.000<br />y: 102","x: 2011.083<br />y:  98","x: 2011.167<br />y:  89","x: 2011.250<br />y: 136","x: 2011.333<br />y: 176","x: 2011.417<br />y: 178","x: 2011.500<br />y: 221","x: 2011.583<br />y: 217","x: 2011.667<br />y: 250","x: 2011.750<br />y: 188","x: 2011.833<br />y: 133","x: 2011.917<br />y: 151","x: 2012.000<br />y: 114","x: 2012.083<br />y: 101","x: 2012.167<br />y: 130","x: 2012.250<br />y: 127","x: 2012.333<br />y: 173","x: 2012.417<br />y: 183","x: 2012.500<br />y: 247","x: 2012.583<br />y: 191","x: 2012.667<br />y: 140","x: 2012.750<br />y: 113","x: 2012.833<br />y:  98","x: 2012.917<br />y: 100","x: 2013.000<br />y: 119","x: 2013.083<br />y:  66","x: 2013.167<br />y:  85","x: 2013.250<br />y:  94","x: 2013.333<br />y:  99","x: 2013.417<br />y: 139","x: 2013.500<br />y: 141","x: 2013.583<br />y: 162","x: 2013.667<br />y: 120","x: 2013.750<br />y: 125","x: 2013.833<br />y:  98","x: 2013.917<br />y:  91","x: 2014.000<br />y: 107","x: 2014.083<br />y:  52","x: 2014.167<br />y: 109","x: 2014.250<br />y:  98","x: 2014.333<br />y: 129","x: 2014.417<br />y: 153","x: 2014.500<br />y: 161","x: 2014.583<br />y: 169","x: 2014.667<br />y: 109","x: 2014.750<br />y: 130","x: 2014.833<br />y: 107","x: 2014.917<br />y: 140","x: 2015.000<br />y: 117","x: 2015.083<br />y:  68","x: 2015.167<br />y:  93","x: 2015.250<br />y: 106","x: 2015.333<br />y: 181","x: 2015.417<br />y: 135","x: 2015.500<br />y: 132","x: 2015.583<br />y: 162","x: 2015.667<br />y: 115","x: 2015.750<br />y: 103","x: 2015.833<br />y: 104","x: 2015.917<br />y: 118","x: 2016.000<br />y:  79","x: 2016.083<br />y:  74","x: 2016.167<br />y:  79","x: 2016.250<br />y:  72","x: 2016.333<br />y: 108","x: 2016.417<br />y: 116","x: 2016.500<br />y: 112","x: 2016.583<br />y: 184","x: 2016.667<br />y: 128","x: 2016.750<br />y: 105","x: 2016.833<br />y:  77","x: 2016.917<br />y:  74","x: 2017.000<br />y:  68","x: 2017.083<br />y:  48","x: 2017.167<br />y:  56","x: 2017.250<br />y:  81","x: 2017.333<br />y:  88","x: 2017.417<br />y: 113","x: 2017.500<br />y: 104","x: 2017.583<br />y:  96","x: 2017.667<br />y:  90","x: 2017.750<br />y:  89","x: 2017.833<br />y:  61","x: 2017.917<br />y:  76","x: 2018.000<br />y:  88","x: 2018.083<br />y:  41","x: 2018.167<br />y:  56","x: 2018.250<br />y:  68","x: 2018.333<br />y:  98","x: 2018.417<br />y:  90","x: 2018.500<br />y: 114","x: 2018.583<br />y:  92","x: 2018.667<br />y:  82","x: 2018.750<br />y:  83","x: 2018.833<br />y:  71","x: 2018.917<br />y:  75","x: 2019.000<br />y:  63","x: 2019.083<br />y:  59","x: 2019.167<br />y:  65","x: 2019.250<br />y:  67","x: 2019.333<br />y:  81","x: 2019.417<br />y: 107","x: 2019.500<br />y: 120","x: 2019.583<br />y: 105","x: 2019.667<br />y:  86","x: 2019.750<br />y:  80","x: 2019.833<br />y:  71","x: 2019.917<br />y:  63","x: 2020.000<br />y:  94","x: 2020.083<br />y:  51","x: 2020.167<br />y:  71","x: 2020.250<br />y:  69","x: 2020.333<br />y: 137","x: 2020.417<br />y: 265","x: 2020.500<br />y: 325","x: 2020.583<br />y: 311","x: 2020.667<br />y: 189","x: 2020.750<br />y: 165","x: 2020.833<br />y: 139","x: 2020.917<br />y: 132"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":40.1826484018265,"l":43.1050228310502},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":"Shoooting in New York 2006-2020","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[2005.25416666667,2021.6625],"tickmode":"array","ticktext":["2010","2015","2020"],"tickvals":[2010,2015,2020],"categoryorder":"array","categoryarray":["2010","2015","2020"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[26.8,339.2],"tickmode":"array","ticktext":["100","200","300"],"tickvals":[100,200,300],"categoryorder":"array","categoryarray":["100","200","300"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Shoots","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8da04f73d8fb":{"x":{},"y":{},"type":"scatter"}},"cur_data":"8da04f73d8fb","visdat":{"8da04f73d8fb":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p>From this plot we can observe:</p>
+<ol style="list-style-type: decimal">
+<li><p>For the trend, the average shooting events is actually decreasing overtime, except the last year 2020, after COVID outbreak, there was a huge spike of occurrences.</p></li>
+<li><p>For the variation, it seems except the last year, the variation tends to decrease.</p></li>
+<li><p>For the seasonality, there is a very significant seasonality that in winter there are less shootings and in summer there are more. Probably because winter people will not go out so much compared to summer.</p></li>
+</ol>
+<p>Also we can check the seasonality by plot each years data by different colors. From the plot below there is a clear spike in summer for all of the years.</p>
+<pre class="r"><code>l1 = ggseasonplot(murder_count_time_series, year.labels=TRUE, year.labels.left=TRUE) +
+  ylab(&quot;Shoots&quot;) +
+  ggtitle(&quot;Seasonal Plot: Shoooting in New York 2006-2020&quot;)
+ggplotly(l1, tooltip = c(&quot;x&quot;, &quot;y&quot;)) </code></pre>
+<div id="htmlwidget-187cce6a975bec7d5a91" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-187cce6a975bec7d5a91">{"x":{"data":[{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[129,97,102,156,173,180,233,245,196,199,167,178],"text":["time: 0.00000000<br />y: 129","time: 0.08333333<br />y:  97","time: 0.16666667<br />y: 102","time: 0.25000000<br />y: 156","time: 0.33333333<br />y: 173","time: 0.41666667<br />y: 180","time: 0.50000000<br />y: 233","time: 0.58333333<br />y: 245","time: 0.66666667<br />y: 196","time: 0.75000000<br />y: 199","time: 0.83333333<br />y: 167","time: 0.91666667<br />y: 178"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(248,118,109,1)","dash":"solid"},"hoveron":"points","name":"2006","legendgroup":"2006","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[109,78,103,117,199,201,239,212,173,197,135,124],"text":["time: 0.00000000<br />y: 109","time: 0.08333333<br />y:  78","time: 0.16666667<br />y: 103","time: 0.25000000<br />y: 117","time: 0.33333333<br />y: 199","time: 0.41666667<br />y: 201","time: 0.50000000<br />y: 239","time: 0.58333333<br />y: 212","time: 0.66666667<br />y: 173","time: 0.75000000<br />y: 197","time: 0.83333333<br />y: 135","time: 0.91666667<br />y: 124"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(229,135,0,1)","dash":"solid"},"hoveron":"points","name":"2007","legendgroup":"2007","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[114,80,128,153,194,197,234,215,197,153,130,164],"text":["time: 0.00000000<br />y: 114","time: 0.08333333<br />y:  80","time: 0.16666667<br />y: 128","time: 0.25000000<br />y: 153","time: 0.33333333<br />y: 194","time: 0.41666667<br />y: 197","time: 0.50000000<br />y: 234","time: 0.58333333<br />y: 215","time: 0.66666667<br />y: 197","time: 0.75000000<br />y: 153","time: 0.83333333<br />y: 130","time: 0.91666667<br />y: 164"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(201,152,0,1)","dash":"solid"},"hoveron":"points","name":"2008","legendgroup":"2008","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[105,113,104,136,172,182,211,210,167,143,161,124],"text":["time: 0.00000000<br />y: 105","time: 0.08333333<br />y: 113","time: 0.16666667<br />y: 104","time: 0.25000000<br />y: 136","time: 0.33333333<br />y: 172","time: 0.41666667<br />y: 182","time: 0.50000000<br />y: 211","time: 0.58333333<br />y: 210","time: 0.66666667<br />y: 167","time: 0.75000000<br />y: 143","time: 0.83333333<br />y: 161","time: 0.91666667<br />y: 124"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(163,165,0,1)","dash":"solid"},"hoveron":"points","name":"2009","legendgroup":"2009","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[97,123,132,167,166,219,211,203,182,144,140,128],"text":["time: 0.00000000<br />y:  97","time: 0.08333333<br />y: 123","time: 0.16666667<br />y: 132","time: 0.25000000<br />y: 167","time: 0.33333333<br />y: 166","time: 0.41666667<br />y: 219","time: 0.50000000<br />y: 211","time: 0.58333333<br />y: 203","time: 0.66666667<br />y: 182","time: 0.75000000<br />y: 144","time: 0.83333333<br />y: 140","time: 0.91666667<br />y: 128"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(107,177,0,1)","dash":"solid"},"hoveron":"points","name":"2010","legendgroup":"2010","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[102,98,89,136,176,178,221,217,250,188,133,151],"text":["time: 0.00000000<br />y: 102","time: 0.08333333<br />y:  98","time: 0.16666667<br />y:  89","time: 0.25000000<br />y: 136","time: 0.33333333<br />y: 176","time: 0.41666667<br />y: 178","time: 0.50000000<br />y: 221","time: 0.58333333<br />y: 217","time: 0.66666667<br />y: 250","time: 0.75000000<br />y: 188","time: 0.83333333<br />y: 133","time: 0.91666667<br />y: 151"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,186,56,1)","dash":"solid"},"hoveron":"points","name":"2011","legendgroup":"2011","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[114,101,130,127,173,183,247,191,140,113,98,100],"text":["time: 0.00000000<br />y: 114","time: 0.08333333<br />y: 101","time: 0.16666667<br />y: 130","time: 0.25000000<br />y: 127","time: 0.33333333<br />y: 173","time: 0.41666667<br />y: 183","time: 0.50000000<br />y: 247","time: 0.58333333<br />y: 191","time: 0.66666667<br />y: 140","time: 0.75000000<br />y: 113","time: 0.83333333<br />y:  98","time: 0.91666667<br />y: 100"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,191,125,1)","dash":"solid"},"hoveron":"points","name":"2012","legendgroup":"2012","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[119,66,85,94,99,139,141,162,120,125,98,91],"text":["time: 0.00000000<br />y: 119","time: 0.08333333<br />y:  66","time: 0.16666667<br />y:  85","time: 0.25000000<br />y:  94","time: 0.33333333<br />y:  99","time: 0.41666667<br />y: 139","time: 0.50000000<br />y: 141","time: 0.58333333<br />y: 162","time: 0.66666667<br />y: 120","time: 0.75000000<br />y: 125","time: 0.83333333<br />y:  98","time: 0.91666667<br />y:  91"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,192,175,1)","dash":"solid"},"hoveron":"points","name":"2013","legendgroup":"2013","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[107,52,109,98,129,153,161,169,109,130,107,140],"text":["time: 0.00000000<br />y: 107","time: 0.08333333<br />y:  52","time: 0.16666667<br />y: 109","time: 0.25000000<br />y:  98","time: 0.33333333<br />y: 129","time: 0.41666667<br />y: 153","time: 0.50000000<br />y: 161","time: 0.58333333<br />y: 169","time: 0.66666667<br />y: 109","time: 0.75000000<br />y: 130","time: 0.83333333<br />y: 107","time: 0.91666667<br />y: 140"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,188,216,1)","dash":"solid"},"hoveron":"points","name":"2014","legendgroup":"2014","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[117,68,93,106,181,135,132,162,115,103,104,118],"text":["time: 0.00000000<br />y: 117","time: 0.08333333<br />y:  68","time: 0.16666667<br />y:  93","time: 0.25000000<br />y: 106","time: 0.33333333<br />y: 181","time: 0.41666667<br />y: 135","time: 0.50000000<br />y: 132","time: 0.58333333<br />y: 162","time: 0.66666667<br />y: 115","time: 0.75000000<br />y: 103","time: 0.83333333<br />y: 104","time: 0.91666667<br />y: 118"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,176,246,1)","dash":"solid"},"hoveron":"points","name":"2015","legendgroup":"2015","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[79,74,79,72,108,116,112,184,128,105,77,74],"text":["time: 0.00000000<br />y:  79","time: 0.08333333<br />y:  74","time: 0.16666667<br />y:  79","time: 0.25000000<br />y:  72","time: 0.33333333<br />y: 108","time: 0.41666667<br />y: 116","time: 0.50000000<br />y: 112","time: 0.58333333<br />y: 184","time: 0.66666667<br />y: 128","time: 0.75000000<br />y: 105","time: 0.83333333<br />y:  77","time: 0.91666667<br />y:  74"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(97,156,255,1)","dash":"solid"},"hoveron":"points","name":"2016","legendgroup":"2016","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[68,48,56,81,88,113,104,96,90,89,61,76],"text":["time: 0.00000000<br />y:  68","time: 0.08333333<br />y:  48","time: 0.16666667<br />y:  56","time: 0.25000000<br />y:  81","time: 0.33333333<br />y:  88","time: 0.41666667<br />y: 113","time: 0.50000000<br />y: 104","time: 0.58333333<br />y:  96","time: 0.66666667<br />y:  90","time: 0.75000000<br />y:  89","time: 0.83333333<br />y:  61","time: 0.91666667<br />y:  76"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(185,131,255,1)","dash":"solid"},"hoveron":"points","name":"2017","legendgroup":"2017","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[88,41,56,68,98,90,114,92,82,83,71,75],"text":["time: 0.00000000<br />y:  88","time: 0.08333333<br />y:  41","time: 0.16666667<br />y:  56","time: 0.25000000<br />y:  68","time: 0.33333333<br />y:  98","time: 0.41666667<br />y:  90","time: 0.50000000<br />y: 114","time: 0.58333333<br />y:  92","time: 0.66666667<br />y:  82","time: 0.75000000<br />y:  83","time: 0.83333333<br />y:  71","time: 0.91666667<br />y:  75"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(231,107,243,1)","dash":"solid"},"hoveron":"points","name":"2018","legendgroup":"2018","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[63,59,65,67,81,107,120,105,86,80,71,63],"text":["time: 0.00000000<br />y:  63","time: 0.08333333<br />y:  59","time: 0.16666667<br />y:  65","time: 0.25000000<br />y:  67","time: 0.33333333<br />y:  81","time: 0.41666667<br />y: 107","time: 0.50000000<br />y: 120","time: 0.58333333<br />y: 105","time: 0.66666667<br />y:  86","time: 0.75000000<br />y:  80","time: 0.83333333<br />y:  71","time: 0.91666667<br />y:  63"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(253,97,209,1)","dash":"solid"},"hoveron":"points","name":"2019","legendgroup":"2019","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"y":[94,51,71,69,137,265,325,311,189,165,139,132],"text":["time: 0.00000000<br />y:  94","time: 0.08333333<br />y:  51","time: 0.16666667<br />y:  71","time: 0.25000000<br />y:  69","time: 0.33333333<br />y: 137","time: 0.41666667<br />y: 265","time: 0.50000000<br />y: 325","time: 0.58333333<br />y: 311","time: 0.66666667<br />y: 189","time: 0.75000000<br />y: 165","time: 0.83333333<br />y: 139","time: 0.91666667<br />y: 132"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(255,103,164,1)","dash":"solid"},"hoveron":"points","name":"2020","legendgroup":"2020","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[129,178],"text":["2006","2006"],"hovertext":["time: -0.0400000<br />y: 129","time:  0.9566667<br />y: 178"],"textfont":{"size":14.6645669291339,"color":"rgba(248,118,109,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2006","legendgroup":"2006","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[109,124],"text":["2007","2007"],"hovertext":["time: -0.0400000<br />y: 109","time:  0.9566667<br />y: 124"],"textfont":{"size":14.6645669291339,"color":"rgba(229,135,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2007","legendgroup":"2007","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[114,164],"text":["2008","2008"],"hovertext":["time: -0.0400000<br />y: 114","time:  0.9566667<br />y: 164"],"textfont":{"size":14.6645669291339,"color":"rgba(201,152,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2008","legendgroup":"2008","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[105,124],"text":["2009","2009"],"hovertext":["time: -0.0400000<br />y: 105","time:  0.9566667<br />y: 124"],"textfont":{"size":14.6645669291339,"color":"rgba(163,165,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2009","legendgroup":"2009","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[97,128],"text":["2010","2010"],"hovertext":["time: -0.0400000<br />y:  97","time:  0.9566667<br />y: 128"],"textfont":{"size":14.6645669291339,"color":"rgba(107,177,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2010","legendgroup":"2010","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[102,151],"text":["2011","2011"],"hovertext":["time: -0.0400000<br />y: 102","time:  0.9566667<br />y: 151"],"textfont":{"size":14.6645669291339,"color":"rgba(0,186,56,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2011","legendgroup":"2011","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[114,100],"text":["2012","2012"],"hovertext":["time: -0.0400000<br />y: 114","time:  0.9566667<br />y: 100"],"textfont":{"size":14.6645669291339,"color":"rgba(0,191,125,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2012","legendgroup":"2012","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[119,91],"text":["2013","2013"],"hovertext":["time: -0.0400000<br />y: 119","time:  0.9566667<br />y:  91"],"textfont":{"size":14.6645669291339,"color":"rgba(0,192,175,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2013","legendgroup":"2013","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[107,140],"text":["2014","2014"],"hovertext":["time: -0.0400000<br />y: 107","time:  0.9566667<br />y: 140"],"textfont":{"size":14.6645669291339,"color":"rgba(0,188,216,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2014","legendgroup":"2014","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[117,118],"text":["2015","2015"],"hovertext":["time: -0.0400000<br />y: 117","time:  0.9566667<br />y: 118"],"textfont":{"size":14.6645669291339,"color":"rgba(0,176,246,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2015","legendgroup":"2015","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[79,74],"text":["2016","2016"],"hovertext":["time: -0.0400000<br />y:  79","time:  0.9566667<br />y:  74"],"textfont":{"size":14.6645669291339,"color":"rgba(97,156,255,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2016","legendgroup":"2016","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[68,76],"text":["2017","2017"],"hovertext":["time: -0.0400000<br />y:  68","time:  0.9566667<br />y:  76"],"textfont":{"size":14.6645669291339,"color":"rgba(185,131,255,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2017","legendgroup":"2017","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[88,75],"text":["2018","2018"],"hovertext":["time: -0.0400000<br />y:  88","time:  0.9566667<br />y:  75"],"textfont":{"size":14.6645669291339,"color":"rgba(231,107,243,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2018","legendgroup":"2018","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[63,63],"text":["2019","2019"],"hovertext":["time: -0.0400000<br />y:  63","time:  0.9566667<br />y:  63"],"textfont":{"size":14.6645669291339,"color":"rgba(253,97,209,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2019","legendgroup":"2019","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.04,0.956666666666667],"y":[94,132],"text":["2020","2020"],"hovertext":["time: -0.0400000<br />y:  94","time:  0.9566667<br />y: 132"],"textfont":{"size":14.6645669291339,"color":"rgba(255,103,164,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"2020","legendgroup":"2020","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":40.1826484018265,"l":43.1050228310502},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":"Seasonal Plot: Shoooting in New York 2006-2020","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.0898333333333333,1.0065],"tickmode":"array","ticktext":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"tickvals":[0,0.0833333333333333,0.166666666666667,0.25,0.333333333333333,0.416666666666667,0.5,0.583333333333333,0.666666666666667,0.75,0.833333333333333,0.916666666666667],"categoryorder":"array","categoryarray":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Month","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[26.8,339.2],"tickmode":"array","ticktext":["100","200","300"],"tickvals":[100,200,300],"categoryorder":"array","categoryarray":["100","200","300"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Shoots","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8da074f03fd":{"colour":{},"x":{},"y":{},"type":"scatter"},"8da0548edaca":{"colour":{},"x":{},"y":{},"label":{}}},"cur_data":"8da074f03fd","visdat":{"8da074f03fd":["function (y) ","x"],"8da0548edaca":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="data-transformation" class="section level4">
+<h4>Data transformation</h4>
+<p>Now we need transformation to make the data suitable for fitting the SARIMA model. The SARIMA model assumes the data need to be stationary, without any seasonality trend, and have equal variance.</p>
+<p>First we check whether we need to apply a box-cox transformation to stablize the variance.</p>
+<pre class="r"><code>library(MASS)
+lambda = boxcox(murder_count_time_series_train~1)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<pre class="r"><code>optlambda = lambda$x[which.max(lambda$y)]
+train1 = (murder_count_time_series_train^optlambda - 1)/optlambda</code></pre>
+<p>As the 95% interval for the best lambda parameter of the box cox transformation does not include 1, so we should use the box cox transformation with lambda = 0.263.</p>
+<p>Then to remove the seasonality trend, we apply a log 12 difference. It does not seems very stationary, so we apply additional lag 1 difference. Now it looks quite good and we can proceed to select the model.</p>
+<pre class="r"><code>train_lag12 = train1 %&gt;% diff(lag = 12)  
+l1 =autoplot(train_lag12)+
+  ylab(&quot;train&quot;) +
+  ggtitle(&quot;Shoooting in New York 2006-2020, lag 12&quot;)
+ggplotly(l1, tooltip = c(&quot;x&quot;, &quot;y&quot;)) </code></pre>
+<div id="htmlwidget-d1d7bda077f1716f12b3" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d1d7bda077f1716f12b3">{"x":{"data":[{"x":[2007,2007.08333333333,2007.16666666667,2007.25,2007.33333333333,2007.41666666667,2007.5,2007.58333333333,2007.66666666667,2007.75,2007.83333333333,2007.91666666667,2008,2008.08333333333,2008.16666666667,2008.25,2008.33333333333,2008.41666666667,2008.5,2008.58333333333,2008.66666666667,2008.75,2008.83333333333,2008.91666666667,2009,2009.08333333333,2009.16666666667,2009.25,2009.33333333333,2009.41666666667,2009.5,2009.58333333333,2009.66666666667,2009.75,2009.83333333333,2009.91666666667,2010,2010.08333333333,2010.16666666667,2010.25,2010.33333333333,2010.41666666667,2010.5,2010.58333333333,2010.66666666667,2010.75,2010.83333333333,2010.91666666667,2011,2011.08333333333,2011.16666666667,2011.25,2011.33333333333,2011.41666666667,2011.5,2011.58333333333,2011.66666666667,2011.75,2011.83333333333,2011.91666666667,2012,2012.08333333333,2012.16666666667,2012.25,2012.33333333333,2012.41666666667,2012.5,2012.58333333333,2012.66666666667,2012.75,2012.83333333333,2012.91666666667,2013,2013.08333333333,2013.16666666667,2013.25,2013.33333333333,2013.41666666667,2013.5,2013.58333333333,2013.66666666667,2013.75,2013.83333333333,2013.91666666667,2014,2014.08333333333,2014.16666666667,2014.25,2014.33333333333,2014.41666666667,2014.5,2014.58333333333,2014.66666666667,2014.75,2014.83333333333,2014.91666666667,2015,2015.08333333333,2015.16666666667,2015.25,2015.33333333333,2015.41666666667,2015.5,2015.58333333333,2015.66666666667,2015.75,2015.83333333333,2015.91666666667,2016,2016.08333333333,2016.16666666667,2016.25,2016.33333333333,2016.41666666667,2016.5,2016.58333333333,2016.66666666667,2016.75,2016.83333333333,2016.91666666667,2017,2017.08333333333,2017.16666666667,2017.25,2017.33333333333,2017.41666666667,2017.5,2017.58333333333,2017.66666666667,2017.75,2017.83333333333,2017.91666666667,2018,2018.08333333333,2018.16666666667,2018.25,2018.33333333333,2018.41666666667,2018.5,2018.58333333333,2018.66666666667,2018.75,2018.83333333333,2018.91666666667],"y":[-0.590517635730384,-0.70447596281141,0.0329114665497183,-1.04371543906979,0.552011315264044,0.437891655953162,0.106768525103664,-0.602029456707276,-0.491136772552016,-0.0405071572700546,-0.793369469824938,-1.34486048715497,0.154671362207223,0.0797598767421572,0.755331345108331,0.970757657702803,-0.101840306285361,-0.0807152271645624,-0.0888340829048353,0.0574763276535979,0.51150415799399,-0.979422961281085,-0.136187349197289,1.02882864559635,-0.282220665966996,1.14266584253546,-0.722654654374374,-0.434650722083468,-0.472591816023529,-0.313897157713495,-0.427677410168839,-0.0961279064076184,-0.647493751085669,-0.251079868238355,0.78991528929391,-1.02882864559635,-0.266257334265465,0.296766744594427,0.833142786284311,0.766579932278884,-0.136582585138278,0.743832643356129,0,-0.137455913443715,0.333596593372175,0.0256800094092089,-0.521210691457574,0.113064242706384,0.168223353762878,-0.780568705591408,-1.34993318028672,-0.766579932278884,0.225697433024518,-0.830747240996098,0.189969907383141,0.271573627617279,1.29856877067936,1.01869385365976,-0.186538413546685,0.603958437653443,0.380254646469583,0.100925302355945,1.29500247807093,-0.246553373263739,-0.0666940408413943,0.1084228361232,0.46586743584697,-0.515572690771126,-2.29301758523742,-1.88499544230629,-1.0600419839355,-1.4587446733285,0.149747038928615,-1.35273979677685,-1.44358182539083,-1.03247304824459,-2.00953039373489,-1.04217800728855,-2.21554493724715,-0.640228505693768,-0.553112781512736,0.353967511914126,0,-0.312209488080015,-0.367753531919362,-0.694482098735301,0.825364868300992,0.138173735119134,0.916284660261526,0.355143965237728,0.495127480344649,0.161828924214751,-0.333808773413441,0.14010632673474,0.296323711772482,1.49125775128556,0.308422038997374,0.784546061631371,-0.533051651313302,0.264328301263395,1.2692571771886,-0.461440259629523,-0.734984587078124,-0.161828924214751,0.185002777265813,-0.810888774802482,-0.0966599961951591,-0.61207620944821,-1.30330344865025,0.258968914714383,-0.525164889123102,-1.25165377496213,-1.8913342709171,-0.539263978499655,-0.579732649552227,0.492631035997665,0.377656750129876,0.0651225139528684,-0.978734109460186,-1.53728580484443,-0.463192833644436,-1.26709479088962,-1.0365040307415,0.367791211809477,-0.681901738684916,-0.0909972093465008,-0.253410136732084,-2.35251536909568,-1.20307198763539,-0.549236217221315,-0.707056798586213,0.0828753833604692,0.807948177397812,-0.426791466528995,0,-0.542216269635572,0.353802354127023,-0.764555578680675,0.314666489185907,-0.140336072154941,-0.299807444626111,-0.224810086209276,0.455878927297596,-0.0412339846224921],"text":["x: 2007.000<br />y: -0.59051764","x: 2007.083<br />y: -0.70447596","x: 2007.167<br />y:  0.03291147","x: 2007.250<br />y: -1.04371544","x: 2007.333<br />y:  0.55201132","x: 2007.417<br />y:  0.43789166","x: 2007.500<br />y:  0.10676853","x: 2007.583<br />y: -0.60202946","x: 2007.667<br />y: -0.49113677","x: 2007.750<br />y: -0.04050716","x: 2007.833<br />y: -0.79336947","x: 2007.917<br />y: -1.34486049","x: 2008.000<br />y:  0.15467136","x: 2008.083<br />y:  0.07975988","x: 2008.167<br />y:  0.75533135","x: 2008.250<br />y:  0.97075766","x: 2008.333<br />y: -0.10184031","x: 2008.417<br />y: -0.08071523","x: 2008.500<br />y: -0.08883408","x: 2008.583<br />y:  0.05747633","x: 2008.667<br />y:  0.51150416","x: 2008.750<br />y: -0.97942296","x: 2008.833<br />y: -0.13618735","x: 2008.917<br />y:  1.02882865","x: 2009.000<br />y: -0.28222067","x: 2009.083<br />y:  1.14266584","x: 2009.167<br />y: -0.72265465","x: 2009.250<br />y: -0.43465072","x: 2009.333<br />y: -0.47259182","x: 2009.417<br />y: -0.31389716","x: 2009.500<br />y: -0.42767741","x: 2009.583<br />y: -0.09612791","x: 2009.667<br />y: -0.64749375","x: 2009.750<br />y: -0.25107987","x: 2009.833<br />y:  0.78991529","x: 2009.917<br />y: -1.02882865","x: 2010.000<br />y: -0.26625733","x: 2010.083<br />y:  0.29676674","x: 2010.167<br />y:  0.83314279","x: 2010.250<br />y:  0.76657993","x: 2010.333<br />y: -0.13658259","x: 2010.417<br />y:  0.74383264","x: 2010.500<br />y:  0.00000000","x: 2010.583<br />y: -0.13745591","x: 2010.667<br />y:  0.33359659","x: 2010.750<br />y:  0.02568001","x: 2010.833<br />y: -0.52121069","x: 2010.917<br />y:  0.11306424","x: 2011.000<br />y:  0.16822335","x: 2011.083<br />y: -0.78056871","x: 2011.167<br />y: -1.34993318","x: 2011.250<br />y: -0.76657993","x: 2011.333<br />y:  0.22569743","x: 2011.417<br />y: -0.83074724","x: 2011.500<br />y:  0.18996991","x: 2011.583<br />y:  0.27157363","x: 2011.667<br />y:  1.29856877","x: 2011.750<br />y:  1.01869385","x: 2011.833<br />y: -0.18653841","x: 2011.917<br />y:  0.60395844","x: 2012.000<br />y:  0.38025465","x: 2012.083<br />y:  0.10092530","x: 2012.167<br />y:  1.29500248","x: 2012.250<br />y: -0.24655337","x: 2012.333<br />y: -0.06669404","x: 2012.417<br />y:  0.10842284","x: 2012.500<br />y:  0.46586744","x: 2012.583<br />y: -0.51557269","x: 2012.667<br />y: -2.29301759","x: 2012.750<br />y: -1.88499544","x: 2012.833<br />y: -1.06004198","x: 2012.917<br />y: -1.45874467","x: 2013.000<br />y:  0.14974704","x: 2013.083<br />y: -1.35273980","x: 2013.167<br />y: -1.44358183","x: 2013.250<br />y: -1.03247305","x: 2013.333<br />y: -2.00953039","x: 2013.417<br />y: -1.04217801","x: 2013.500<br />y: -2.21554494","x: 2013.583<br />y: -0.64022851","x: 2013.667<br />y: -0.55311278","x: 2013.750<br />y:  0.35396751","x: 2013.833<br />y:  0.00000000","x: 2013.917<br />y: -0.31220949","x: 2014.000<br />y: -0.36775353","x: 2014.083<br />y: -0.69448210","x: 2014.167<br />y:  0.82536487","x: 2014.250<br />y:  0.13817374","x: 2014.333<br />y:  0.91628466","x: 2014.417<br />y:  0.35514397","x: 2014.500<br />y:  0.49512748","x: 2014.583<br />y:  0.16182892","x: 2014.667<br />y: -0.33380877","x: 2014.750<br />y:  0.14010633","x: 2014.833<br />y:  0.29632371","x: 2014.917<br />y:  1.49125775","x: 2015.000<br />y:  0.30842204","x: 2015.083<br />y:  0.78454606","x: 2015.167<br />y: -0.53305165","x: 2015.250<br />y:  0.26432830","x: 2015.333<br />y:  1.26925718","x: 2015.417<br />y: -0.46144026","x: 2015.500<br />y: -0.73498459","x: 2015.583<br />y: -0.16182892","x: 2015.667<br />y:  0.18500278","x: 2015.750<br />y: -0.81088877","x: 2015.833<br />y: -0.09666000","x: 2015.917<br />y: -0.61207621","x: 2016.000<br />y: -1.30330345","x: 2016.083<br />y:  0.25896891","x: 2016.167<br />y: -0.52516489","x: 2016.250<br />y: -1.25165377","x: 2016.333<br />y: -1.89133427","x: 2016.417<br />y: -0.53926398","x: 2016.500<br />y: -0.57973265","x: 2016.583<br />y:  0.49263104","x: 2016.667<br />y:  0.37765675","x: 2016.750<br />y:  0.06512251","x: 2016.833<br />y: -0.97873411","x: 2016.917<br />y: -1.53728580","x: 2017.000<br />y: -0.46319283","x: 2017.083<br />y: -1.26709479","x: 2017.167<br />y: -1.03650403","x: 2017.250<br />y:  0.36779121","x: 2017.333<br />y: -0.68190174","x: 2017.417<br />y: -0.09099721","x: 2017.500<br />y: -0.25341014","x: 2017.583<br />y: -2.35251537","x: 2017.667<br />y: -1.20307199","x: 2017.750<br />y: -0.54923622","x: 2017.833<br />y: -0.70705680","x: 2017.917<br />y:  0.08287538","x: 2018.000<br />y:  0.80794818","x: 2018.083<br />y: -0.42679147","x: 2018.167<br />y:  0.00000000","x: 2018.250<br />y: -0.54221627","x: 2018.333<br />y:  0.35380235","x: 2018.417<br />y: -0.76455558","x: 2018.500<br />y:  0.31466649","x: 2018.583<br />y: -0.14033607","x: 2018.667<br />y: -0.29980744","x: 2018.750<br />y: -0.22481009","x: 2018.833<br />y:  0.45587893","x: 2018.917<br />y: -0.04123398"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":40.1826484018265,"l":37.2602739726027},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":"Shoooting in New York 2006-2020, lag 12","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[2006.40416666667,2019.5125],"tickmode":"array","ticktext":["2008","2010","2012","2014","2016","2018"],"tickvals":[2008,2010,2012,2014,2016,2018],"categoryorder":"array","categoryarray":["2008","2010","2012","2014","2016","2018"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-2.54470402511474,1.68344640730462],"tickmode":"array","ticktext":["-2","-1","0","1"],"tickvals":[-2,-1,0,1],"categoryorder":"array","categoryarray":["-2","-1","0","1"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"train","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8da044a83cb9":{"x":{},"y":{},"type":"scatter"}},"cur_data":"8da044a83cb9","visdat":{"8da044a83cb9":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>train_lag121 = train1 %&gt;% diff(lag = 12)  %&gt;% diff(lag = 1)  
+l1 =autoplot(train_lag121)+
+  ylab(&quot;train&quot;) +
+  ggtitle(&quot;Shoooting in New York 2006-2020, lag 12, then lag 1&quot;)
+ggplotly(l1, tooltip = c(&quot;x&quot;, &quot;y&quot;)) </code></pre>
+<div id="htmlwidget-a0ffa4f5129a07c6714c" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-a0ffa4f5129a07c6714c">{"x":{"data":[{"x":[2007.08333333333,2007.16666666667,2007.25,2007.33333333333,2007.41666666667,2007.5,2007.58333333333,2007.66666666667,2007.75,2007.83333333333,2007.91666666667,2008,2008.08333333333,2008.16666666667,2008.25,2008.33333333333,2008.41666666667,2008.5,2008.58333333333,2008.66666666667,2008.75,2008.83333333333,2008.91666666667,2009,2009.08333333333,2009.16666666667,2009.25,2009.33333333333,2009.41666666667,2009.5,2009.58333333333,2009.66666666667,2009.75,2009.83333333333,2009.91666666667,2010,2010.08333333333,2010.16666666667,2010.25,2010.33333333333,2010.41666666667,2010.5,2010.58333333333,2010.66666666667,2010.75,2010.83333333333,2010.91666666667,2011,2011.08333333333,2011.16666666667,2011.25,2011.33333333333,2011.41666666667,2011.5,2011.58333333333,2011.66666666667,2011.75,2011.83333333333,2011.91666666667,2012,2012.08333333333,2012.16666666667,2012.25,2012.33333333333,2012.41666666667,2012.5,2012.58333333333,2012.66666666667,2012.75,2012.83333333333,2012.91666666667,2013,2013.08333333333,2013.16666666667,2013.25,2013.33333333333,2013.41666666667,2013.5,2013.58333333333,2013.66666666667,2013.75,2013.83333333333,2013.91666666667,2014,2014.08333333333,2014.16666666667,2014.25,2014.33333333333,2014.41666666667,2014.5,2014.58333333333,2014.66666666667,2014.75,2014.83333333333,2014.91666666667,2015,2015.08333333333,2015.16666666667,2015.25,2015.33333333333,2015.41666666667,2015.5,2015.58333333333,2015.66666666667,2015.75,2015.83333333333,2015.91666666667,2016,2016.08333333333,2016.16666666667,2016.25,2016.33333333333,2016.41666666667,2016.5,2016.58333333333,2016.66666666667,2016.75,2016.83333333333,2016.91666666667,2017,2017.08333333333,2017.16666666667,2017.25,2017.33333333333,2017.41666666667,2017.5,2017.58333333333,2017.66666666667,2017.75,2017.83333333333,2017.91666666667,2018,2018.08333333333,2018.16666666667,2018.25,2018.33333333333,2018.41666666667,2018.5,2018.58333333333,2018.66666666667,2018.75,2018.83333333333,2018.91666666667],"y":[-0.113958327081026,0.737387429361128,-1.07662690561951,1.59572675433383,-0.114119659310882,-0.331123130849498,-0.708797981810941,0.11089268415526,0.450629615281962,-0.752862312554884,-0.551491017330029,1.49953184936219,-0.0749114854650657,0.675571468366174,0.215426312594472,-1.07259796398816,0.0211250791207984,-0.00811885574027293,0.146310410558433,0.454027830340392,-1.49092711927507,0.843235612083795,1.16501599479364,-1.31104931156335,1.42488650850246,-1.86532049690984,0.288003932290906,-0.0379410939400611,0.158694658310035,-0.113780252455344,0.33154950376122,-0.551365844678051,0.396413882847314,1.04099515753227,-1.81874393489026,0.762571311330888,0.563024078859891,0.536376041689884,-0.0665628540054275,-0.903162517417162,0.880415228494407,-0.743832643356129,-0.137455913443715,0.471052506815889,-0.307916583962966,-0.546890700866783,0.634274934163958,0.0551591110564935,-0.948792059354286,-0.569364474695307,0.583353248007832,0.992277365303401,-1.05644467402062,1.02071714837924,0.0816037202341384,1.02699514306208,-0.279874917019601,-1.20523226720644,0.790496851200128,-0.22370379118386,-0.279329344113638,1.19407717571498,-1.54155585133467,0.179859332422344,0.175116876964594,0.35744459972377,-0.981440126618097,-1.7774448944663,0.408022142931134,0.824953458370789,-0.398702689393005,1.60849171225712,-1.50248683570546,-0.0908420286139835,0.411108777146246,-0.977057345490303,0.967352386446342,-1.1733669299586,1.57531643155338,0.0871157241810323,0.907080293426862,-0.353967511914126,-0.312209488080015,-0.0555440438393475,-0.326728566815938,1.51984696703629,-0.687191133181859,0.778110925142393,-0.561140695023798,0.139983515106922,-0.333298556129899,-0.495637697628192,0.473915100148181,0.156217385037742,1.19493403951308,-1.18283571228819,0.476124022633996,-1.31759771294467,0.797379952576698,1.0049288759252,-1.73069743681812,-0.273544327448601,0.573155662863373,0.346831701480564,-0.995891552068295,0.714228778607323,-0.515416213253051,-0.691227239202044,1.56227236336464,-0.784133803837485,-0.726488885839032,-0.639680495954961,1.35207029241744,-0.0404686710525723,1.07236368554989,-0.114974285867788,-0.312534236177008,-1.04385662341305,-0.55855169538424,1.07409297119999,-0.803901957245179,0.230590760148111,1.40429524255098,-1.04969295049439,0.590904529338415,-0.162412927385583,-2.09910523236359,1.14944338146029,0.653835770414075,-0.157820581364898,0.789932181946682,0.725072794037342,-1.23473964392681,0.426791466528995,-0.542216269635572,0.896018623762595,-1.1183579328077,1.07922206786658,-0.455002561340848,-0.15947137247117,0.0749973584168355,0.680689013506872,-0.497112911920088],"text":["x: 2007.083<br />y: -0.113958327","x: 2007.167<br />y:  0.737387429","x: 2007.250<br />y: -1.076626906","x: 2007.333<br />y:  1.595726754","x: 2007.417<br />y: -0.114119659","x: 2007.500<br />y: -0.331123131","x: 2007.583<br />y: -0.708797982","x: 2007.667<br />y:  0.110892684","x: 2007.750<br />y:  0.450629615","x: 2007.833<br />y: -0.752862313","x: 2007.917<br />y: -0.551491017","x: 2008.000<br />y:  1.499531849","x: 2008.083<br />y: -0.074911485","x: 2008.167<br />y:  0.675571468","x: 2008.250<br />y:  0.215426313","x: 2008.333<br />y: -1.072597964","x: 2008.417<br />y:  0.021125079","x: 2008.500<br />y: -0.008118856","x: 2008.583<br />y:  0.146310411","x: 2008.667<br />y:  0.454027830","x: 2008.750<br />y: -1.490927119","x: 2008.833<br />y:  0.843235612","x: 2008.917<br />y:  1.165015995","x: 2009.000<br />y: -1.311049312","x: 2009.083<br />y:  1.424886509","x: 2009.167<br />y: -1.865320497","x: 2009.250<br />y:  0.288003932","x: 2009.333<br />y: -0.037941094","x: 2009.417<br />y:  0.158694658","x: 2009.500<br />y: -0.113780252","x: 2009.583<br />y:  0.331549504","x: 2009.667<br />y: -0.551365845","x: 2009.750<br />y:  0.396413883","x: 2009.833<br />y:  1.040995158","x: 2009.917<br />y: -1.818743935","x: 2010.000<br />y:  0.762571311","x: 2010.083<br />y:  0.563024079","x: 2010.167<br />y:  0.536376042","x: 2010.250<br />y: -0.066562854","x: 2010.333<br />y: -0.903162517","x: 2010.417<br />y:  0.880415228","x: 2010.500<br />y: -0.743832643","x: 2010.583<br />y: -0.137455913","x: 2010.667<br />y:  0.471052507","x: 2010.750<br />y: -0.307916584","x: 2010.833<br />y: -0.546890701","x: 2010.917<br />y:  0.634274934","x: 2011.000<br />y:  0.055159111","x: 2011.083<br />y: -0.948792059","x: 2011.167<br />y: -0.569364475","x: 2011.250<br />y:  0.583353248","x: 2011.333<br />y:  0.992277365","x: 2011.417<br />y: -1.056444674","x: 2011.500<br />y:  1.020717148","x: 2011.583<br />y:  0.081603720","x: 2011.667<br />y:  1.026995143","x: 2011.750<br />y: -0.279874917","x: 2011.833<br />y: -1.205232267","x: 2011.917<br />y:  0.790496851","x: 2012.000<br />y: -0.223703791","x: 2012.083<br />y: -0.279329344","x: 2012.167<br />y:  1.194077176","x: 2012.250<br />y: -1.541555851","x: 2012.333<br />y:  0.179859332","x: 2012.417<br />y:  0.175116877","x: 2012.500<br />y:  0.357444600","x: 2012.583<br />y: -0.981440127","x: 2012.667<br />y: -1.777444894","x: 2012.750<br />y:  0.408022143","x: 2012.833<br />y:  0.824953458","x: 2012.917<br />y: -0.398702689","x: 2013.000<br />y:  1.608491712","x: 2013.083<br />y: -1.502486836","x: 2013.167<br />y: -0.090842029","x: 2013.250<br />y:  0.411108777","x: 2013.333<br />y: -0.977057345","x: 2013.417<br />y:  0.967352386","x: 2013.500<br />y: -1.173366930","x: 2013.583<br />y:  1.575316432","x: 2013.667<br />y:  0.087115724","x: 2013.750<br />y:  0.907080293","x: 2013.833<br />y: -0.353967512","x: 2013.917<br />y: -0.312209488","x: 2014.000<br />y: -0.055544044","x: 2014.083<br />y: -0.326728567","x: 2014.167<br />y:  1.519846967","x: 2014.250<br />y: -0.687191133","x: 2014.333<br />y:  0.778110925","x: 2014.417<br />y: -0.561140695","x: 2014.500<br />y:  0.139983515","x: 2014.583<br />y: -0.333298556","x: 2014.667<br />y: -0.495637698","x: 2014.750<br />y:  0.473915100","x: 2014.833<br />y:  0.156217385","x: 2014.917<br />y:  1.194934040","x: 2015.000<br />y: -1.182835712","x: 2015.083<br />y:  0.476124023","x: 2015.167<br />y: -1.317597713","x: 2015.250<br />y:  0.797379953","x: 2015.333<br />y:  1.004928876","x: 2015.417<br />y: -1.730697437","x: 2015.500<br />y: -0.273544327","x: 2015.583<br />y:  0.573155663","x: 2015.667<br />y:  0.346831701","x: 2015.750<br />y: -0.995891552","x: 2015.833<br />y:  0.714228779","x: 2015.917<br />y: -0.515416213","x: 2016.000<br />y: -0.691227239","x: 2016.083<br />y:  1.562272363","x: 2016.167<br />y: -0.784133804","x: 2016.250<br />y: -0.726488886","x: 2016.333<br />y: -0.639680496","x: 2016.417<br />y:  1.352070292","x: 2016.500<br />y: -0.040468671","x: 2016.583<br />y:  1.072363686","x: 2016.667<br />y: -0.114974286","x: 2016.750<br />y: -0.312534236","x: 2016.833<br />y: -1.043856623","x: 2016.917<br />y: -0.558551695","x: 2017.000<br />y:  1.074092971","x: 2017.083<br />y: -0.803901957","x: 2017.167<br />y:  0.230590760","x: 2017.250<br />y:  1.404295243","x: 2017.333<br />y: -1.049692950","x: 2017.417<br />y:  0.590904529","x: 2017.500<br />y: -0.162412927","x: 2017.583<br />y: -2.099105232","x: 2017.667<br />y:  1.149443381","x: 2017.750<br />y:  0.653835770","x: 2017.833<br />y: -0.157820581","x: 2017.917<br />y:  0.789932182","x: 2018.000<br />y:  0.725072794","x: 2018.083<br />y: -1.234739644","x: 2018.167<br />y:  0.426791467","x: 2018.250<br />y: -0.542216270","x: 2018.333<br />y:  0.896018624","x: 2018.417<br />y: -1.118357933","x: 2018.500<br />y:  1.079222068","x: 2018.583<br />y: -0.455002561","x: 2018.667<br />y: -0.159471372","x: 2018.750<br />y:  0.074997358","x: 2018.833<br />y:  0.680689014","x: 2018.917<br />y: -0.497112912"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":40.1826484018265,"l":37.2602739726027},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":"Shoooting in New York 2006-2020, lag 12, then lag 1","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[2006.49166666667,2019.50833333333],"tickmode":"array","ticktext":["2008","2010","2012","2014","2016","2018"],"tickvals":[2008,2010,2012,2014,2016,2018],"categoryorder":"array","categoryarray":["2008","2010","2012","2014","2016","2018"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-2.28448507959463,1.79387155948815],"tickmode":"array","ticktext":["-2","-1","0","1"],"tickvals":[-2,-1,0,1],"categoryorder":"array","categoryarray":["-2","-1","0","1"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"train","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8da037877799":{"x":{},"y":{},"type":"scatter"}},"cur_data":"8da037877799","visdat":{"8da037877799":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="model-selection" class="section level4">
+<h4>Model selection</h4>
+<p>First let us check the sample ACF, PACF of the series after transformation:</p>
+<pre class="r"><code>l1= tsdisplay(train_lag121)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p>The ACF plot, in non seasonality part (&lt; lag 8), we have significant lag 1 only, and the seasonality part have significant lag 12 and marginally significant lag 24, so the MA part could be MA1, and the SMA part should be 1 or 2.</p>
+<p>The PACF plot, in non seasonality part (&lt; lag 8), the lag tails off, and for the seasonality part, also we can observe the lag spike tails off, (or it’s the first 2 significant). So the AR part should be 0 and the SAR part can be 0 or 2.</p>
+<p>So the most probable candidate models should be <span class="math inline">\(SARIMA(p,1,q)(P,1,Q)_{12}\)</span> with <span class="math inline">\(p=0\)</span>, <span class="math inline">\(q = 1,2\)</span>, <span class="math inline">\(P = 0, 2\)</span>, <span class="math inline">\(Q = 1,2\)</span>.</p>
+<p>We fit those models and calculate the AICc of those models fitted by R. The result is:</p>
+<pre class="r"><code># model selection
+AICc = 10000
+model_list = list(c(0,1,1,0,1,1), c(0,1,1,0,1,2),
+                  c(0,1,1,2,1,1), c(0,1,1,2,1,2),
+                  c(0,1,2,0,1,1), c(0,1,2,0,1,2),
+                  c(0,1,2,2,1,1), c(0,1,2,2,1,2))
+AICcs = c()
+fit1 = 1
+for(i in 1:length(model_list))
+{
+    result = tryCatch({
+      fit = Arima(train1,order=model_list[[i]][1:3],
+       seasonal = model_list[[i]][4:6],
+       method = &quot;CSS-ML&quot;)
+      AICcs[i] = fit$aicc
+      
+      if(fit$aicc &lt; AICc){
+      AICc = fit$aicc
+      fit1 = fit
+    }
+  }, error = function(e) {
+      fit = list()
+      fit$aicc = NA
+  })
+}
+
+df = data.frame(
+  Model = c(
+                  &quot;SARIMA(0,1,1)(0,1,1)_12&quot;, &quot;SARIMA(0,1,1)(0,1,2)_12&quot;,
+                  &quot;SARIMA(0,1,1)(2,1,1)_12&quot;, &quot;SARIMA(0,1,1)(2,1,2)_12&quot;,
+                  &quot;SARIMA(0,1,2)(0,1,1)_12&quot;, &quot;SARIMA(0,1,2)(0,1,2)_12&quot;,
+                  &quot;SARIMA(0,1,2)(2,1,1)_12&quot;, &quot;SARIMA(0,1,2)(2,1,2)_12&quot;
+  ),
+  AICc = AICcs
+)</code></pre>
+<pre class="r"><code>knitr::kable(df, caption = &quot;AICCs of the models&quot;)</code></pre>
+<table>
+<caption>AICCs of the models</caption>
+<thead>
+<tr class="header">
+<th align="left">Model</th>
+<th align="right">AICc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">SARIMA(0,1,1)(0,1,1)_12</td>
+<td align="right">262.6220</td>
+</tr>
+<tr class="even">
+<td align="left">SARIMA(0,1,1)(0,1,2)_12</td>
+<td align="right">264.0517</td>
+</tr>
+<tr class="odd">
+<td align="left">SARIMA(0,1,1)(2,1,1)_12</td>
+<td align="right">265.7343</td>
+</tr>
+<tr class="even">
+<td align="left">SARIMA(0,1,1)(2,1,2)_12</td>
+<td align="right">268.0756</td>
+</tr>
+<tr class="odd">
+<td align="left">SARIMA(0,1,2)(0,1,1)_12</td>
+<td align="right">264.6530</td>
+</tr>
+<tr class="even">
+<td align="left">SARIMA(0,1,2)(0,1,2)_12</td>
+<td align="right">265.9070</td>
+</tr>
+<tr class="odd">
+<td align="left">SARIMA(0,1,2)(2,1,1)_12</td>
+<td align="right">267.5682</td>
+</tr>
+<tr class="even">
+<td align="left">SARIMA(0,1,2)(2,1,2)_12</td>
+<td align="right">269.7245</td>
+</tr>
+</tbody>
+</table>
+<p>From the table, the model <span class="math inline">\(SARIMA(0,1,1)(0,1,1)_{12}\)</span> has the smallest AICc so it’s the best. The model summary is:</p>
+<pre class="r"><code>summary(fit1)</code></pre>
+<pre><code>## Series: train1 
+## ARIMA(0,1,1)(0,1,1)[12] 
+## 
+## Coefficients:
+##           ma1     sma1
+##       -0.7592  -0.8463
+## s.e.   0.0629   0.0917
+## 
+## sigma^2 estimated as 0.3194:  log likelihood=-128.22
+## AIC=262.45   AICc=262.62   BIC=271.34
+## 
+## Training set error measures:
+##                       ME      RMSE       MAE        MPE     MAPE      MASE
+## Training set -0.01589969 0.5372774 0.4100619 -0.3197275 4.304198 0.6802193
+##                   ACF1
+## Training set 0.0195208</code></pre>
+<p>And the mathematical form is: (After box cox transformation with lambda = 0.263)</p>
+<p><span class="math display">\[
+(1-B)(1-B^{12})X_n=(1-0.7592B)(1-0.8463B^{12})Z_n
+\]</span></p>
+<p><span class="math display">\[ Z_n \overset{iid}\sim N[0,0.3194]\]</span></p>
+</div>
+<div id="model-diagnostic" class="section level4">
+<h4>Model Diagnostic</h4>
+<p>First we check the ACF and PACF of the residual. The residual should assemble white noise so the AFC and PACF should not contain any significant spikes. From the ACF and PACF plot, except lag4 is marginally significant, all others are good, so we think the residual is similar to white noise for the ACF and PACF.</p>
+<pre class="r"><code>residual = resid(fit1)
+tsdisplay(residual, lag.max = 28)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
+<p>From the result, except for the lag 14 very marginally spike of the ACF and PACF (Which may because some complex patterns in the data), all other lags are insignificant, so we can believe the ACF and PACF of the residual is quite similar to the white noise.</p>
+<p>Then check the inverse polynomial roots. The characteristic roots should be outside the unit circle to assure the model stationary and invertible, thus the inverse characteristic roots should be inside the unit circle. From the plot below all the inverse characteristic roots are inside the unit circle. so the model is legible.</p>
+<pre class="r"><code>autoplot(fit1)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<p>Next we check the model residual independence:</p>
+<p>Use Box - Pierce test, Ljung - Box test and McLeod - Li test. The training data have 156 observations, model parameters 2, so the degree of freedom should be 12, 12, 14 respectively.</p>
+<pre class="r"><code># independence
+pv = c()
+pv[1]=Box.test(residual, lag = 14, type = c(&quot;Box-Pierce&quot;),fitdf = 2)$p.value
+pv[2]=Box.test(residual, lag = 14, type = c(&quot;Ljung-Box&quot;),fitdf = 2)$p.value
+pv[3]=Box.test(residual^2, lag = 14, type = c(&quot;Ljung-Box&quot;),fitdf = 0)$p.value
+df = data.frame(tests = c(&quot;Box-Pierce&quot;,&quot;Ljung-Box&quot;,&quot;McLeod-Li&quot;), p.value = pv, df = c(12,12,14))
+knitr::kable(df)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">tests</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Box-Pierce</td>
+<td align="right">0.2836037</td>
+<td align="right">12</td>
+</tr>
+<tr class="even">
+<td align="left">Ljung-Box</td>
+<td align="right">0.2311293</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">McLeod-Li</td>
+<td align="right">0.9971713</td>
+<td align="right">14</td>
+</tr>
+</tbody>
+</table>
+<p>All of the independence tests pass with p value &gt; 0.05, so our residual does not have any sequential correlation.</p>
+</div>
+<div id="forecast" class="section level4">
+<h4>Forecast</h4>
+<p>Now we forecast the model on the test set:</p>
+<pre class="r"><code># Forecast 
+n = length(murder_count_time_series_test)
+pred = predict(fit1, n.ahead=n)$pred
+se = predict(fit1, n.ahead=n)$se
+pred1 = exp(log(pred * optlambda + 1)/optlambda)
+pred1l = exp(log((pred-1.96*se) * optlambda + 1)/optlambda)
+pred1u = exp(log((pred+1.96*se) * optlambda + 1)/optlambda)
+ts.plot(murder_count_time_series_train, 
+        xlim = c(2015,2022), ylim = c(35,350), ylab = &quot;shoots&quot;)
+title(&quot;Forecast Plot (red) and the Real Data (blue) For 2019-2020&quot;)
+points(2019+(1:n)/12,pred1,col = &quot;red&quot;,
+       pch  = &quot;.&quot;, cex= 4)
+lines(2019+(1:n)/12,pred1l,lty=2)
+lines(2019+(1:n)/12,pred1u,lty=2)
+points(2019+(1:n)/12,murder_count_time_series_test,col = &quot;blue&quot;,
+       pch  = &quot;.&quot;, cex= 4)
+lines(2019+(1:n)/12,murder_count_time_series_test,col = &quot;blue&quot;,lty=2)</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+<p>The forecast result shows that in 2019, all blue points (real values) are inside the 95% confidence interval, and actually quite close to the predicted red points. But in 2020, nearly all predicted value are smaller than the actual value, and in summer the actual value is much higher than the predicted ones.</p>
+<p>This is because after April the COVID outbreaks in US. The economy was greatly suffered so the social become violent thus much more shooting occurs. Our SARIMA model can’t take that COVID event into consideration, and still predict it as the COVID does not exist, so that’s why our predicted values are much smaller than the actual values. In fact, no model can forecast those black swarm events.</p>
+<p>Also from the disparity of the predicted and actual shooting numers in 2020, we can have a feeling of how big influence that COVID bring to US.</p>
+</div>
+</div>
+</div>
+<div id="additional-feature" class="section level2">
+<h2>Additional Feature</h2>
+<p><strong>Interactive Map</strong> We used <code>leaflet</code> in <code>shinyApp</code> to visualize the distribution of the shooting incidents on the New York City map. On the map, we can choose different parameter of interest, the borough, year range, time range, or the incident outcome to explore the distribution of the incidents accordingly.</p>
 </div>
 <div id="discussion" class="section level2">
 <h2>Discussion</h2>
 <p><strong>report的要求</strong></p>
-<p>Your report should include the following topics. Depending on your project type the amount of discussion you devote to each of them will vary:</p>
-<p>Motivation: Provide an overview of the project goals and motivation. Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class. Initial questions: What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis? Data: Source, scraping method, cleaning, etc. Exploratory analysis: Visualizations, summaries, and exploratory statistical analyses. Justify the steps you took, and show any major changes to your ideas. Additional analysis: If you undertake formal statistical analyses, describe these in detail Discussion: What were your findings? Are they what you expect? What insights into the data can you make?</p>
+<p>Discussion: What were your findings? Are they what you expect? What insights into the data can you make?</p>
 </div>
 
 
