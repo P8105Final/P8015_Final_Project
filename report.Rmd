@@ -43,8 +43,8 @@ Initially, we wanted to compile data on the shooting incident in NYC from 2006-2
 **New Questions**:  
 
 1.. Is there a relationship between unemployment rate and the incline of shooting incidents in 2020？  
-2. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough？
-2. Can we predict future New York shooting occurrences by construct time series analysis model？
+2. Is the rates of death per gunshoot differed between 2019 and 2020 in different borough？  
+3. Can we predict future New York shooting occurrences by construct time series analysis model？
 
 ## Data  
 
