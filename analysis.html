@@ -13,8 +13,8 @@
 
 <title>Descriptive Analysis</title>
 
-<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
-<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
@@ -220,6 +221,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -328,8 +332,20 @@ div.tocify {
 <li>
   <a href="analysis.html">Descriptive Analysis</a>
 </li>
-<li>
-  <a href="ModelAnalysis2.html">Statistical Analysis</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Statistical Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="ModelAnalysis2.html">Kruskal-Wallis Analysis</a>
+    </li>
+    <li>
+      <a href="Modeling_Poisson_Analysis.html">Modeling Poisson Analysis</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="model.html">Regression Model</a>
@@ -359,6 +375,14 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Descriptive Analysis</h1>
@@ -369,6 +393,20 @@ div.tocify {
 <div id="overall-glance" class="section level1">
 <h1>Overall glance</h1>
 <p>At the very beginning, let’s have a overall glance at the shooting incidence and focusing on the most serious issue, which is the amount of death on shooting incident from <strong>2006 to 2020</strong> in New York City.</p>
+<pre class="r"><code>year_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006 ) %&gt;% 
+  group_by(year, statistical_murder_flag) %&gt;%
+  summarise(n = n()) %&gt;% 
+
+  ggplot(aes(x = year, y = n, color = statistical_murder_flag))  + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_point() + geom_line() +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Year&quot;
+       )
+
+year_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <p>Murdered shooting incidents are much less than survived shooting incident. From 2006 to 2011, the survived shooting incidents were steadily fluctuate around 1500 and murdered shooting incidents were steadily fluctuate around 400.Both types of the shooting incidents were decreasing gradually from 2010 to 2019. However, there is a huge dramatically increase in 2020. We suspect it might be influenced by the outbreak of COVID-19 which led to a raise in unemployment and panic. We will do more statistical analysis on that later.</p>
 <p>Now, let’s take a closer look on more details about the victims.</p>
@@ -377,26 +415,100 @@ div.tocify {
 <h1>Victim</h1>
 <div id="race" class="section level2">
 <h2>Race</h2>
+<pre class="r"><code>vic_race_plot = 
+  data_hist %&gt;%
+  filter(year &gt;= 2006,
+         vic_race %in% c(&quot;black&quot;,&quot;white hispanic&quot;,&quot;black hispanic&quot;,&quot;white&quot;,&quot;asian / pacific islander&quot;,&quot;white&quot;)) %&gt;% 
+  group_by(year, vic_race) %&gt;%
+  summarise(n = n()) %&gt;%
+  ggplot(aes(x = year, y = n, fill= vic_race) ) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Race&quot;)
+       
+vic_race_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
 <p>The majority of victim are <strong>black</strong>. In 2010, 2011 and 2014, white people are the second highest number of victim. The rest of years, white hispanic are the second most among all victim’s race.</p>
 </div>
 <div id="sex" class="section level2">
 <h2>Sex</h2>
+<pre class="r"><code>vic_sex_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         vic_sex != &quot;unknown&quot;) %&gt;% 
+  group_by(year, vic_sex) %&gt;%
+  summarise(n = n()) %&gt;% 
+  ggplot(aes(x = year, y = n, fill = vic_sex, color = vic_sex)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_point() + geom_line() +
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total Incident&quot;,
+       title = &quot;Shooting Incident Trend By Victim’s Sex&quot;)
+
+
+vic_sex_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
 <p><strong>Male</strong> victims are the majority and female victims have a very small proportion among the total victims in nyc across 2006 to 2020.</p>
 </div>
 <div id="age" class="section level2">
 <h2>Age</h2>
+<pre class="r"><code>vic_age_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;
+         ) %&gt;% 
+  group_by(vic_age_group, year) %&gt;%
+  summarise(n = n()) %&gt;% 
+
+  ggplot(aes(x = year, y = n, color = vic_age_group)) + scale_x_continuous(breaks = seq(2006, 2020, by = 1)) +
+  geom_point() + geom_line() +
+
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By victim&#39;s Age group&quot;
+       )
+vic_age_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <p>The proportion of age group under 18 and 45-64 have been keeping consistently low across 2006 to 2020, and there are nearly zero incidence for age group over 65. From 2006-2014, age group 18-24 and age group 25-44 have the highest proportion among the shooting incident. But since 2015, the amount of group 18-24 victims have been decreasing rapidly and become the second highest group among the total shooting incident. 18-24 usually is the age to graduate from high school and enter to college, this decrease may referring to some educational policy from 2015.Then we want to see what happened in perpetrator later.</p>
 </div>
 <div id="place" class="section level2">
 <h2>Place</h2>
+<pre class="r"><code>jurisdiction_code_plot=
+  data_hist %&gt;%
+  filter(year &gt; 2006,
+         vic_age_group != &quot;NA&quot;,
+         vic_age_group != &quot;UNKNOWN&quot;) %&gt;% 
+  group_by(jurisdiction_code, vic_age_group) %&gt;%
+  summarise(n = n()) %&gt;% 
+  ggplot(aes(x = vic_age_group, y = n, fill = jurisdiction_code)) +
+  geom_bar(width = 0.8, stat = &quot;identity&quot;) +
+  labs(x = &quot;Age group of victims&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident By Location Of The Incident&quot;
+       )
+
+  
+jurisdiction_code_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <p>Most of the shooting incidents happened in the <strong>patrol</strong>, some of the shooting incidents in housing and only few cases were on transit.</p>
 </div>
 <div id="hour-in-a-day" class="section level2">
 <h2>Hour in a day</h2>
+<pre class="r"><code>incident_by_hour =
+  data_hist %&gt;%
+  filter(year &gt;= 2006) %&gt;% 
+  group_by(hour) %&gt;%
+  mutate(n = n()) %&gt;% 
+  ggplot(aes(x = hour, group = n)) + 
+  geom_bar(position = &quot;dodge&quot;) +
+  facet_grid(rows = vars(boro)) +
+  labs(x = &quot;Hour&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Hour In Day&quot;
+       )
+  
+incident_by_hour</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <p><strong>Brooklyn</strong> has most shooting incident, then is bronx. Staten island has least shooting incidents since it does not have much population. Most of the shooting incidents happened at night and very early in the morning. For Bronx and Brooklyn, the shooting incidents are gradually increasing after 12pm and reach to peaks around 10pm to 11pm. The shooting incidences in the morning are not as high as the shooting incidents at night. For queens and manhanttan, the shooting incidents in the morning reach to the highest peak and have a noteworthy amount until 5 am. We will provide more statistical analysis about which borought is the most dangerous in next section.</p>
 </div>
@@ -405,17 +517,50 @@ div.tocify {
 <h1>Perpetrator</h1>
 <div id="age-1" class="section level2">
 <h2>Age</h2>
+<pre class="r"><code>perp_age_plot = 
+  data_hist %&gt;% 
+  filter(year &gt;= 2006,
+         perp_age_group != &quot;NA&quot;,
+         perp_age_group != &quot;unknown&quot;
+         ) %&gt;% 
+  group_by(perp_age_group, year) %&gt;%
+  summarise(n = n()) %&gt;% 
+
+  ggplot(aes(x = year, y = n, color = perp_age_group)) + 
+  geom_point() + geom_line() +
+
+  labs(x = &quot;Year&quot;,
+       y = &quot;Total incident&quot;,
+       title = &quot;Shooting Incident Trend By Perpetrator&#39;s Age group&quot;
+       )
+perp_age_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <p>From the plot we can see same situation happened and more obvious. From 2006-2014, majority perpetrator are from age group 18-24 in the shooting incident. But since 2015, the amount of group 18-24 perpetrator have been decreasing rapidly. we infer that both of the perpetrators and victims might be influenced by the education level. Therefore, we visualize educational plot to verify our deduction. The association between the educational level and perpetrator’s age group and victim’s age is required more analysis.</p>
 </div>
 </div>
 <div id="education" class="section level1">
 <h1>Education</h1>
+<pre class="r"><code>education_plot = 
+  educational %&gt;%
+  ggplot(aes(x = year, y = percent, color = boro)) + scale_x_continuous(breaks = seq(2010, 2020, by = 1)) +
+  geom_line() +
+  labs(
+    title = &quot;Education&quot;, 
+    x =  &quot;Year&quot;,
+    y = &quot;Percent&quot;) 
+
+education_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 <p>This plot shows the percentage change in each borough over the year that every person over 18 with high school education or above. All borough have the upward trend in last 10 years. However, brooklyn the one with most shooting incident borough has a notability increase slope in 2015, which matched our forecast about the association with age group and education. We conclude that when education increase, the shooting incident decrease.</p>
 </div>
 <div id="unemployment" class="section level1">
 <h1>Unemployment</h1>
+<pre class="r"><code>unemployment_plot = 
+  unemployment %&gt;%
+  ggplot(aes(x = year, y = unemployment_rate)) +
+  geom_point() +
+  geom_smooth()
+unemployment_plot</code></pre>
 <p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
 <p>According to the plot, we can see the unemployment rate was decreasing from 2010 to 2019. There is an exaggerated increase in the unemployment rate in 2020, which matched our forecast about the association with total shooting incident and unemployment rate. We conclude that when unemployment increase, the shooting incident increase.</p>
 </div>
@@ -455,6 +600,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {
