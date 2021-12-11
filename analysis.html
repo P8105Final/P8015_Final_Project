@@ -557,12 +557,12 @@ data_ana %&gt;%
   scale_x_continuous(limits = c(2010, 2020), breaks = seq(2010, 2020, by = 1))+
   scale_y_continuous(
     # First axis
-    name = &quot;Total Number of Incidents&quot;,
+    name = &quot;Total Number of Incidents by Perpetrator aged 18-24&quot;,
     # Add a second axis and specify its features
     sec.axis = sec_axis(trans = ~ ./50,name = &quot;Unemployment Rate (%)&quot;)
   ) +
   geom_text(x = 2012, y = 275, label = &quot;Unemployment Rate (%)&quot;, color = &quot;sienna2&quot;) + 
-geom_text(x = 2017, y = 325, label = &quot;Total Incident&quot;, color = &quot;steelblue2&quot;)+
+geom_text(x = 2017, y = 325, label = &quot;Total Incidents&quot;, color = &quot;steelblue2&quot;)+
   theme(
     axis.title.y = element_text(color = &quot;steelblue2&quot;),
     axis.title.y.right = element_text(color = &quot;sienna2&quot;)
