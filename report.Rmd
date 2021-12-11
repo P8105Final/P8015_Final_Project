@@ -15,7 +15,7 @@ So, for this project, we are motivated to explore the shooting incidents in NYC,
 1. Visualizing the distribution of the shooting incidents in NYC. 
 2. Understanding and analyzing the risk factors that are related to shooting incidents.
 3. Discussing the correlation between risk factors and shooting incidents to analyze the measure we can take to keep our own safety.
-4. Building a model to predict the number of shooting incidents.
+4. Building a model to predict future New York shooting occurrences in one month.
 
 ## Related Work
 
